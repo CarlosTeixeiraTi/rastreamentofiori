@@ -1,0 +1,169 @@
+<mvc:View
+    controllerName="br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+    <Page
+        id="dashboardPage"
+        title="Dashboard de Rastreamento RFID">
+
+        <content>
+
+            <VBox
+                id="mainContainer"
+                class="sapUiMediumMargin">
+
+                <!-- KPI -->
+
+                <Title
+                    text="Indicadores"
+                    level="H2" />
+
+                <HBox
+                    width="100%"
+                    justifyContent="Center"
+                    wrap="Wrap"
+                    class="sapUiMediumMarginBottom">
+
+                    <Panel
+                        width="250px"
+                        class="sapUiSmallMargin">
+
+                        <VBox
+                            alignItems="Center"
+                            class="sapUiMediumMargin">
+
+                            <Title
+                                text="{dashboard>/totalEquipamentos}"
+                                level="H1" />
+
+                            <Text text="Equipamentos" />
+
+                        </VBox>
+
+                    </Panel>
+
+                    <Panel
+                        width="250px"
+                        class="sapUiSmallMargin">
+
+                        <VBox
+                            alignItems="Center"
+                            class="sapUiMediumMargin">
+
+                            <Title
+                                text="{dashboard>/online}"
+                                level="H1" />
+
+                            <Text text="Online" />
+
+                        </VBox>
+
+                    </Panel>
+
+                    <Panel
+                        width="250px"
+                        class="sapUiSmallMargin">
+
+                        <VBox
+                            alignItems="Center"
+                            class="sapUiMediumMargin">
+
+                            <Title
+                                text="{dashboard>/offline}"
+                                level="H1" />
+
+                            <Text text="Offline" />
+
+                        </VBox>
+
+                    </Panel>
+
+                    <Panel
+                        width="250px"
+                        class="sapUiSmallMargin">
+
+                        <VBox
+                            alignItems="Center"
+                            class="sapUiMediumMargin">
+
+                            <Title
+                                text="{dashboard>/gateways}"
+                                level="H1" />
+
+                            <Text text="Gateways" />
+
+                        </VBox>
+
+                    </Panel>
+
+                </HBox>
+
+                <!-- MAPA -->
+
+                <Panel
+                    id="panelMapa"
+                    headerText="Mapa dos Equipamentos"
+                    class="sapUiMediumMarginBottom">
+
+                    <content>
+
+                        <core:HTML
+                            id="htmlMapa"
+                            preferDOM="false" />
+
+                    </content>
+
+                </Panel>
+
+                <!-- LINHA INFERIOR -->
+
+                <HBox
+                    width="100%"
+                    wrap="Wrap"
+                    justifyContent="Center"
+                    class="sapUiMediumMarginTop">
+
+                    <Panel
+                        width="500px"
+                        class="sapUiSmallMargin"
+                        headerText="Equipamentos por Grupo">
+
+                        <List
+                            items="{dashboard>/grupos}">
+
+                            <ObjectListItem
+                                title="{dashboard>grupo}"
+                                number="{dashboard>quantidade}"
+                                numberUnit="ativos" />
+
+                        </List>
+
+                    </Panel>
+
+                    <Panel
+                        width="500px"
+                        class="sapUiSmallMargin"
+                        headerText="Últimas Leituras">
+
+                        <List
+                            items="{dashboard>/ultimasLeituras}">
+
+                            <StandardListItem
+                                title="{dashboard>identificador}"
+                                description="{dashboard>recebidoEm}"
+                                icon="sap-icon://history" />
+
+                        </List>
+
+                    </Panel>
+
+                </HBox>
+
+            </VBox>
+
+        </content>
+
+    </Page>
+
+</mvc:View>
