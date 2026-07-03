@@ -116,37 +116,126 @@ sap.ui.define([
                     });
 
                 this.byId("htmlMapa").setContent(`
-                    <div style="
-                        height:500px;
-                        overflow:auto;
-                        padding:10px;
-                        border:1px solid #ccc;
-                        background:#fafafa">
+    <div
+        id="mapaEquipamentos"
+        style="height:500px;width:100%;">
+    </div>
+`);
 
-                        ${dadosFiltrados
-                        .filter(item =>
-                            !isNaN(parseFloat(item.latitude)) &&
-                            !isNaN(parseFloat(item.longitude))
-                        )
-                        .map(item => `
-                                <div style="
-                                    margin-bottom:8px;
-                                    padding:8px;
-                                    background:white;
-                                    border-radius:4px;
-                                    border:1px solid #ddd">
+                sap.ui.getCore().applyChanges();
 
-                                    📍 <strong>${item.identificador}</strong><br>
-                                    Grupo: ${item.grupo}<br>
-                                    Latitude: ${item.latitude}<br>
-                                    Longitude: ${item.longitude}
+                setTimeout(() => {
 
-                                </div>
-                            `)
-                        .join("")}
+                    const equipamentos = dadosFiltrados.filter(item => {
 
-                    </div>
-                `);
+                        const lat = parseFloat(item.latitude);
+                        const lng = parseFloat(item.longitude);
+
+                        return (
+                            !isNaN(lat) &&
+                            !isNaN(lng) &&
+                            lat >= -21 &&
+                            lat <= -18 &&
+                            lng >= -45 &&
+                            lng <= -42
+                        );
+
+                    });
+
+                    if (!equipamentos.length) {
+                        return;
+                    }
+
+                    if (this._map) {
+                        this._map.remove();
+                    }
+
+                    const osm = L.tileLayer(
+                        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        {
+                            attribution: "&copy; OpenStreetMap"
+                        }
+                    );
+
+                    const satelite = L.tileLayer(
+                        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+                        {
+                            attribution: "Tiles © Esri"
+                        }
+                    );
+
+                    this._map = L.map("mapaEquipamentos", {
+                        layers: [satelite]
+                    });
+
+
+                    L.control.layers(
+                        {
+                            "Mapa": osm,
+                            "Satélite": satelite
+                        }
+                    ).addTo(this._map);
+
+                    const markers = L.layerGroup();
+
+                    equipamentos.forEach(item => {
+
+                        const lat = parseFloat(item.latitude);
+                        const lng = parseFloat(item.longitude);
+
+                        const marker = L.marker(
+                            [lat, lng],
+                            {
+                                icon: L.divIcon({
+                                    className: "",
+                                    html: `
+                <div style="
+                    width:16px;
+                    height:16px;
+                    background:#2ecc71;
+                    border:3px solid white;
+                    border-radius:50%;
+                    box-shadow:
+                        0 0 0 4px rgba(46,204,113,0.25),
+                        0 0 10px rgba(46,204,113,0.8);
+                "></div>
+            `,
+                                    iconSize: [22, 22],
+                                    iconAnchor: [11, 11]
+                                })
+                            }
+                        ).bindPopup(`
+    <b>${item.identificador}</b><br>
+    Grupo: ${item.grupo}<br>
+    Latitude: ${lat}<br>
+    Longitude: ${lng}
+`);
+
+                        markers.addLayer(marker);
+
+                    });
+
+                    this._map.addLayer(markers);
+
+                    const bounds = [];
+
+                    equipamentos.forEach(item => {
+                        bounds.push([
+                            parseFloat(item.latitude),
+                            parseFloat(item.longitude)
+                        ]);
+                    });
+
+                    if (bounds.length > 0) {
+
+                        this._map.fitBounds(bounds, {
+                            padding: [30, 30]
+                        });
+
+                    }
+
+                }, 500);
+
 
             },
 

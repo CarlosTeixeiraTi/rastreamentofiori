@@ -9,7 +9,8 @@
   ],
   "main": "webapp/index.html",
   "dependencies": {
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3"
   },
   "devDependencies": {
     "@sap-ux/eslint-plugin-fiori-tools": "^10.0.0",
