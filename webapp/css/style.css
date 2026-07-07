@@ -1,1 +1,50 @@
-/* Enter your custom styles here */
+.painelGrupos .sapMPanelHdr {
+    font-size: 22px !important;
+    font-weight: bold !important;
+}
+
+.painelGrupos .sapMObjLTitle {
+    font-size: 18px !important;
+}
+
+.painelGrupos .sapMLIB {
+    min-height: 110px !important;
+}
+
+.painelGrupos .sapMObjectNumber {
+    min-height: 0px !important;
+}
+
+.painelGrupos .sapMObjectNumberText {
+    font-size: 48px !important;
+    font-weight: bold !important;
+    line-height: 50px !important;
+}
+
+.painelGrupos .sapMObjectNumberUnit {
+    display: block !important;
+    font-size: 16px !important;
+    margin-top: 10px !important;
+    line-height: 18px !important;
+}
+.kpiNumero {
+    font-size: 46px !important;
+    font-weight: bold !important;
+}
+
+.kpiTexto {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+.itemNormal {
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 8px !important;
+    margin-bottom: 6px !important;
+}
+
+.itemEspecial {
+    border: 2px solid #ff9800 !important;
+    border-radius: 8px !important;
+    background: #fff8e1 !important;
+    margin-bottom: 6px !important;
+}
