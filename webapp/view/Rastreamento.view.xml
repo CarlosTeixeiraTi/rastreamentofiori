@@ -1,243 +1,373 @@
-            <mvc:View
-                controllerName="br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento"
-                xmlns:mvc="sap.ui.core.mvc"
-                xmlns="sap.m"
-                xmlns:core="sap.ui.core"
-                xmlns:l="sap.ui.layout">
+<mvc:View
+    controllerName="br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout">
 
-                <Page
-                    id="dashboardPage"
-                    title="Dashboard de Rastreamento RFID">
+    <Page
+        id="dashboardPage"
+        title="Dashboard de Rastreamento RFID">
 
-                    <content>
+        <content>
+
+            <VBox
+                id="mainContainer"
+                class="sapUiLargeMargin painelPrincipal">
+
+                <!-- KPI -->
+
+                <HBox
+                    width="100%"
+                    justifyContent="Center"
+                    wrap="Wrap"
+                    class="sapUiMediumMarginBottom">
+
+                    <Panel
+                        width="350px"
+                        class="sapUiSmallMargin kpiCard kpiTotal">
 
                         <VBox
-                            id="mainContainer"
-                            class="sapUiLargeMargin painelPrincipal">
-        
-                            <!-- KPI -->
+                            alignItems="Center"
+                            class="sapUiSmallMargin">
 
-                            <HBox
-                                width="100%"
-                                justifyContent="Center"
-                                wrap="Wrap"
-                                class="sapUiMediumMarginBottom">
+                            <Title
+                                text="{dashboard>/totalEquipamentos}"
+                                level="H1"
+                                class="kpiNumero" />
 
-                                <Panel
-                                    width="350px"
-                                    class="sapUiSmallMargin kpiCard kpiTotal">
+                            <Text
+                                text="Equipamentos"
+                                class="kpiTexto" />
 
-                                    <VBox
-                                        alignItems="Center"
-                                        class="sapUiSmallMargin">
+                        </VBox>
 
-                                        <Title
-                                            text="{dashboard>/totalEquipamentos}"
-                                            level="H1"
-                                            class="kpiNumero" />
+                    </Panel>
 
-                                        <Text
-                                            text="Equipamentos"
-                                            class="kpiTexto" />
+                    <Panel
+                        width="350px"
+                        class="sapUiSmallMargin kpiCard kpiOnline">
 
-                                    </VBox>
+                        <VBox
+                            alignItems="Center"
+                            class="sapUiSmallMargin">
 
-                                </Panel>
+                            <Title
+                                text="{dashboard>/online}"
+                                level="H1"
+                                class="kpiNumero" />
 
-                                <Panel
-                                    width="350px"
-                                    class="sapUiSmallMargin kpiCard kpiOnline">
+                            <Text
+                                text="Online"
+                                class="kpiTexto" />
 
-                                    <VBox
-                                        alignItems="Center"
-                                        class="sapUiSmallMargin">
+                        </VBox>
 
-                                        <Title
-                                            text="{dashboard>/online}"
-                                            level="H1"
-                                            class="kpiNumero" />
+                    </Panel>
 
-                                        <Text
-                                            text="Online"
-                                            class="kpiTexto" />
+                    <Panel
+                        width="350px"
+                        class="sapUiSmallMargin kpiCard kpiOffline">
 
-                                    </VBox>
+                        <VBox
+                            alignItems="Center"
+                            class="sapUiSmallMargin">
 
-                                </Panel>
+                            <Title
+                                text="{dashboard>/offline}"
+                                level="H1"
+                                class="kpiNumero" />
 
-                                <Panel
-                                    width="350px"
-                                    class="sapUiSmallMargin kpiCard kpiOffline">
+                            <Text
+                                text="Offline"
+                                class="kpiTexto" />
 
-                                    <VBox
-                                        alignItems="Center"
-                                        class="sapUiSmallMargin">
+                        </VBox>
 
-                                        <Title
-                                            text="{dashboard>/offline}"
-                                            level="H1"
-                                            class="kpiNumero" />
+                    </Panel>
 
-                                        <Text
-                                            text="Offline"
-                                            class="kpiTexto" />
+                    <Panel
+                        width="350px"
+                        class="sapUiSmallMargin kpiCard kpiGateway">
 
-                                    </VBox>
+                        <VBox
+                            alignItems="Center"
+                            class="sapUiSmallMargin">
 
-                                </Panel>
+                            <Title
+                                text="{dashboard>/gateways}"
+                                level="H1"
+                                class="kpiNumero" />
 
-                                <Panel
-                                    width="350px"
-                                    class="sapUiSmallMargin kpiCard kpiGateway">
+                            <Text
+                                text="Gateways"
+                                class="kpiTexto" />
 
-                                    <VBox
-                                        alignItems="Center"
-                                        class="sapUiSmallMargin">
+                        </VBox>
 
-                                        <Title
-                                            text="{dashboard>/gateways}"
-                                            level="H1"
-                                            class="kpiNumero" />
+                    </Panel>
 
-                                        <Text
-                                            text="Gateways"
-                                            class="kpiTexto" />
+                </HBox>
 
-                                    </VBox>
+                <!-- GRUPOS + MAPA -->
 
-                                </Panel>
+                <HBox
+                    width="100%"
+                    fitContainer="true"
+                    alignItems="Start"
+                    justifyContent="SpaceBetween"
+                    renderType="Bare">
 
-                            </HBox>
+                    <Panel
+                        width="320px"
+                        class="sapUiSmallMarginEnd painelGrupos"
+                        headerText="Equipamentos">
 
-                            <!-- GRUPOS + MAPA -->
+                        <List
+                            items="{dashboard>/grupos}">
 
-                            <HBox
-                                width="100%"
-                                fitContainer="true"
-                                alignItems="Start"
-                                justifyContent="SpaceBetween"
-                                renderType="Bare">
+                            <ObjectListItem
+                                type="Active"
+                                press=".onQuantidadeObjectListItemPress"
+                                title="{dashboard>grupo}"
+                                number="{dashboard>quantidade}"
+                                numberUnit="" />
 
-                                <Panel
-                                    width="320px"
-                                    class="sapUiSmallMarginEnd painelGrupos"
-                                    headerText="Equipamentos">
+                        </List>
 
-                                    <List
-                                        items="{dashboard>/grupos}">
+                    </Panel>
 
-                                        <ObjectListItem
-                                            type="Active"
-                                            press=".onQuantidadeObjectListItemPress"
-                                            title="{dashboard>grupo}"
-                                            number="{dashboard>quantidade}"
-                                            numberUnit="" />
+                    <VBox width="100%">
 
-                                    </List>
+                        <SearchField
+                            id="idPesquisaRastreador"
+                            width="300px"
+                            placeholder="Pesquisar rastreador"
+                            search=".onPesquisarRastreador"
+                            class="sapUiSmallMarginBottom pesquisaRastreador" />
 
-                                </Panel>
+                        <Panel
+                            id="panelMapa"
+                            width="100%"
+                            class="painelMapa"
+                            headerText="">
 
-            <VBox width="100%">
+                            <content>
 
-            <Panel
-                id="panelMapa"
-                width="100%"
-                class="painelMapa"
-                headerText="">
+                                <core:HTML
+                                    id="htmlMapa"
+                                    preferDOM="false" />
 
-                <content>
+                            </content>
 
-                    <core:HTML
-                        id="htmlMapa"
-                        preferDOM="false" />
+                        </Panel>
 
-                </content>
+                    </VBox>
 
-            </Panel>
+                </HBox>
 
-       </VBox>
+                <Panel
+                    headerText="Resumo por Tipo de Equipamento"
+                    class="sapUiMediumMarginTop">
 
-    </HBox>
+                    <Table
+                        items="{dashboard>/resumoEquipamentos}">
 
-    <Panel
-        headerText="Resumo por Tipo de Equipamento"
-        class="sapUiMediumMarginTop">
+                        <columns>
 
-        <Table
-            items="{dashboard>/resumoEquipamentos}">
+                            <Column>
+                                <Text text="Equipamento" />
+                            </Column>
 
-            <columns>
+                            <Column hAlign="Center">
+                                <Text text="Total" />
+                            </Column>
 
-                <Column>
-                    <Text text="Equipamento" />
-                </Column>
+                            <Column hAlign="Center">
+                                <Text text="Instalados" />
+                            </Column>
 
-                <Column hAlign="Center">
-                    <Text text="Total" />
-                </Column>
+                            <Column hAlign="Center">
+                                <Text text="Ref. Interna" />
+                            </Column>
 
-                <Column hAlign="Center">
-                    <Text text="Instalados" />
-                </Column>
+                            <Column hAlign="Center">
+                                <Text text="Ref. Externa" />
+                            </Column>
 
-                <Column hAlign="Center">
-                    <Text text="Ref. Interna" />
-                </Column>
+                            <Column hAlign="Center">
+                                <Text text="Reformados" />
+                            </Column>
 
-                <Column hAlign="Center">
-                    <Text text="Ref. Externa" />
-                </Column>
+                            <Column hAlign="Center">
+                                <Text text="A Reformar" />
+                            </Column>
 
-                <Column hAlign="Center">
-                    <Text text="Reformados" />
-                </Column>
+                        </columns>
 
-                <Column hAlign="Center">
-                    <Text text="A Reformar" />
-                </Column>
+                        <items>
 
-            </columns>
+                            <ColumnListItem>
 
-            <items>
+                                <cells>
 
-                <ColumnListItem>
+                                    <Text text="{dashboard>familia}" />
 
-                    <cells>
+                                    <ObjectNumber
+                                        number="{dashboard>total}" />
 
-                        <Text text="{dashboard>familia}" />
+                                    <ObjectNumber
+                                        number="{dashboard>instalados}" />
 
-                        <ObjectNumber
-                            number="{dashboard>total}" />
+                                    <ObjectNumber
+                                        number="{dashboard>reformaInterna}" />
 
-                        <ObjectNumber
-                            number="{dashboard>instalados}" />
+                                    <ObjectNumber
+                                        number="{dashboard>reformaExterna}" />
 
-                        <ObjectNumber
-                            number="{dashboard>reformaInterna}" />
+                                    <ObjectNumber
+                                        number="{dashboard>reformados}" />
 
-                        <ObjectNumber
-                            number="{dashboard>reformaExterna}" />
+                                    <ObjectNumber
+                                        number="{dashboard>aReformar}" />
 
-                        <ObjectNumber
-                            number="{dashboard>reformados}" />
+                                </cells>
 
-                        <ObjectNumber
-                            number="{dashboard>aReformar}" />
+                            </ColumnListItem>
 
-                    </cells>
+                        </items>
 
-                </ColumnListItem>
+                    </Table>
 
-            </items>
+                </Panel>
 
-        </Table>
 
-    </Panel>
+                <Panel
+                    headerText="Resumo por Grupo Atual"
+                    class="sapUiMediumMarginTop">
 
-</VBox>
+                    <Table
+                        items="{dashboard>/resumoGrupoAtual}">
 
-</content>
+                        <columns>
+                            <Column width="15rem">
+                                <Text text="Grupo Atual" />
+                            </Column>
 
-</Page>
+                            <Column
+                                width="6rem"
+                                hAlign="Begin">
+                                <Text text="Quantidade" />
+                            </Column>
+
+                        </columns>
+
+                        <items>
+
+                            <ColumnListItem>
+
+                                <cells>
+
+                                    <Text
+                                        text="{dashboard>grupo}" />
+
+                                    <ObjectNumber
+                                        number="{dashboard>quantidade}" />
+
+                                </cells>
+
+                            </ColumnListItem>
+
+                        </items>
+
+                    </Table>
+
+                </Panel>
+                <Panel
+                    headerText="Detalhes das Tags Desatualizadas (>72h)"
+                    class="sapUiMediumMarginTop">
+
+                    <Table
+                        items="{dashboard>/detalhesTagsDesatualizadas}">
+
+                        <columns>
+
+                            <Column width="5rem">
+                                <Text text="Identificador" />
+                            </Column>
+
+                            <Column width="10rem">
+                                <Text text="Equipamento" />
+                            </Column>
+
+                            <Column width="12rem">
+                                <Text text="Local de Instalação" />
+                            </Column>
+
+                            <Column width="7rem">
+                                <Text text="Grupo Atual" />
+                            </Column>
+
+                            <Column width="6rem">
+                                <Text text="Última Atualização" />
+                            </Column>
+                            <Column
+                                width="2rem"
+                                hAlign="End">
+                                <Text text="Dias" />
+                            </Column>
+
+                            <Column width="20rem">
+                                <Text text="Dedução" />
+                            </Column>
+
+                        </columns>
+
+                        <items>
+
+                            <ColumnListItem
+                                highlight="{
+        = ${dashboard>grupoAtual} === 'Reformado'
+            ? 'Warning'
+            : 'None'
+    }">
+
+                                <cells>
+
+                                    <Text
+                                        text="{dashboard>identificador}" />
+
+                                    <Text
+                                        text="{dashboard>equipamento}" />
+
+                                    <Text
+                                        text="{dashboard>localInstalacao}" />
+
+                                    <Text
+                                        text="{dashboard>grupoAtual}" />
+
+                                    <Text
+                                        text="{dashboard>ultimaPosicao}" />
+
+                                    <ObjectNumber
+                                        number="{dashboard>diasSemAtualizacao}"
+                                        textAlign="End" />
+
+                                    <ObjectStatus
+                                        text="{dashboard>deducao}"
+                                        state="Information" />
+                                </cells>
+                            </ColumnListItem>
+
+                        </items>
+
+                    </Table>
+
+                </Panel>
+            </VBox>
+
+        </content>
+
+    </Page>
 
 </mvc:View>

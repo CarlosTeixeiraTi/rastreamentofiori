@@ -11,31 +11,31 @@ sap.ui.define([
     "use strict";
 
     return Controller.extend(
-    "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento",
-    {
+        "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento",
+        {
 
-        onInit() {
+            onInit() {
 
-            const oDashboardModel = new JSONModel({
-                totalEquipamentos: 0,
-                online: 0,
-                offline: 0,
-                gateways: 0,
-                grupos: [],
-                ultimasLeituras: []
-            });
+                const oDashboardModel = new JSONModel({
+                    totalEquipamentos: 0,
+                    online: 0,
+                    offline: 0,
+                    gateways: 0,
+                    grupos: [],
+                    ultimasLeituras: []
+                });
 
-            this.getView().setModel(
-                oDashboardModel,
-                "dashboard"
-            );
+                this.getView().setModel(
+                    oDashboardModel,
+                    "dashboard"
+                );
 
-            this._grupoSelecionado = null;
+                this._grupoSelecionado = null;
 
-            this.carregarDashboard();
+                this.carregarDashboard();
 
-        },
-        determinarGrupo(item) {
+            },
+            determinarGrupo(item) {
 
                 let grupo =
                     item.grupoAtual ||
@@ -45,7 +45,7 @@ sap.ui.define([
                     (item.descLocalInstalacao || "")
                         .toUpperCase();
 
-                if ( descLocal.includes(" A REF")) {
+                if (descLocal.includes(" A REF")) {
 
                     grupo = "A reformar";
 
@@ -72,296 +72,513 @@ sap.ui.define([
                 return grupo;
 
             },
-onExportarExcel() {
 
-    const dados = (this._dadosFiltrados || []).map(item => ({
+            onPesquisarRastreador(oEvent) {
 
-        identificador:
-            item.identificador || "",
+                const identificador =
+                    oEvent.getParameter("query")
+                        .trim();
 
-        descEquipamento:
-            item.descEquipamento || "",
-
-        grupoAtual:
-            item.grupoAtual || "",
-
-        localInstalacao:
-            item.localInstalacao || "",
-
-        descLocalInstalacao:
-            item.descLocalInstalacao || "",
-
-        gateway:
-            item.gateway || "",
-
-        ultimaPosicao:
-            item.ultimaPosicao || "",
-
-        latitude:
-            item.latitude || "",
-
-        longitude:
-            item.longitude || ""
-
-    }));
-
-    const oSpreadsheet = new Spreadsheet({
-
-        workbook: {
-
-            columns: [
-
-                {
-                    label: "Identificador",
-                    property: "identificador"
-                },
-
-                {
-                    label: "Descrição Equipamento",
-                    property: "descEquipamento"
-                },
-
-                {
-                    label: "Grupo Atual",
-                    property: "grupoAtual"
-                },
-
-                {
-                    label: "Local Instalação",
-                    property: "localInstalacao"
-                },
-
-                {
-                    label: "Descrição Local",
-                    property: "descLocalInstalacao"
-                },
-
-                {
-                    label: "Gateway",
-                    property: "gateway"
-                },
-
-                {
-                    label: "Última Atualização",
-                    property: "ultimaPosicao"
-                },
-
-                {
-                    label: "Latitude",
-                    property: "latitude"
-                },
-
-                {
-                    label: "Longitude",
-                    property: "longitude"
+                if (!identificador) {
+                    return;
                 }
 
-            ]
+                const marker =
+                    this._equipamentoMarkers?.[
+                    identificador
+                    ];
 
-        },
+                if (!marker) {
 
-        dataSource: dados,
+                    sap.m.MessageToast.show(
+                        "Rastreador não encontrado."
+                    );
 
-        fileName: "Rastreamento_RFID.xlsx"
+                    return;
 
-    });
+                }
 
-    oSpreadsheet.build()
-        .then(() => {
-            oSpreadsheet.destroy();
-        });
+                this._map.setView(
+                    marker.getLatLng(),
+                    18
+                );
 
-},
-        onQuantidadeObjectListItemPress(oEvent) {
+                marker.openPopup();
 
-    const grupo =
-        oEvent.getSource()
-            .getBindingContext("dashboard")
-            .getObject()
-            .grupo;
+                this.piscarEquipamento(marker);
 
-    const dados =
-        this.getView()
-            .getModel("dashboard")
-            .getData();
+            },
+            piscarEquipamento(marker) { 
 
-    const bounds = [];
+                const elemento = marker.getElement();
 
-    this._dadosFiltrados.forEach(item => {
+                if (!elemento) {
+                    return;
+                }
 
-    let localizacao =
-    this.determinarGrupo(item);
-    if (localizacao.startsWith("Instalado no ")) {
-        localizacao = "Instalados";
-    }
+                let contador = 0;
 
-    if (localizacao === grupo) {
+                const intervalo = setInterval(() => {
 
-        const lat = parseFloat(item.latitude);
-        const lng = parseFloat(item.longitude);
+                elemento.style.opacity =
+                    elemento.style.opacity === "0.1"
+                        ? "1"
+                        : "0.1";
 
-        if (!isNaN(lat) && !isNaN(lng)) {
+                contador++;
 
-            bounds.push([lat, lng]);
+                if (contador >= 12) {
 
-        }
+                    clearInterval(intervalo);
 
-    }
+                    elemento.style.opacity = "1";
 
-});
+                }
 
-    if (bounds.length > 0 && this._map) {
-
-        this._map.fitBounds(bounds, {
-            padding: [50, 50],
-            maxZoom: 18
-        });
-
-    }
+            }, 250);
 
 },
-    gerarResumoEquipamentos(dados) {
+            onExportarExcel() {
 
-    const resumo = {};
+                const dados = (this._dadosFiltrados || []).map(item => ({
 
-    dados.forEach(item => {
+                    identificador:
+                        item.identificador || "",
 
-        const desc =
-            (item.descEquipamento || "")
-                .toUpperCase();
+                    descEquipamento:
+                        item.descEquipamento || "",
 
-        let familia = "OUTROS";
+                    grupoAtual:
+                        item.grupoAtual || "",
 
-        if (desc.startsWith("COMANDO FINAL")) {
-            familia = "COMANDO FINAL";
-        } else if (desc.startsWith("TRANSMISSAO")) {
-            familia = "TRANSMISSAO";
-        } else if (desc.startsWith("CONVERSOR TORQUE")) {
-            familia = "CONVERSOR TORQUE";
-        } else if (desc.startsWith("DIFERENCIAL")) {
-            familia = "DIFERENCIAL";
-        } else if (desc.startsWith("MOTOR COMBUSTAO")) {
-            familia = "MOTOR COMBUSTAO";
-        }
+                    localInstalacao:
+                        item.localInstalacao || "",
 
-        if (!resumo[familia]) {
+                    descLocalInstalacao:
+                        item.descLocalInstalacao || "",
 
-            resumo[familia] = {
-                familia,
-                total: 0,
-                instalados: 0,
-                reformaInterna: 0,
-                reformaExterna: 0,
-                reformados: 0,
-                aReformar: 0
-            };
+                    gateway:
+                        item.gateway || "",
 
-        }
+                    ultimaPosicao:
+                        item.ultimaPosicao || "",
 
-        resumo[familia].total++;
+                    latitude:
+                        item.latitude || "",
 
-        const grupo =
-            this.determinarGrupo(item);
+                    longitude:
+                        item.longitude || ""
 
-        if (
-            item.grupoAtual &&
-            item.grupoAtual.startsWith("Instalado no ")
-        ) {
+                }));
 
-            resumo[familia].instalados++;
+                const oSpreadsheet = new Spreadsheet({
 
-        } else if (grupo === "Reforma interna") {
+                    workbook: {
 
-            resumo[familia].reformaInterna++;
+                        columns: [
 
-        } else if (grupo === "Reforma externa") {
+                            {
+                                label: "Identificador",
+                                property: "identificador"
+                            },
 
-            resumo[familia].reformaExterna++;
+                            {
+                                label: "Descrição Equipamento",
+                                property: "descEquipamento"
+                            },
 
-        } else if (grupo === "Reformado") {
+                            {
+                                label: "Grupo Atual",
+                                property: "grupoAtual"
+                            },
 
-            resumo[familia].reformados++;
+                            {
+                                label: "Local Instalação",
+                                property: "localInstalacao"
+                            },
 
-        } else if (grupo === "A reformar") {
+                            {
+                                label: "Descrição Local",
+                                property: "descLocalInstalacao"
+                            },
 
-            resumo[familia].aReformar++;
+                            {
+                                label: "Gateway",
+                                property: "gateway"
+                            },
 
-        }
+                            {
+                                label: "Última Atualização",
+                                property: "ultimaPosicao"
+                            },
 
-    });
+                            {
+                                label: "Latitude",
+                                property: "latitude"
+                            },
 
-    const resultado = Object.values(resumo)
-    .sort((a, b) =>
-        a.familia.localeCompare(
-            b.familia,
-            "pt-BR"
-        )
-    );
+                            {
+                                label: "Longitude",
+                                property: "longitude"
+                            }
 
-resultado.push({
+                        ]
 
-    familia: "TOTAL",
+                    },
 
-    total: resultado.reduce(
-        (s, x) => s + x.total, 0
-    ),
+                    dataSource: dados,
 
-    instalados: resultado.reduce(
-        (s, x) => s + x.instalados, 0
-    ),
+                    fileName: "Rastreamento_RFID.xlsx"
 
-    reformaInterna: resultado.reduce(
-        (s, x) => s + x.reformaInterna, 0
-    ),
+                });
 
-    reformaExterna: resultado.reduce(
-        (s, x) => s + x.reformaExterna, 0
-    ),
+                oSpreadsheet.build()
+                    .then(() => {
+                        oSpreadsheet.destroy();
+                    });
 
-    reformados: resultado.reduce(
-        (s, x) => s + x.reformados, 0
-    ),
+            },
+            onQuantidadeObjectListItemPress(oEvent) {
 
-    aReformar: resultado.reduce(
-        (s, x) => s + x.aReformar, 0
-    )
+                const grupo =
+                    oEvent.getSource()
+                        .getBindingContext("dashboard")
+                        .getObject()
+                        .grupo;
 
-});
-const totalGeral = resultado.reduce(
-    (s, x) => s + x.total,
-    0
-);
+                const dados =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getData();
 
-resultado.forEach(item => {
+                const bounds = [];
 
-    item.percentual =
-        totalGeral > 0
-            ? (
-                (item.total / totalGeral) * 100
-              ).toFixed(1) + "%"
-            : "0%";
+                this._dadosFiltrados.forEach(item => {
 
-});
-return resultado;
+                    let localizacao =
+                        this.determinarGrupo(item);
+                    if (localizacao.startsWith("Instalado no ")) {
+                        localizacao = "Instalados";
+                    }
 
-},
+                    if (localizacao === grupo) {
 
-        async carregarDashboard() {
- 
-            const response = await fetch(
-                "/odata/v4/smart-pcm/Rastreio"
-            );
-            const json = await response.json();
+                        const lat = parseFloat(item.latitude);
+                        const lng = parseFloat(item.longitude);
 
-            const responseGateway = await fetch(
-                "http://10.44.32.193:4000/Gateway"
-            );
+                        if (!isNaN(lat) && !isNaN(lng)) {
 
-            const gateways = await responseGateway.json();
+                            bounds.push([lat, lng]);
 
-            sap.m.MessageToast.show(
-                "Gateways: " + gateways.length
-            );
+                        }
+
+                    }
+
+                });
+
+                if (bounds.length > 0 && this._map) {
+
+                    this._map.fitBounds(bounds, {
+                        padding: [50, 50],
+                        maxZoom: 18
+                    });
+
+                }
+
+            },
+            gerarResumoEquipamentos(dados) {
+
+                const resumo = {};
+
+                dados.forEach(item => {
+
+                    const desc =
+                        (item.descEquipamento || "")
+                            .toUpperCase();
+
+                    let familia = "OUTROS";
+
+                    if (desc.startsWith("COMANDO FINAL")) {
+                        familia = "COMANDO FINAL";
+                    } else if (desc.startsWith("TRANSMISSAO")) {
+                        familia = "TRANSMISSAO";
+                    } else if (desc.startsWith("CONVERSOR TORQUE")) {
+                        familia = "CONVERSOR TORQUE";
+                    } else if (desc.startsWith("DIFERENCIAL")) {
+                        familia = "DIFERENCIAL";
+                    } else if (desc.startsWith("MOTOR COMBUSTAO")) {
+                        familia = "MOTOR COMBUSTAO";
+                    }
+
+                    if (!resumo[familia]) {
+
+                        resumo[familia] = {
+                            familia,
+                            total: 0,
+                            instalados: 0,
+                            reformaInterna: 0,
+                            reformaExterna: 0,
+                            reformados: 0,
+                            aReformar: 0
+                        };
+
+                    }
+
+                    resumo[familia].total++;
+
+                    const grupo =
+                        this.determinarGrupo(item);
+
+                    if (
+                        item.grupoAtual &&
+                        item.grupoAtual.startsWith("Instalado no ")
+                    ) {
+
+                        resumo[familia].instalados++;
+
+                    } else if (grupo === "Reforma interna") {
+
+                        resumo[familia].reformaInterna++;
+
+                    } else if (grupo === "Reforma externa") {
+
+                        resumo[familia].reformaExterna++;
+
+                    } else if (grupo === "Reformado") {
+
+                        resumo[familia].reformados++;
+
+                    } else if (grupo === "A reformar") {
+
+                        resumo[familia].aReformar++;
+
+                    }
+
+                });
+
+                const resultado = Object.values(resumo)
+                    .sort((a, b) =>
+                        a.familia.localeCompare(
+                            b.familia,
+                            "pt-BR"
+                        )
+                    );
+
+                resultado.push({
+
+                    familia: "TOTAL",
+
+                    total: resultado.reduce(
+                        (s, x) => s + x.total, 0
+                    ),
+
+                    instalados: resultado.reduce(
+                        (s, x) => s + x.instalados, 0
+                    ),
+
+                    reformaInterna: resultado.reduce(
+                        (s, x) => s + x.reformaInterna, 0
+                    ),
+
+                    reformaExterna: resultado.reduce(
+                        (s, x) => s + x.reformaExterna, 0
+                    ),
+
+                    reformados: resultado.reduce(
+                        (s, x) => s + x.reformados, 0
+                    ),
+
+                    aReformar: resultado.reduce(
+                        (s, x) => s + x.aReformar, 0
+                    )
+
+                });
+                const totalGeral = resultado.reduce(
+                    (s, x) => s + x.total,
+                    0
+                );
+
+                resultado.forEach(item => {
+
+                    item.percentual =
+                        totalGeral > 0
+                            ? (
+                                (item.total / totalGeral) * 100
+                            ).toFixed(1) + "%"
+                            : "0%";
+
+                });
+                return resultado;
+
+            },
+
+            gerarResumoGrupoAtual(dados) {
+
+                const grupos = {};
+
+                dados.forEach(item => {
+
+                    let grupo =
+                        this.determinarGrupo(item);
+
+                    if (
+                        grupo ===
+                        "Tags Digitais desatualizadas"
+                    ) {
+                        grupo = "Fora de zona";
+                    }
+
+                    grupos[grupo] =
+                        (grupos[grupo] || 0) + 1;
+
+                });
+
+                const resultado = [];
+
+                Object.keys(grupos).forEach(grupo => {
+
+                    resultado.push({
+
+                        grupo,
+
+                        quantidade: grupos[grupo]
+
+                    });
+
+                });
+                resultado.sort((a, b) =>
+                    (a.grupo || "").localeCompare(
+                        b.grupo || "",
+                        "pt-BR",
+                        { sensitivity: "base" }
+                    )
+                );
+
+                return resultado;
+
+            },
+            gerarDetalhesTagsDesatualizadas(dados) {
+
+                const agora = new Date();
+
+                const limiteOnline = new Date(
+                    agora.getTime() - (72 * 60 * 60 * 1000)
+                );
+
+                const resultado = [];
+
+                dados.forEach(item => {
+
+                    if (!item.ultimaPosicao) {
+                        return;
+                    }
+
+                    const dataPosicao =
+                        this.converterDataBr(
+                            item.ultimaPosicao
+                        );
+
+                    if (dataPosicao < limiteOnline) {
+
+                        const dias =
+                            Math.floor(
+                                (agora - dataPosicao) /
+                                (1000 * 60 * 60 * 24)
+                            );
+
+                        const grupoAtual =
+                            this.determinarGrupo(item);
+
+                        let deducao = "";
+
+                        if (
+                            grupoAtual.startsWith("Instalado no ")
+                        ) {
+
+                            deducao =
+                                "Equipamento em operação. Avaliar necessidade de gateway na área.";
+
+                        } else if (
+                            grupoAtual === "Reforma externa"
+                        ) {
+
+                            deducao =
+                                "Equipamento enviado para reforma externa. Ausência de leituras é esperada.";
+
+                        } else if (
+                            grupoAtual === "Reformado"
+                        ) {
+
+                            deducao =
+                                "Equipamento reformado sem leituras recentes. Avaliar necessidade de gateway na área.";
+
+                        } else {
+
+                            deducao =
+                                "Verificar condição operacional e conectividade do equipamento.";
+
+                        }
+
+                        resultado.push({
+
+                            identificador:
+                                item.identificador,
+
+                            equipamento:
+                                item.descEquipamento,
+
+                            localInstalacao:
+                                item.localInstalacao,
+
+                            grupoAtual:
+                                grupoAtual,
+
+
+                            ultimaPosicao:
+                                item.ultimaPosicao,
+
+                            diasSemAtualizacao:
+                                dias,
+
+                            deducao:
+                                deducao
+
+                        });
+
+                    }
+
+                });
+
+                resultado.sort((a, b) =>
+                    a.grupoAtual.localeCompare(
+                        b.grupoAtual,
+                        "pt-BR",
+                        { sensitivity: "base" }
+                    )
+                );
+
+                return resultado;
+
+            },
+
+
+
+            async carregarDashboard() {
+
+                const response = await fetch(
+                    "/odata/v4/smart-pcm/Rastreio"
+                );
+                const json = await response.json();
+
+                const responseGateway = await fetch(
+                    "http://10.44.32.193:4000/Gateway"
+                );
+
+                const gateways = await responseGateway.json();
+
+                sap.m.MessageToast.show(
+                    "Gateways: " + gateways.length
+                );
 
 
                 if (!gateways.length) {
@@ -372,86 +589,87 @@ return resultado;
 
                 }
                 const dadosFiltrados = (json.value || []).filter(
-                    item => item.grupoAtual !== "Tags Digitais Não Habilitadas"
+                    item =>
+                        item.grupoAtual !== "Tags Digitais Não Habilitadas" &&
+                        item.identificador !== "11039948"
                 );
-            this._dadosFiltrados = dadosFiltrados;
+                this._dadosFiltrados = dadosFiltrados;
                 const gatewaysSet = new Set();
                 const gruposMap = {};
 
                 const agora = new Date();
 
-const limiteOnline = new Date(
-    agora.getTime() - (72 * 60 * 60 * 1000)
-);
+                const limiteOnline = new Date(
+                    agora.getTime() - (72 * 60 * 60 * 1000)
+                );
 
-let online = 0;
+                let online = 0;
 
-dadosFiltrados.forEach(item => {
+                dadosFiltrados.forEach(item => {
 
-    let localizacao =
-        this.determinarGrupo(item);
+                    let localizacao =
+                        this.determinarGrupo(item);
 
-    if (localizacao.startsWith("Instalado no ")) {
-        localizacao = "Instalados";
-    }
+                    if (localizacao.startsWith("Instalado no ")) {
+                        localizacao = "Instalados";
+                    }
 
-    gruposMap[localizacao] =
-        (gruposMap[localizacao] || 0) + 1;
+                    gruposMap[localizacao] =
+                        (gruposMap[localizacao] || 0) + 1;
 
-    if (item.ultimaPosicao) {
+                    if (item.ultimaPosicao) {
 
-        const dataPosicao =
-            this.converterDataBr(item.ultimaPosicao);
+                        const dataPosicao =
+                            this.converterDataBr(item.ultimaPosicao);
 
-        if (dataPosicao >= limiteOnline) {
+                        if (dataPosicao >= limiteOnline) {
 
-            online++;
+                            online++;
 
-            if (item.gateway) {
-                gatewaysSet.add(item.gateway);
-            }
+                            if (item.gateway) {
+                                gatewaysSet.add(item.gateway);
+                            }
 
-        }
+                        }
 
-    }
+                    }
 
-});
+                });
 
-const offline =
-    dadosFiltrados.length - online;
-            const gruposNormais = [];
-            const gruposEspeciais = [];
+                const offline =
+                    dadosFiltrados.length - online;
+                const gruposNormais = [];
+                const gruposEspeciais = [];
 
-            Object.keys(gruposMap).forEach(grupo => {
+                Object.keys(gruposMap).forEach(grupo => {
 
-                const item = {
-                    grupo,
-                    quantidade: gruposMap[grupo]
-                };
+                    const item = {
+                        grupo,
+                        quantidade: gruposMap[grupo]
+                    };
 
-                if (
-                    grupo === "Fora de zona" ||
-                    grupo === "Tags Digitais desatualizadas"
-                ) {
-                    gruposEspeciais.push(item);
-                } else {
-                    gruposNormais.push(item);
-                }
+                    if (
+                        grupo === "Fora de zona"
+                    ) {
+                        gruposEspeciais.push(item);
+                    } else {
+                        gruposNormais.push(item);
+                    }
 
-});
+                });
 
-gruposNormais.sort((a, b) =>
-    a.grupo.localeCompare(
-        b.grupo,
-        "pt-BR",
-        { sensitivity: "base" }
-    )
-);
+                gruposNormais.sort((a, b) =>
+                    a.grupo.localeCompare(
+                        b.grupo,
+                        "pt-BR",
+                        { sensitivity: "base" }
+                    )
+                );
 
-const grupos = [
-    ...gruposNormais,
-    ...gruposEspeciais
-];
+                const grupos = [
+                    ...gruposNormais,
+                    ...gruposEspeciais
+                ];
 
                 const ultimasLeituras = [...dadosFiltrados]
                     .sort(
@@ -460,29 +678,44 @@ const grupos = [
                             this.converterDataBr(a.ultimaPosicao)
                     )
                     .slice(0, 10);
-const resumoEquipamentos =
-    this.gerarResumoEquipamentos(
-        dadosFiltrados
-    );
-this.getView()
-    .getModel("dashboard")
-    .setData({
+                const resumoEquipamentos =
+                    this.gerarResumoEquipamentos(
+                        dadosFiltrados
+                    );
 
-        totalEquipamentos: dadosFiltrados.length,
+                const resumoGrupoAtual =
+                    this.gerarResumoGrupoAtual(
+                        dadosFiltrados
+                    );
+                const detalhesTagsDesatualizadas =
+                    this.gerarDetalhesTagsDesatualizadas(
+                        dadosFiltrados
+                    );
 
-        online,
 
-        offline,
+                this.getView()
+                    .getModel("dashboard")
+                    .setData({
 
-        gateways: gateways.length,
+                        totalEquipamentos: dadosFiltrados.length,
 
-        grupos,
+                        online,
 
-        ultimasLeituras,
+                        offline,
 
-        resumoEquipamentos
+                        gateways: gateways.length,
 
-    });
+                        grupos,
+
+                        ultimasLeituras,
+
+                        resumoEquipamentos,
+
+                        resumoGrupoAtual,
+
+                        detalhesTagsDesatualizadas
+
+                    });
 
                 this.byId("htmlMapa").setContent(`
     <div
@@ -496,43 +729,50 @@ this.getView()
                 setTimeout(() => {
                     let dadosMapa = dadosFiltrados;
 
-if (this._grupoSelecionado) {
+                    if (this._grupoSelecionado) {
 
-    dadosMapa = dadosFiltrados.filter(item => {
+                        dadosMapa = dadosFiltrados.filter(item => {
 
-let localizacao =
-    this.determinarGrupo(item);
+                            let localizacao =
+                                this.determinarGrupo(item);
 
-if (localizacao.startsWith("Instalado no ")) {
-    localizacao = "Instalados";
-}
+                            if (
+                                localizacao ===
+                                "Tags Digitais desatualizadas"
+                            ) {
+                                localizacao = "Fora de zona";
+                            }
 
-return localizacao === this._grupoSelecionado;
+                            if (localizacao.startsWith("Instalado no ")) {
+                                localizacao = "Instalados";
+                            }
 
-    });
+                            return localizacao === this._grupoSelecionado;
 
-}
-const equipamentos = dadosMapa.filter(item => {
+                        });
 
-    if (
-    item.grupoAtual === "Tags Digitais Não Habilitadas"
-) {
-    return false;
-}
+                    }
+                    const equipamentos = dadosMapa.filter(item => {
 
-    const lat = parseFloat(item.latitude);
-    const lng = parseFloat(item.longitude);
+                        if (
+                            item.grupoAtual === "Tags Digitais Não Habilitadas"
+                        ) {
+                            return false;
+                        }
 
-    return (
-        !isNaN(lat) &&
-        !isNaN(lng) &&
-        lat >= -21 &&
-        lat <= -18 &&
-        lng >= -45 &&
-        lng <= -42
-    );
+                        const lat = parseFloat(item.latitude);
+                        const lng = parseFloat(item.longitude);
 
-});
+                        return (
+                            !isNaN(lat) &&
+                            !isNaN(lng) &&
+                            lat >= -21 &&
+                            lat <= -18 &&
+                            lng >= -45 &&
+                            lng <= -42
+                        );
+
+                    });
 
                     if (!equipamentos.length) {
                         return;
@@ -560,59 +800,59 @@ const equipamentos = dadosMapa.filter(item => {
                         layers: [satelite]
                     });
                     const botaoMedir = L.control({
-    position: "topleft"
-});
+                        position: "topleft"
+                    });
 
-botaoMedir.onAdd = () => {
+                    botaoMedir.onAdd = () => {
 
-    const div =
-        L.DomUtil.create("div");
+                        const div =
+                            L.DomUtil.create("div");
 
-    div.innerHTML = `
-        <button
-            style="
-                background:white;
-                border:1px solid #ccc;
-                padding:8px;
-                cursor:pointer;
-                font-size:16px;
-                font-weight:bold;">
-            📏 Medir
-        </button>
-    `;
+                        div.innerHTML = `
+                    <button
+                        style="
+                            background:white;
+                            border:1px solid #ccc;
+                            padding:8px;
+                            cursor:pointer;
+                            font-size:16px;
+                            font-weight:bold;">
+                        📏 Medir
+                    </button>
+                `;
 
-    div.onclick = () => {
+                        div.onclick = () => {
 
-        this._modoMedicao =
-            !this._modoMedicao;
+                            this._modoMedicao =
+                                !this._modoMedicao;
 
-        this._pontosMedicao = [];
+                            this._pontosMedicao = [];
 
-        if (this._linhaMedicao) {
+                            if (this._linhaMedicao) {
 
-            this._map.removeLayer(
-                this._linhaMedicao
-            );
+                                this._map.removeLayer(
+                                    this._linhaMedicao
+                                );
 
-            this._linhaMedicao = null;
+                                this._linhaMedicao = null;
 
-        }
+                            }
 
-        sap.m.MessageToast.show(
+                            sap.m.MessageToast.show(
 
-            this._modoMedicao
-                ? "Modo medição ativado"
-                : "Modo medição desativado"
+                                this._modoMedicao
+                                    ? "Modo medição ativado"
+                                    : "Modo medição desativado"
 
-        );
+                            );
 
-    };
+                        };
 
-    return div;
+                        return div;
 
-};
+                    };
 
-botaoMedir.addTo(this._map);
+                    botaoMedir.addTo(this._map);
                     setTimeout(() => {
                         this._map.invalidateSize();
                     }, 200);
@@ -668,106 +908,107 @@ botaoMedir.addTo(this._map);
 
                         div.innerHTML =
 
-    "<span style='display:inline-block;" +
-    "width:8px;" +
-    "height:8px;" +
-    "background:#2ecc71;" +
-    "border:3px solid white;" +
-    "border-radius:50%;" +
-    "box-shadow:0 0 0 4px rgba(46,204,113,0.25),0 0 10px rgba(46,204,113,0.8);" +
-    "vertical-align:middle;" +
-    "margin-right:8px;'></span> Online<br>" +
+                            "<span style='display:inline-block;" +
+                            "width:8px;" +
+                            "height:8px;" +
+                            "background:#2ecc71;" +
+                            "border:3px solid white;" +
+                            "border-radius:50%;" +
+                            "box-shadow:0 0 0 4px rgba(46,204,113,0.25),0 0 10px rgba(46,204,113,0.8);" +
+                            "vertical-align:middle;" +
+                            "margin-right:8px;'></span> Online<br>" +
 
-    "<span style='display:inline-block;" +
-    "width:8px;" +
-    "height:8px;" +
-    "background:#f1c40f;" +
-    "border:3px solid white;" +
-    "border-radius:50%;" +
-    "box-shadow:0 0 0 4px rgba(241,196,15,0.25),0 0 10px rgba(241,196,15,0.8);" +
-    "vertical-align:middle;" +
-    "margin-right:8px;'></span> Offline<br>" +
+                            "<span style='display:inline-block;" +
+                            "width:8px;" +
+                            "height:8px;" +
+                            "background:#f1c40f;" +
+                            "border:3px solid white;" +
+                            "border-radius:50%;" +
+                            "box-shadow:0 0 0 4px rgba(241,196,15,0.25),0 0 10px rgba(241,196,15,0.8);" +
+                            "vertical-align:middle;" +
+                            "margin-right:8px;'></span> Offline<br>" +
 
-"<span style='display:inline-block;" +
-"width:8px;" +
-"height:8px;" +
-"background:#3498db;" +
-"border:3px solid white;" +
-"border-radius:50%;" +
-"box-shadow:0 0 0 4px rgba(52,152,219,0.25),0 0 10px rgba(52,152,219,0.8);" +
-"vertical-align:middle;" +
-"margin-right:8px;'></span> Gateway<br>" +
+                            "<span style='display:inline-block;" +
+                            "width:8px;" +
+                            "height:8px;" +
+                            "background:#3498db;" +
+                            "border:3px solid white;" +
+                            "border-radius:50%;" +
+                            "box-shadow:0 0 0 4px rgba(52,152,219,0.25),0 0 10px rgba(52,152,219,0.8);" +
+                            "vertical-align:middle;" +
+                            "margin-right:8px;'></span> Gateway<br>" +
 
 
-"<span style='display:inline-block;" +
-"width:8px;" +
-"height:8px;" +
-"background:#ff6347;" +
-"border:3px solid white;" +
-"border-radius:50%;" +
-"box-shadow:0 0 0 4px rgba(255,99,71,0.25),0 0 10px rgba(255,99,71,0.8);" +
-"vertical-align:middle;" +
-"margin-right:8px;'></span> Instalado";
+                            "<span style='display:inline-block;" +
+                            "width:8px;" +
+                            "height:8px;" +
+                            "background:#ff6347;" +
+                            "border:3px solid white;" +
+                            "border-radius:50%;" +
+                            "box-shadow:0 0 0 4px rgba(255,99,71,0.25),0 0 10px rgba(255,99,71,0.8);" +
+                            "vertical-align:middle;" +
+                            "margin-right:8px;'></span> Instalado";
 
                         return div;
                     };
 
                     legenda.addTo(this._map);
-
                     const markers = L.layerGroup();
                     const gatewaysLayer = L.layerGroup();
-this._gatewayMarkers = {};
-this._gatewayInfo = {};
-this._modoMedicao = false;
-this._pontosMedicao = [];
-this._linhaMedicao = null;
+
+                    this._gatewayMarkers = {};
+                    this._gatewayInfo = {};
+                    this._equipamentoMarkers = {};
+                    this._modoMedicao = false;
+                    this._pontosMedicao = [];
+                    this._linhaMedicao = null;
 
 
                     equipamentos.forEach(item => {
 
                         const lat = parseFloat(item.latitude);
                         const lng = parseFloat(item.longitude);
-                       const dataPosicao =
-    this.converterDataBr(item.ultimaPosicao);
+                        const dataPosicao =
+                            this.converterDataBr(item.ultimaPosicao);
 
-const online =
-    dataPosicao >= limiteOnline;
+                        const online =
+                            dataPosicao >= limiteOnline;
 
-const ehDesatualizada =
-    item.grupoAtual === "Tags Digitais desatualizadas";
+                        const ehDesatualizada =
+                            item.grupoAtual === "Tags Digitais desatualizadas";
 
-const cor =
-    ehDesatualizada
-        ? "#f1c40f"
-        : (online ? "#2ecc71" : "#f1c40f");
+                        const cor =
+                            ehDesatualizada
+                                ? "#f1c40f"
+                                : (online ? "#2ecc71" : "#f1c40f");
 
-const sombra =
-    ehDesatualizada
-        ? "rgba(241,196,15,0.8)"
-        : (
-            online
-                ? "rgba(46,204,113,0.8)"
-                : "rgba(241,196,15,0.8)"
-        );
+                        const sombra =
+                            ehDesatualizada
+                                ? "rgba(241,196,15,0.8)"
+                                : (
+                                    online
+                                        ? "rgba(46,204,113,0.8)"
+                                        : "rgba(241,196,15,0.8)"
+                                );
 
-const halo =
-    ehDesatualizada
-        ? "rgba(241,196,15,0.25)"
-        : (
-            online
-                ? "rgba(46,204,113,0.25)"
-                : "rgba(241,196,15,0.25)"
-        );
-                                const ehInstalado =
-                                item.grupoAtual &&
-                                item.grupoAtual.startsWith("Instalado no ");
+                        const halo =
+                            ehDesatualizada
+                                ? "rgba(241,196,15,0.25)"
+                                : (
+                                    online
+                                        ? "rgba(46,204,113,0.25)"
+                                        : "rgba(241,196,15,0.25)"
+                                );
+                        const ehInstalado =
+                            item.grupoAtual &&
+                            item.grupoAtual.startsWith("Instalado no ");
                         const marker = L.marker(
                             [lat, lng],
                             {
                                 icon: L.divIcon({
                                     className: "",
-                                   html: ehInstalado
-    ? `
+                                    html: ehInstalado
+                                        ? `
         <div style="
             width:16px;
             height:16px;
@@ -780,7 +1021,7 @@ const halo =
         "></div>
       
       `
-    : `
+                                        : `
         <div style="
             width:16px;
             height:16px;
@@ -792,7 +1033,7 @@ const halo =
                 0 0 10px ${sombra};
         "></div>
       `,
-                                                iconSize: [22, 22],
+                                    iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
@@ -805,65 +1046,73 @@ const halo =
     Gateway: ${item.gateway || ''}<br>
     Última Atualização: ${item.ultimaPosicao || ''}
 `);
-marker.on("dblclick", () => {
 
-    const gatewayMarker =
-        this._gatewayMarkers[item.gateway];
+                        marker.on("dblclick", () => {
 
-    if (!gatewayMarker) {
+                            const gatewayMarker =
+                                this._gatewayMarkers[item.gateway];
 
-        sap.m.MessageToast.show(
-            "Gateway não encontrado."
-        );
+                            if (!gatewayMarker) {
 
-        return;
+                                sap.m.MessageToast.show(
+                                    "Gateway não encontrado."
+                                );
 
-    }
+                                return;
 
-    this.piscarGateway(gatewayMarker);
+                            }
 
-    const posGateway =
-    gatewayMarker.getLatLng();
+                            this.piscarGateway(gatewayMarker);
 
-const distancia =
-    this.calcularDistanciaMetros(
-        lat,
-        lng,
-        posGateway.lat,
-        posGateway.lng
-    );
-const textoDistancia =
-    distancia >= 1000
-        ? (distancia / 1000)
-            .toFixed(2)
-            .replace(".", ",") + " km"
-        : distancia.toFixed(0) + " m";
-const gatewayInfo =
-    this._gatewayInfo[item.gateway];
-sap.m.MessageBox.information(
+                            const posGateway =
+                                gatewayMarker.getLatLng();
 
-    "Gateway: " +
-    item.gateway +
+                            const distancia =
+                                this.calcularDistanciaMetros(
+                                    lat,
+                                    lng,
+                                    posGateway.lat,
+                                    posGateway.lng
+                                );
+                            const textoDistancia =
+                                distancia >= 1000
+                                    ? (distancia / 1000)
+                                        .toFixed(2)
+                                        .replace(".", ",") + " km"
+                                    : distancia.toFixed(0) + " m";
+                            const gatewayInfo =
+                                this._gatewayInfo[item.gateway];
+                            sap.m.MessageBox.information(
 
-    "\nDescrição: " +
-    (gatewayInfo?.identificador || "N/A") +
+                                "Gateway: " +
+                                item.gateway +
 
-    "\nDistância estimada: " +
-    textoDistancia
+                                "\nDescrição: " +
+                                (gatewayInfo?.identificador || "N/A") +
 
-);
+                                "\nDistância estimada: " +
+                                textoDistancia
 
-});
+                            );
+
+                        });
+
+                        this._equipamentoMarkers[
+                            item.identificador
+                        ] = marker;
+
                         markers.addLayer(marker);
 
                     });
 
+
+
                     this._map.addLayer(markers);
                     this._map.addLayer(gatewaysLayer);
                     sap.m.MessageToast.show(
-    "Markers gateway: " +
-    gatewaysLayer.getLayers().length
-);
+                        "Markers gateway: " +
+                        gatewaysLayer.getLayers().length
+                    );
                     const bounds = [];
 
                     equipamentos.forEach(item => {
@@ -877,9 +1126,9 @@ sap.m.MessageBox.information(
                     );
                     gateways.forEach(gw => {
 
-    sap.m.MessageToast.show(
-        gw.identificador
-    );
+                        sap.m.MessageToast.show(
+                            gw.identificador
+                        );
 
                         const lat = parseFloat(gw.latitude);
                         const lng = parseFloat(gw.longitude);
@@ -888,12 +1137,12 @@ sap.m.MessageBox.information(
                             return;
                         }
 
-                            const marker = L.marker(
-                                [lat, lng],
-                                {
-                                    icon: L.divIcon({
-                                        className: "",
-                                        html: `
+                        const marker = L.marker(
+                            [lat, lng],
+                            {
+                                icon: L.divIcon({
+                                    className: "",
+                                    html: `
                                 <div style="
                                 width:16px;
                                 height:16px;
@@ -905,35 +1154,35 @@ sap.m.MessageBox.information(
                                 0 0 12px rgba(52,152,219,0.8);
                                 "></div>
                                                 `,
-                                iconSize: [22, 22],
-                                iconAnchor: [11, 11]
-                                    })
-                                }
+                                    iconSize: [22, 22],
+                                    iconAnchor: [11, 11]
+                                })
+                            }
+                        )
+                            .bindTooltip(
+                                gw.identificador
                             )
-.bindTooltip(
-    gw.identificador
-)
-.bindPopup(`
+                            .bindPopup(`
     <b>${gw.identificador}</b><br>
     Gateway ID: ${gw.gatewayId}<br>
     Localidade: ${gw.localidade}<br>
     Condição: ${gw.condicao}
 `);
-marker.on("click", () => {
+                        marker.on("click", () => {
 
-        this.processarMedicao(
-            lat,
-            lng,
-            gw.identificador
-        );
+                            this.processarMedicao(
+                                lat,
+                                lng,
+                                gw.identificador
+                            );
 
-    });
-this._gatewayMarkers[gw.gatewayId] = marker;
-this._gatewayInfo[gw.gatewayId] = {
-    identificador: gw.identificador,
-    localidade: gw.localidade,
-    condicao: gw.condicao
-};   
+                        });
+                        this._gatewayMarkers[gw.gatewayId] = marker;
+                        this._gatewayInfo[gw.gatewayId] = {
+                            identificador: gw.identificador,
+                            localidade: gw.localidade,
+                            condicao: gw.condicao
+                        };
                         gatewaysLayer.addLayer(marker);
 
                     });
@@ -950,124 +1199,137 @@ this._gatewayInfo[gw.gatewayId] = {
 
             },
             processarMedicao(
-    lat,
-    lng,
-    descricao
-) {
+                lat,
+                lng,
+                descricao
+            ) {
 
-    if (!this._modoMedicao) {
-        return;
-    }
+                if (!this._modoMedicao) {
+                    return;
+                }
 
-    this._pontosMedicao.push({
-        lat,
-        lng,
-        descricao
-    });
+                this._pontosMedicao.push({
+                    lat,
+                    lng,
+                    descricao
+                });
 
-    if (
-        this._pontosMedicao.length < 2
-    ) {
-        return;
-    }
+                if (
+                    this._pontosMedicao.length < 2
+                ) {
+                    return;
+                }
 
-    const p1 =
-        this._pontosMedicao[0];
+                const p1 =
+                    this._pontosMedicao[0];
 
-    const p2 =
-        this._pontosMedicao[1];
+                const p2 =
+                    this._pontosMedicao[1];
 
-    const distancia =
-        this._map.distance(
-            [p1.lat, p1.lng],
-            [p2.lat, p2.lng]
-        );
+                const distancia =
+                    this._map.distance(
+                        [p1.lat, p1.lng],
+                        [p2.lat, p2.lng]
+                    );
 
-    if (this._linhaMedicao) {
+                if (this._linhaMedicao) {
 
-        this._map.removeLayer(
-            this._linhaMedicao
-        );
+                    this._map.removeLayer(
+                        this._linhaMedicao
+                    );
 
-    }
+                }
 
-    this._linhaMedicao = L.polyline(
-        [
-            [p1.lat, p1.lng],
-            [p2.lat, p2.lng]
-        ],
-        {
-            color: "red",
-            weight: 4
-        }
-    ).addTo(this._map);
+                this._linhaMedicao = L.polyline(
+                    [
+                        [p1.lat, p1.lng],
+                        [p2.lat, p2.lng]
+                    ],
+                    {
+                        color: "red",
+                        weight: 4
+                    }
+                ).addTo(this._map);
 
-    const meioLat =
-        (p1.lat + p2.lat) / 2;
+                const meioLat =
+                    (p1.lat + p2.lat) / 2;
 
-    const meioLng =
-        (p1.lng + p2.lng) / 2;
+                const meioLng =
+                    (p1.lng + p2.lng) / 2;
 
-    L.popup()
-        .setLatLng([
-            meioLat,
-            meioLng
-        ])
-        .setContent(`
+                L.popup()
+                    .setLatLng([
+                        meioLat,
+                        meioLng
+                    ])
+                    .setContent(`
             <b>
                 ${(distancia / 1000)
-                    .toFixed(2)} km
+                            .toFixed(2)} km
             </b>
         `)
-        .openOn(this._map);
+                    .openOn(this._map);
 
-    this._pontosMedicao = [];
+                this._pontosMedicao = [];
 
-},  
-calcularDistanciaMetros(
-    lat1,
-    lon1,
-    lat2,
-    lon2
-) {
+            },
+            calcularDistanciaMetros(
+                lat1,
+                lon1,
+                lat2,
+                lon2
+            ) {
 
-    return this._map.distance(
-        [lat1, lon1],
-        [lat2, lon2]
-    );
+                return this._map.distance(
+                    [lat1, lon1],
+                    [lat2, lon2]
+                );
 
-},      
+            },
 
-piscarGateway(marker) {
+            piscarGateway(marker) {
 
-    const elemento = marker.getElement();
+                const elemento = marker.getElement();
 
-    if (!elemento) {
-        return;
-    }
+                if (!elemento) {
+                    return;
+                }
 
-    let contador = 0;
+                let contador = 0;
 
-    const intervalo = setInterval(() => {
+                const intervalo = setInterval(() => {
 
-        elemento.style.opacity =
-            elemento.style.opacity === "0.2"
-                ? "1"
-                : "0.2";
+                    elemento.style.opacity =
+                        elemento.style.opacity === "0.2"
+                            ? "1"
+                            : "0.2";
 
-        contador++;
+                    contador++;
 
-        if (contador >= 8) {
+                    if (contador >= 8) {
 
-            clearInterval(intervalo);
+                        clearInterval(intervalo);
 
-            elemento.style.opacity = "1";
+                        elemento.style.opacity = "1";
 
-        }
+                    }
 
-    }, 250);
+                }, 250);
 
-},
+            },
+            formatarStatusGrupo(grupoAtual) {
+
+
+                if (
+                    grupoAtual &&
+                    grupoAtual.toUpperCase().includes("REFORMADO")
+                ) {
+                    return "Warning";
+                }
+
+                return "None";
+
+            },
             converterDataBr(dataStr) {
 
                 try {

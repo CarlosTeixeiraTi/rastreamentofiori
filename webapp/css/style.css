@@ -27,6 +27,7 @@
     margin-top: 10px !important;
     line-height: 18px !important;
 }
+
 .kpiNumero {
     font-size: 46px !important;
     font-weight: bold !important;
@@ -36,6 +37,7 @@
     font-size: 14px !important;
     font-weight: 600 !important;
 }
+
 .itemNormal {
     border: 1px solid #d9d9d9 !important;
     border-radius: 8px !important;
@@ -48,6 +50,7 @@
     background: #fff8e1 !important;
     margin-bottom: 6px !important;
 }
+
 /* ============================
    VISUAL MODERNO DASHBOARD
    ============================ */
@@ -129,19 +132,24 @@
 }
 
 /* Mapa */
+.pesquisaRastreador input {
+    font-size: 20px !important;
+    font-weight: 600;
+}
 
 #mapaEquipamentos {
     border-radius: 14px;
 }
+
 .gatewayLabel {
-    background: rgba(255,255,255,0.95);
+    background: rgba(255, 255, 255, 0.95);
     border: 1px solid #3498db;
     border-radius: 6px;
     padding: 2px 6px;
     color: #1565c0;
     font-size: 12px;
     font-weight: bold;
-    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .2);
 }
 
 .gatewayLabel:before {
