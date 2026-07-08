@@ -1,8 +1,13 @@
 /* global L */
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "sap/ui/model/json/JSONModel"
-], (Controller, JSONModel) => {
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/export/Spreadsheet"
+], (
+    Controller,
+    JSONModel,
+    Spreadsheet
+) => {
     "use strict";
 
     return Controller.extend(
@@ -30,7 +35,143 @@ sap.ui.define([
             this.carregarDashboard();
 
         },
+        determinarGrupo(item) {
 
+                let grupo =
+                    item.grupoAtual ||
+                    "Sem Localização";
+
+                const descLocal =
+                    (item.descLocalInstalacao || "")
+                        .toUpperCase();
+
+                if ( descLocal.includes(" A REF")) {
+
+                    grupo = "A reformar";
+
+                } else if (descLocal.includes("REFORMADO")) {
+
+                    grupo = "Reformado";
+
+                } else if (descLocal.includes("EXT")) {
+
+                    grupo = "Reforma externa";
+
+                } else if (
+                    (
+                        descLocal.includes("EMREF") ||
+                        descLocal.includes("REFORMA")
+                    ) &&
+                    !descLocal.includes("EXT")
+                ) {
+
+                    grupo = "Reforma interna";
+
+                }
+
+                return grupo;
+
+            },
+onExportarExcel() {
+
+    const dados = (this._dadosFiltrados || []).map(item => ({
+
+        identificador:
+            item.identificador || "",
+
+        descEquipamento:
+            item.descEquipamento || "",
+
+        grupoAtual:
+            item.grupoAtual || "",
+
+        localInstalacao:
+            item.localInstalacao || "",
+
+        descLocalInstalacao:
+            item.descLocalInstalacao || "",
+
+        gateway:
+            item.gateway || "",
+
+        ultimaPosicao:
+            item.ultimaPosicao || "",
+
+        latitude:
+            item.latitude || "",
+
+        longitude:
+            item.longitude || ""
+
+    }));
+
+    const oSpreadsheet = new Spreadsheet({
+
+        workbook: {
+
+            columns: [
+
+                {
+                    label: "Identificador",
+                    property: "identificador"
+                },
+
+                {
+                    label: "Descrição Equipamento",
+                    property: "descEquipamento"
+                },
+
+                {
+                    label: "Grupo Atual",
+                    property: "grupoAtual"
+                },
+
+                {
+                    label: "Local Instalação",
+                    property: "localInstalacao"
+                },
+
+                {
+                    label: "Descrição Local",
+                    property: "descLocalInstalacao"
+                },
+
+                {
+                    label: "Gateway",
+                    property: "gateway"
+                },
+
+                {
+                    label: "Última Atualização",
+                    property: "ultimaPosicao"
+                },
+
+                {
+                    label: "Latitude",
+                    property: "latitude"
+                },
+
+                {
+                    label: "Longitude",
+                    property: "longitude"
+                }
+
+            ]
+
+        },
+
+        dataSource: dados,
+
+        fileName: "Rastreamento_RFID.xlsx"
+
+    });
+
+    oSpreadsheet.build()
+        .then(() => {
+            oSpreadsheet.destroy();
+        });
+
+},
         onQuantidadeObjectListItemPress(oEvent) {
 
     const grupo =
@@ -49,9 +190,7 @@ sap.ui.define([
     this._dadosFiltrados.forEach(item => {
 
     let localizacao =
-        item.grupoAtual ||
-        "Sem Localização";
-
+    this.determinarGrupo(item);
     if (localizacao.startsWith("Instalado no ")) {
         localizacao = "Instalados";
     }
@@ -81,7 +220,131 @@ sap.ui.define([
     }
 
 },
+    gerarResumoEquipamentos(dados) {
 
+    const resumo = {};
+
+    dados.forEach(item => {
+
+        const desc =
+            (item.descEquipamento || "")
+                .toUpperCase();
+
+        let familia = "OUTROS";
+
+        if (desc.startsWith("COMANDO FINAL")) {
+            familia = "COMANDO FINAL";
+        } else if (desc.startsWith("TRANSMISSAO")) {
+            familia = "TRANSMISSAO";
+        } else if (desc.startsWith("CONVERSOR TORQUE")) {
+            familia = "CONVERSOR TORQUE";
+        } else if (desc.startsWith("DIFERENCIAL")) {
+            familia = "DIFERENCIAL";
+        } else if (desc.startsWith("MOTOR COMBUSTAO")) {
+            familia = "MOTOR COMBUSTAO";
+        }
+
+        if (!resumo[familia]) {
+
+            resumo[familia] = {
+                familia,
+                total: 0,
+                instalados: 0,
+                reformaInterna: 0,
+                reformaExterna: 0,
+                reformados: 0,
+                aReformar: 0
+            };
+
+        }
+
+        resumo[familia].total++;
+
+        const grupo =
+            this.determinarGrupo(item);
+
+        if (
+            item.grupoAtual &&
+            item.grupoAtual.startsWith("Instalado no ")
+        ) {
+
+            resumo[familia].instalados++;
+
+        } else if (grupo === "Reforma interna") {
+
+            resumo[familia].reformaInterna++;
+
+        } else if (grupo === "Reforma externa") {
+
+            resumo[familia].reformaExterna++;
+
+        } else if (grupo === "Reformado") {
+
+            resumo[familia].reformados++;
+
+        } else if (grupo === "A reformar") {
+
+            resumo[familia].aReformar++;
+
+        }
+
+    });
+
+    const resultado = Object.values(resumo)
+    .sort((a, b) =>
+        a.familia.localeCompare(
+            b.familia,
+            "pt-BR"
+        )
+    );
+
+resultado.push({
+
+    familia: "TOTAL",
+
+    total: resultado.reduce(
+        (s, x) => s + x.total, 0
+    ),
+
+    instalados: resultado.reduce(
+        (s, x) => s + x.instalados, 0
+    ),
+
+    reformaInterna: resultado.reduce(
+        (s, x) => s + x.reformaInterna, 0
+    ),
+
+    reformaExterna: resultado.reduce(
+        (s, x) => s + x.reformaExterna, 0
+    ),
+
+    reformados: resultado.reduce(
+        (s, x) => s + x.reformados, 0
+    ),
+
+    aReformar: resultado.reduce(
+        (s, x) => s + x.aReformar, 0
+    )
+
+});
+const totalGeral = resultado.reduce(
+    (s, x) => s + x.total,
+    0
+);
+
+resultado.forEach(item => {
+
+    item.percentual =
+        totalGeral > 0
+            ? (
+                (item.total / totalGeral) * 100
+              ).toFixed(1) + "%"
+            : "0%";
+
+});
+return resultado;
+
+},
 
         async carregarDashboard() {
  
@@ -111,24 +374,22 @@ sap.ui.define([
                 const dadosFiltrados = (json.value || []).filter(
                     item => item.grupoAtual !== "Tags Digitais Não Habilitadas"
                 );
-this._dadosFiltrados = dadosFiltrados;
+            this._dadosFiltrados = dadosFiltrados;
                 const gatewaysSet = new Set();
                 const gruposMap = {};
 
                 const agora = new Date();
 
-                const limiteOnline = new Date(
-                    agora.getTime() - (72 * 60 * 60 * 1000)
-                );
+const limiteOnline = new Date(
+    agora.getTime() - (72 * 60 * 60 * 1000)
+);
 
-                let online = 0;
-                let offline = 0;
+let online = 0;
 
-                dadosFiltrados.forEach(item => {
+dadosFiltrados.forEach(item => {
 
     let localizacao =
-        item.grupoAtual ||
-        "Sem Localização";
+        this.determinarGrupo(item);
 
     if (localizacao.startsWith("Instalado no ")) {
         localizacao = "Instalados";
@@ -137,50 +398,45 @@ this._dadosFiltrados = dadosFiltrados;
     gruposMap[localizacao] =
         (gruposMap[localizacao] || 0) + 1;
 
-                    if (item.ultimaPosicao) {
+    if (item.ultimaPosicao) {
 
-                        const dataPosicao =
-                            this.converterDataBr(item.ultimaPosicao);
+        const dataPosicao =
+            this.converterDataBr(item.ultimaPosicao);
 
-                        if (dataPosicao >= limiteOnline) {
+        if (dataPosicao >= limiteOnline) {
 
-                            online++;
+            online++;
 
-                            if (item.gateway) {
-                                gatewaysSet.add(item.gateway);
-                            }
+            if (item.gateway) {
+                gatewaysSet.add(item.gateway);
+            }
 
-                        } else {
+        }
 
-                            offline++;
-
-                        }
-
-                    } else {
-
-                        offline++;
-
-                    }
-
-                });
-const gruposNormais = [];
-const gruposEspeciais = [];
-
-Object.keys(gruposMap).forEach(grupo => {
-
-    const item = {
-        grupo,
-        quantidade: gruposMap[grupo]
-    };
-
-    if (
-        grupo === "Fora de zona" ||
-        grupo === "Tags Digitais desatualizadas"
-    ) {
-        gruposEspeciais.push(item);
-    } else {
-        gruposNormais.push(item);
     }
+
+});
+
+const offline =
+    dadosFiltrados.length - online;
+            const gruposNormais = [];
+            const gruposEspeciais = [];
+
+            Object.keys(gruposMap).forEach(grupo => {
+
+                const item = {
+                    grupo,
+                    quantidade: gruposMap[grupo]
+                };
+
+                if (
+                    grupo === "Fora de zona" ||
+                    grupo === "Tags Digitais desatualizadas"
+                ) {
+                    gruposEspeciais.push(item);
+                } else {
+                    gruposNormais.push(item);
+                }
 
 });
 
@@ -204,28 +460,34 @@ const grupos = [
                             this.converterDataBr(a.ultimaPosicao)
                     )
                     .slice(0, 10);
+const resumoEquipamentos =
+    this.gerarResumoEquipamentos(
+        dadosFiltrados
+    );
+this.getView()
+    .getModel("dashboard")
+    .setData({
 
-                this.getView()
-                    .getModel("dashboard")
-                    .setData({
+        totalEquipamentos: dadosFiltrados.length,
 
-                        totalEquipamentos: dadosFiltrados.length,
+        online,
 
-                        online,
+        offline,
 
-                        offline,
-gateways: gateways.length,
+        gateways: gateways.length,
 
-                        grupos,
+        grupos,
 
-                        ultimasLeituras
+        ultimasLeituras,
 
-                    });
+        resumoEquipamentos
+
+    });
 
                 this.byId("htmlMapa").setContent(`
     <div
         id="mapaEquipamentos"
-        style="height:900px;width:100%;">
+        style="height:650px;width:100%;">
     </div>
 `);
 
@@ -239,8 +501,7 @@ if (this._grupoSelecionado) {
     dadosMapa = dadosFiltrados.filter(item => {
 
 let localizacao =
-    item.grupoAtual ||
-    "Sem Localização";
+    this.determinarGrupo(item);
 
 if (localizacao.startsWith("Instalado no ")) {
     localizacao = "Instalados";
@@ -298,7 +559,60 @@ const equipamentos = dadosMapa.filter(item => {
                     this._map = L.map("mapaEquipamentos", {
                         layers: [satelite]
                     });
-                    
+                    const botaoMedir = L.control({
+    position: "topleft"
+});
+
+botaoMedir.onAdd = () => {
+
+    const div =
+        L.DomUtil.create("div");
+
+    div.innerHTML = `
+        <button
+            style="
+                background:white;
+                border:1px solid #ccc;
+                padding:8px;
+                cursor:pointer;
+                font-size:16px;
+                font-weight:bold;">
+            📏 Medir
+        </button>
+    `;
+
+    div.onclick = () => {
+
+        this._modoMedicao =
+            !this._modoMedicao;
+
+        this._pontosMedicao = [];
+
+        if (this._linhaMedicao) {
+
+            this._map.removeLayer(
+                this._linhaMedicao
+            );
+
+            this._linhaMedicao = null;
+
+        }
+
+        sap.m.MessageToast.show(
+
+            this._modoMedicao
+                ? "Modo medição ativado"
+                : "Modo medição desativado"
+
+        );
+
+    };
+
+    return div;
+
+};
+
+botaoMedir.addTo(this._map);
                     setTimeout(() => {
                         this._map.invalidateSize();
                     }, 200);
@@ -374,15 +688,26 @@ const equipamentos = dadosMapa.filter(item => {
     "vertical-align:middle;" +
     "margin-right:8px;'></span> Offline<br>" +
 
-    "<span style='display:inline-block;" +
-    "width:8px;" +
-    "height:8px;" +
-    "background:#3498db;" +
-    "border:3px solid white;" +
-    "border-radius:50%;" +
-    "box-shadow:0 0 0 4px rgba(52,152,219,0.25),0 0 10px rgba(52,152,219,0.8);" +
-    "vertical-align:middle;" +
-    "margin-right:8px;'></span> Gateway";
+"<span style='display:inline-block;" +
+"width:8px;" +
+"height:8px;" +
+"background:#3498db;" +
+"border:3px solid white;" +
+"border-radius:50%;" +
+"box-shadow:0 0 0 4px rgba(52,152,219,0.25),0 0 10px rgba(52,152,219,0.8);" +
+"vertical-align:middle;" +
+"margin-right:8px;'></span> Gateway<br>" +
+
+
+"<span style='display:inline-block;" +
+"width:8px;" +
+"height:8px;" +
+"background:#ff6347;" +
+"border:3px solid white;" +
+"border-radius:50%;" +
+"box-shadow:0 0 0 4px rgba(255,99,71,0.25),0 0 10px rgba(255,99,71,0.8);" +
+"vertical-align:middle;" +
+"margin-right:8px;'></span> Instalado";
 
                         return div;
                     };
@@ -391,6 +716,12 @@ const equipamentos = dadosMapa.filter(item => {
 
                     const markers = L.layerGroup();
                     const gatewaysLayer = L.layerGroup();
+this._gatewayMarkers = {};
+this._gatewayInfo = {};
+this._modoMedicao = false;
+this._pontosMedicao = [];
+this._linhaMedicao = null;
+
 
                     equipamentos.forEach(item => {
 
@@ -467,14 +798,62 @@ const halo =
                             }
                         ).bindPopup(`
     <b>${item.identificador}</b><br>
-    Localização: ${item.grupoAtual}<br>
-    Origem: ${item.grupoOriginal}<br>
-    Comunicação: ${item.tipoComunicacao}<br>
-    Confiança: ${item.confianca}<br>
-    Última posição: ${item.ultimaPosicao}<br>
-    Status: ${online ? "ONLINE" : "OFFLINE"}
+    Local de Instalação: ${item.localInstalacao || ''}<br>
+    Descrição do Local: ${item.descLocalInstalacao || ''}<br>
+    Descrição do Equipamento: ${item.descEquipamento || ''}<br>
+    Grupo Atual: ${item.grupoAtual || ''}<br>
+    Gateway: ${item.gateway || ''}<br>
+    Última Atualização: ${item.ultimaPosicao || ''}
 `);
+marker.on("dblclick", () => {
 
+    const gatewayMarker =
+        this._gatewayMarkers[item.gateway];
+
+    if (!gatewayMarker) {
+
+        sap.m.MessageToast.show(
+            "Gateway não encontrado."
+        );
+
+        return;
+
+    }
+
+    this.piscarGateway(gatewayMarker);
+
+    const posGateway =
+    gatewayMarker.getLatLng();
+
+const distancia =
+    this.calcularDistanciaMetros(
+        lat,
+        lng,
+        posGateway.lat,
+        posGateway.lng
+    );
+const textoDistancia =
+    distancia >= 1000
+        ? (distancia / 1000)
+            .toFixed(2)
+            .replace(".", ",") + " km"
+        : distancia.toFixed(0) + " m";
+const gatewayInfo =
+    this._gatewayInfo[item.gateway];
+sap.m.MessageBox.information(
+
+    "Gateway: " +
+    item.gateway +
+
+    "\nDescrição: " +
+    (gatewayInfo?.identificador || "N/A") +
+
+    "\nDistância estimada: " +
+    textoDistancia
+
+);
+
+});
                         markers.addLayer(marker);
 
                     });
@@ -509,34 +888,52 @@ const halo =
                             return;
                         }
 
-                        const marker = L.marker(
-                            [lat, lng],
-                            {
-                                icon: L.divIcon({
-                                    className: "",
-                                    html: `
-                    <div style="
-                        width:20px;
-                        height:20px;
-                        background:#3498db;
-                        border:3px solid white;
-                        border-radius:50%;
-                        box-shadow:
-                            0 0 0 5px rgba(52,152,219,0.25),
-                            0 0 12px rgba(52,152,219,0.8);
-                    "></div>
-                `,
-                                    iconSize: [26, 26],
-                                    iconAnchor: [13, 13]
-                                })
-                            }
-                        ).bindPopup(`
-        <b>${gw.identificador}</b><br>
-        Gateway ID: ${gw.gatewayId}<br>
-        Localidade: ${gw.localidade}<br>
-        Condição: ${gw.condicao}
-    `);
+                            const marker = L.marker(
+                                [lat, lng],
+                                {
+                                    icon: L.divIcon({
+                                        className: "",
+                                        html: `
+                                <div style="
+                                width:16px;
+                                height:16px;
+                                background:#3498db;
+                                border:3px solid white;
+                                border-radius:50%;
+                                box-shadow:
+                                0 0 0 5px rgba(52,152,219,0.25),
+                                0 0 12px rgba(52,152,219,0.8);
+                                "></div>
+                                                `,
+                                iconSize: [22, 22],
+                                iconAnchor: [11, 11]
+                                    })
+                                }
+                            )
+.bindTooltip(
+    gw.identificador
+)
+.bindPopup(`
+    <b>${gw.identificador}</b><br>
+    Gateway ID: ${gw.gatewayId}<br>
+    Localidade: ${gw.localidade}<br>
+    Condição: ${gw.condicao}
+`);
+marker.on("click", () => {
 
+        this.processarMedicao(
+            lat,
+            lng,
+            gw.identificador
+        );
+
+    });
+this._gatewayMarkers[gw.gatewayId] = marker;
+this._gatewayInfo[gw.gatewayId] = {
+    identificador: gw.identificador,
+    localidade: gw.localidade,
+    condicao: gw.condicao
+};   
                         gatewaysLayer.addLayer(marker);
 
                     });
@@ -552,7 +949,125 @@ const halo =
 
 
             },
+            processarMedicao(
+    lat,
+    lng,
+    descricao
+) {
 
+    if (!this._modoMedicao) {
+        return;
+    }
+
+    this._pontosMedicao.push({
+        lat,
+        lng,
+        descricao
+    });
+
+    if (
+        this._pontosMedicao.length < 2
+    ) {
+        return;
+    }
+
+    const p1 =
+        this._pontosMedicao[0];
+
+    const p2 =
+        this._pontosMedicao[1];
+
+    const distancia =
+        this._map.distance(
+            [p1.lat, p1.lng],
+            [p2.lat, p2.lng]
+        );
+
+    if (this._linhaMedicao) {
+
+        this._map.removeLayer(
+            this._linhaMedicao
+        );
+
+    }
+
+    this._linhaMedicao = L.polyline(
+        [
+            [p1.lat, p1.lng],
+            [p2.lat, p2.lng]
+        ],
+        {
+            color: "red",
+            weight: 4
+        }
+    ).addTo(this._map);
+
+    const meioLat =
+        (p1.lat + p2.lat) / 2;
+
+    const meioLng =
+        (p1.lng + p2.lng) / 2;
+
+    L.popup()
+        .setLatLng([
+            meioLat,
+            meioLng
+        ])
+        .setContent(`
+            <b>
+                ${(distancia / 1000)
+                    .toFixed(2)} km
+            </b>
+        `)
+        .openOn(this._map);
+
+    this._pontosMedicao = [];
+
+},  
+calcularDistanciaMetros(
+    lat1,
+    lon1,
+    lat2,
+    lon2
+) {
+
+    return this._map.distance(
+        [lat1, lon1],
+        [lat2, lon2]
+    );
+
+},      
+
+piscarGateway(marker) {
+
+    const elemento = marker.getElement();
+
+    if (!elemento) {
+        return;
+    }
+
+    let contador = 0;
+
+    const intervalo = setInterval(() => {
+
+        elemento.style.opacity =
+            elemento.style.opacity === "0.2"
+                ? "1"
+                : "0.2";
+
+        contador++;
+
+        if (contador >= 8) {
+
+            clearInterval(intervalo);
+
+            elemento.style.opacity = "1";
+
+        }
+
+    }, 250);
+
+},
             converterDataBr(dataStr) {
 
                 try {
