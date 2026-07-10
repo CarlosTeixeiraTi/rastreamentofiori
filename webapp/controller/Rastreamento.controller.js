@@ -108,7 +108,7 @@ sap.ui.define([
                 this.piscarEquipamento(marker);
 
             },
-            piscarEquipamento(marker) { 
+            piscarEquipamento(marker) {
 
                 const elemento = marker.getElement();
 
@@ -120,24 +120,24 @@ sap.ui.define([
 
                 const intervalo = setInterval(() => {
 
-                elemento.style.opacity =
-                    elemento.style.opacity === "0.1"
-                        ? "1"
-                        : "0.1";
+                    elemento.style.opacity =
+                        elemento.style.opacity === "0.1"
+                            ? "1"
+                            : "0.1";
 
-                contador++;
+                    contador++;
 
-                if (contador >= 12) {
+                    if (contador >= 12) {
 
-                    clearInterval(intervalo);
+                        clearInterval(intervalo);
 
-                    elemento.style.opacity = "1";
+                        elemento.style.opacity = "1";
 
-                }
+                    }
 
-            }, 250);
+                }, 250);
 
-},
+            },
             onExportarExcel() {
 
                 const dados = (this._dadosFiltrados || []).map(item => ({
@@ -1043,10 +1043,13 @@ sap.ui.define([
     Descrição do Local: ${item.descLocalInstalacao || ''}<br>
     Descrição do Equipamento: ${item.descEquipamento || ''}<br>
     Grupo Atual: ${item.grupoAtual || ''}<br>
+    Nota: ${item.nota || 'Não informado'}<br>
+    Centro de Trabalho: ${item.centro_trab_resp || 'Não informado'}<br>
+    Centro de Localização: ${item.centro_localizacao || 'Não informado'}<br>
+    Oficina: ${item.oficina || 'Não informado'}<br>
     Gateway: ${item.gateway || ''}<br>
     Última Atualização: ${item.ultimaPosicao || ''}
 `);
-
                         marker.on("dblclick", () => {
 
                             const gatewayMarker =
