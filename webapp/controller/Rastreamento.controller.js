@@ -562,7 +562,45 @@ sap.ui.define([
             },
 
 
+            gerarResumoVeiculo(veiculoId, dados) {
 
+                const resumo = {};
+
+                dados.forEach(item => {
+
+                    if (
+                        item.grupoAtual !==
+                        `Instalado no ${veiculoId}`
+                    ) {
+                        return;
+                    }
+
+                    const desc =
+                        (item.descEquipamento || "")
+                            .toUpperCase();
+
+                    let familia = "OUTROS";
+
+                    if (desc.startsWith("COMANDO FINAL")) {
+                        familia = "COMANDO FINAL";
+                    } else if (desc.startsWith("TRANSMISSAO")) {
+                        familia = "TRANSMISSAO";
+                    } else if (desc.startsWith("CONVERSOR TORQUE")) {
+                        familia = "CONVERSOR TORQUE";
+                    } else if (desc.startsWith("DIFERENCIAL")) {
+                        familia = "DIFERENCIAL";
+                    } else if (desc.startsWith("MOTOR COMBUSTAO")) {
+                        familia = "MOTOR COMBUSTAO";
+                    }
+
+                    resumo[familia] =
+                        (resumo[familia] || 0) + 1;
+
+                });
+
+                return resumo;
+
+            },
             async carregarDashboard() {
 
                 const response = await fetch(
@@ -588,6 +626,28 @@ sap.ui.define([
                     );
 
                 }
+                let veiculos = [];
+
+                try {
+
+                    const responseVeiculos = await fetch(
+                        "http://localhost:4000/Veiculo"
+                    );
+
+                    veiculos = await responseVeiculos.json();
+
+                    sap.m.MessageToast.show(
+                        "Veículos: " + veiculos.length
+                    );
+
+                } catch (e) {
+
+                    sap.m.MessageBox.error(
+                        e.toString()
+                    );
+
+                }
+                sap.m.MessageToast.show("veiculos: " + veiculos.length);
                 const dadosFiltrados = (json.value || []).filter(
                     item =>
                         item.grupoAtual !== "Tags Digitais Não Habilitadas" &&
@@ -718,11 +778,11 @@ sap.ui.define([
                     });
 
                 this.byId("htmlMapa").setContent(`
-    <div
-        id="mapaEquipamentos"
-        style="height:650px;width:100%;">
-    </div>
-`);
+        <div
+            id="mapaEquipamentos"
+            style="height:650px;width:100%;">
+        </div>
+    `);
 
                 sap.ui.getCore().applyChanges();
 
@@ -756,6 +816,13 @@ sap.ui.define([
 
                         if (
                             item.grupoAtual === "Tags Digitais Não Habilitadas"
+                        ) {
+                            return false;
+                        }
+
+                        if (
+                            item.grupoAtual &&
+                            item.grupoAtual.startsWith("Instalado no ")
                         ) {
                             return false;
                         }
@@ -809,17 +876,17 @@ sap.ui.define([
                             L.DomUtil.create("div");
 
                         div.innerHTML = `
-                    <button
-                        style="
-                            background:white;
-                            border:1px solid #ccc;
-                            padding:8px;
-                            cursor:pointer;
-                            font-size:16px;
-                            font-weight:bold;">
-                        📏 Medir
-                    </button>
-                `;
+                        <button
+                            style="
+                                background:white;
+                                border:1px solid #ccc;
+                                padding:8px;
+                                cursor:pointer;
+                                font-size:16px;
+                                font-weight:bold;">
+                            📏 Medir
+                        </button>
+                    `;
 
                         div.onclick = () => {
 
@@ -867,7 +934,7 @@ sap.ui.define([
                             collapsed: false
                         }
                     ).addTo(this._map);
-                    setTimeout(() => {
+                    setTimeout((a) => {
 
                         const controleLayers =
                             document.querySelector(".leaflet-control-layers");
@@ -955,7 +1022,7 @@ sap.ui.define([
                     legenda.addTo(this._map);
                     const markers = L.layerGroup();
                     const gatewaysLayer = L.layerGroup();
-
+                    const bounds = [];
                     this._gatewayMarkers = {};
                     this._gatewayInfo = {};
                     this._equipamentoMarkers = {};
@@ -1009,47 +1076,54 @@ sap.ui.define([
                                     className: "",
                                     html: ehInstalado
                                         ? `
-        <div style="
-            width:16px;
-            height:16px;
-            background:#ff6347;
-            border:3px solid white;
-            border-radius:50%;
-            box-shadow:
-                0 0 0 4px rgba(255,99,71,0.25),
-                0 0 10px rgba(255,99,71,0.8);
-        "></div>
-      
-      `
+                            <div style="
+                                width:16px;
+                                height:16px;
+                                background:#ff6347;
+                                border:3px solid white;
+                                border-radius:50%;
+                                box-shadow:
+                                    0 0 0 4px rgba(255,99,71,0.25),
+                                    0 0 10px rgba(255,99,71,0.8);
+                            "></div>
+                        
+                        `
                                         : `
-        <div style="
-            width:16px;
-            height:16px;
-            background:${cor};
-            border:3px solid white;
-            border-radius:50%;
-            box-shadow:
-                0 0 0 4px ${halo},
-                0 0 10px ${sombra};
-        "></div>
-      `,
+                            <div style="
+                                width:16px;
+                                height:16px;
+                                background:${cor};
+                                border:3px solid white;
+                                border-radius:50%;
+                                box-shadow:
+                                    0 0 0 4px ${halo},
+                                    0 0 10px ${sombra};
+                            "></div>
+                        `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         ).bindPopup(`
-    <b>${item.identificador}</b><br>
-    Local de Instalação: ${item.localInstalacao || ''}<br>
-    Descrição do Local: ${item.descLocalInstalacao || ''}<br>
-    Descrição do Equipamento: ${item.descEquipamento || ''}<br>
-    Grupo Atual: ${item.grupoAtual || ''}<br>
-    Nota: ${item.nota || 'Não informado'}<br>
-    Centro de Trabalho: ${item.centro_trab_resp || 'Não informado'}<br>
-    Centro de Localização: ${item.centro_localizacao || 'Não informado'}<br>
-    Oficina: ${item.oficina || 'Não informado'}<br>
-    Gateway: ${item.gateway || ''}<br>
-    Última Atualização: ${item.ultimaPosicao || ''}
-`);
+        <div style="min-width:280px;">
+            <b>${item.identificador}</b><br>
+            <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
+            <b>Local:</b> ${item.localInstalacao || ''}<br>
+            <b>Nota:</b> ${item.nota || 'Não informado'}<br>
+            <b>Gateway:</b> ${item.gateway || ''}<br>
+            <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
+
+            <details>
+                <summary><b>Ver detalhes</b></summary>
+                <br>
+                <b>Grupo:</b> ${item.grupoAtual || ''}<br>
+                <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
+                <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
+                <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
+                <b>Oficina:</b> ${item.oficina || 'Não informado'}
+            </details>
+        </div>
+    `);
                         marker.on("dblclick", () => {
 
                             const gatewayMarker =
@@ -1107,22 +1181,268 @@ sap.ui.define([
                         markers.addLayer(marker);
 
                     });
+                    const veiculosUnicos = [];
+
+                    const mapaVeiculos = {};
+
+                    veiculos.forEach(v => {
+
+                        const existente = mapaVeiculos[v.Veiculo];
+
+                        if (
+                            !existente ||
+                            new Date(v.DataAtualizacao) >
+                            new Date(existente.DataAtualizacao)
+                        ) {
+                            mapaVeiculos[v.Veiculo] = v;
+                        }
+
+                    });
+
+                    Object.values(mapaVeiculos)
+                        .forEach(v => veiculosUnicos.push(v));
+                    veiculosUnicos.forEach(veiculo => {
+                        const resumo =
+                            this.gerarResumoVeiculo(
+                                veiculo.Veiculo,
+                                dadosFiltrados
+                            );
+                        const equipamentosVeiculo =
+                            dadosFiltrados.filter(item =>
+                                item.grupoAtual ===
+                                `Instalado no ${veiculo.Veiculo}`
+                            );
+
+                        const totalEquipamentos =
+                            Object.values(resumo)
+                                .reduce(
+                                    (a, b) => a + b,
+                                    0
+                                );
+
+                        let htmlResumo = "";
+
+                        Object.keys(resumo)
+                            .sort()
+                            .forEach(tipo => {
+
+                                htmlResumo += `
+                <b>${tipo}:</b>
+                ${resumo[tipo]}<br>
+            `;
+
+                            });
+                        const lat = parseFloat(veiculo.Latitude);
+                        const lng = parseFloat(veiculo.Longitude);
+
+                        if (isNaN(lat) || isNaN(lng)) {
+                            return;
+                        }
 
 
+                        const textoResumo = Object.keys(resumo)
+                            .sort()
+                            .map(tipo =>
+                                `${tipo}: ${resumo[tipo]}`
+                            )
+                            .join('\\n');
 
-                    this._map.addLayer(markers);
-                    this._map.addLayer(gatewaysLayer);
+                        const textoResumoHtml =
+                            textoResumo.replace(/'/g, "\\'");
+
+
+                        const marker = L.marker(
+                            [lat, lng],
+                            {
+                                icon: L.divIcon({
+                                    className: "",
+                                    html: `
+                    <div style="
+                        width:16px;
+                        height:16px;
+                        background:#ff6347;
+                        border:3px solid white;
+                        border-radius:50%;
+                        box-shadow:
+                            0 0 0 4px rgba(255,99,71,0.25),
+                            0 0 10px rgba(255,99,71,0.8);
+                    "></div>
+                `,
+                                    iconSize: [22, 22],
+                                    iconAnchor: [11, 11]
+                                })
+                            }
+                        ).bindPopup(`
+    <div style="min-width:320px;">
+
+        <div style="
+            text-align:right;
+            margin-bottom:10px;
+        ">
+<button
+    title="Copiar local de instalação"
+    onclick="
+        navigator.clipboard.writeText('${veiculo.LOCAL_INSTALACAO}');
+        sap.m.MessageToast.show('✅ Local copiado');
+    "
+    style="
+        cursor:pointer;
+        padding:6px 10px;
+    ">
+    📋 Copiar Local
+</button>
+        </div>
+
+        <b>Veículo:</b>
+        ${veiculo.Veiculo}<br>
+
+        <b>Local:</b>
+        ${veiculo.LOCAL_INSTALACAO}<br>
+
+        <b>Equipamentos embarcados:</b>
+        ${totalEquipamentos}<br><br>
+
+            
+
+
+    <hr>
+
+    <div style="
+    text-align:right;
+    margin-bottom:10px;
+">
+    <button
+        title="Copiar resumo dos equipamentos embarcados"
+        onclick="
+            navigator.clipboard.writeText('${textoResumo}');
+            sap.m.MessageToast.show('✅ Resumo copiado');
+        "
+        style="
+            cursor:pointer;
+            padding:6px 10px;
+        ">
+        📋 Copiar Resumo
+    </button>
+</div>
+
+    ${htmlResumo}
+
+    <div style="
+        text-align:center;
+        margin-top:10px;
+    ">
+    
+    </div>
+
+    <hr>
+
+    <b>Atualização:</b>
+    ${new Date(veiculo.DataAtualizacao)
+                                .toLocaleString("pt-BR", {
+                                    day: "2-digit",
+                                    month: "2-digit",
+                                    year: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit"
+                                })
+                                .replace(",", "")}
+
+        </div>
+        <div style="
+        text-align:center;
+        margin-top:10px;
+    ">
+    <button
+        id="btnExportar_${veiculo.Veiculo}"
+            style="
+                cursor:pointer;
+                padding:6px 10px;
+                width:95%;
+                box-sizing:border-box;
+            ">
+            📊 Exportar Excel
+        </button>
+    </div>
+    `);
+                        markers.addLayer(marker);
+                        marker.on("popupopen", () => {
+
+                            setTimeout(() => {
+
+                                const btn = document.getElementById(
+                                    `btnExportar_${veiculo.Veiculo}`
+                                );
+
+                                if (!btn) {
+                                    return;
+                                }
+
+                                btn.onclick = async () => {
+
+                                    const response = await fetch(
+                                        `http://localhost:4000/StatusComponentes/veiculo?local=${encodeURIComponent(
+                                            veiculo.LOCAL_INSTALACAO
+                                        )}`
+                                    );
+
+                                    const dadosExcel = await response.json();
+
+                                    const oSpreadsheet = new Spreadsheet({
+
+                                        workbook: {
+                                            columns: [
+                                                {
+                                                    label: "Status",
+                                                    property: "status"
+                                                },
+                                                {
+                                                    label: "Equipamento",
+                                                    property: "equipamento"
+                                                },
+                                                {
+                                                    label: "Descrição",
+                                                    property: "descricao"
+                                                },
+                                                {
+                                                    label: "Local Instalação",
+                                                    property: "localInstalacao"
+                                                }
+                                            ]
+                                        },
+
+                                        dataSource: dadosExcel,
+
+                                        fileName: `Veiculo_${veiculo.Veiculo}.xlsx`
+
+                                    });
+
+                                    oSpreadsheet.build()
+                                        .finally(() =>
+                                            oSpreadsheet.destroy()
+                                        );
+
+                                };
+
+                            }, 100);
+
+                        });
+                        bounds.push([lat, lng]);
+
+                    });
+
+
                     sap.m.MessageToast.show(
                         "Markers gateway: " +
                         gatewaysLayer.getLayers().length
                     );
-                    const bounds = [];
-
                     equipamentos.forEach(item => {
+
                         bounds.push([
                             parseFloat(item.latitude),
                             parseFloat(item.longitude)
                         ]);
+
                     });
                     sap.m.MessageToast.show(
                         "Entrando no loop de gateways: " + gateways.length
@@ -1146,31 +1466,31 @@ sap.ui.define([
                                 icon: L.divIcon({
                                     className: "",
                                     html: `
-                                <div style="
-                                width:16px;
-                                height:16px;
-                                background:#3498db;
-                                border:3px solid white;
-                                border-radius:50%;
-                                box-shadow:
+                        <div style="
+                            width:16px;
+                            height:16px;
+                            background:#3498db;
+                            border:3px solid white;
+                            border-radius:50%;
+                            box-shadow:
                                 0 0 0 5px rgba(52,152,219,0.25),
                                 0 0 12px rgba(52,152,219,0.8);
-                                "></div>
-                                                `,
+                        "></div>
+                    `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         )
-                            .bindTooltip(
-                                gw.identificador
-                            )
+
+                            .bindTooltip(gw.identificador)
                             .bindPopup(`
-    <b>${gw.identificador}</b><br>
-    Gateway ID: ${gw.gatewayId}<br>
-    Localidade: ${gw.localidade}<br>
-    Condição: ${gw.condicao}
-`);
+            <b>${gw.identificador}</b><br>
+            Gateway ID: ${gw.gatewayId}<br>
+            Localidade: ${gw.localidade}<br>
+            Condição: ${gw.condicao}
+        `);
+
                         marker.on("click", () => {
 
                             this.processarMedicao(
@@ -1180,15 +1500,20 @@ sap.ui.define([
                             );
 
                         });
+
                         this._gatewayMarkers[gw.gatewayId] = marker;
+
                         this._gatewayInfo[gw.gatewayId] = {
                             identificador: gw.identificador,
                             localidade: gw.localidade,
                             condicao: gw.condicao
                         };
+
                         gatewaysLayer.addLayer(marker);
 
                     });
+                    this._map.addLayer(markers);
+                    this._map.addLayer(gatewaysLayer);
                     if (bounds.length > 0) {
 
                         this._map.fitBounds(bounds, {
@@ -1266,11 +1591,11 @@ sap.ui.define([
                         meioLng
                     ])
                     .setContent(`
-            <b>
-                ${(distancia / 1000)
+                                            <b>
+                                                ${(distancia / 1000)
                             .toFixed(2)} km
-            </b>
-        `)
+                                            </b>
+                                            `)
                     .openOn(this._map);
 
                 this._pontosMedicao = [];

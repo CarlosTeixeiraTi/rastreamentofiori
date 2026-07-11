@@ -155,3 +155,8 @@
 .gatewayLabel:before {
     display: none;
 }
+
+.leaflet-popup-close-button {
+    left: 8px !important;
+    right: auto !important;
+}
