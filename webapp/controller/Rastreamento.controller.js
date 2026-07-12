@@ -22,7 +22,8 @@ sap.ui.define([
                     offline: 0,
                     gateways: 0,
                     grupos: [],
-                    ultimasLeituras: []
+                    ultimasLeituras: [],
+                    dashboardVeiculos: []
                 });
 
                 this.getView().setModel(
@@ -137,6 +138,32 @@ sap.ui.define([
 
                 }, 250);
 
+            },
+            normalizarGrupo(texto) {
+
+                texto = (texto || "").toUpperCase();
+
+                if (texto.startsWith("CONVERSOR")) {
+                    return "CONVERSOR DE TORQUE";
+                }
+
+                if (texto.startsWith("MOTOR")) {
+                    return "MOTOR";
+                }
+
+                if (texto.startsWith("COMANDO FINAL")) {
+                    return "COMANDO FINAL";
+                }
+
+                if (texto.startsWith("TRANSMISSAO")) {
+                    return "TRANSMISSAO";
+                }
+
+                if (texto.startsWith("DIFERENCIAL")) {
+                    return "DIFERENCIAL";
+                }
+
+                return texto;
             },
             onExportarExcel() {
 
@@ -601,6 +628,34 @@ sap.ui.define([
                 return resumo;
 
             },
+            centralizarPopup(marker) {
+
+                const posicao = marker.getLatLng();
+
+                const pontoTela =
+                    this._map.latLngToContainerPoint(
+                        posicao
+                    );
+
+                const novoPontoTela = L.point(
+                    pontoTela.x,
+                    pontoTela.y - 180
+                );
+
+                const novoCentro =
+                    this._map.containerPointToLatLng(
+                        novoPontoTela
+                    );
+
+                this._map.panTo(
+                    novoCentro,
+                    {
+                        animate: true
+                    }
+                );
+
+            },
+
             async carregarDashboard() {
 
                 const response = await fetch(
@@ -664,6 +719,7 @@ sap.ui.define([
                 );
 
                 let online = 0;
+                let offline = 0;
 
                 dadosFiltrados.forEach(item => {
 
@@ -677,27 +733,42 @@ sap.ui.define([
                     gruposMap[localizacao] =
                         (gruposMap[localizacao] || 0) + 1;
 
-                    if (item.ultimaPosicao) {
+                    const instalado =
+                        item.grupoAtual &&
+                        item.grupoAtual.startsWith("Instalado no ");
 
-                        const dataPosicao =
-                            this.converterDataBr(item.ultimaPosicao);
+                    // Equipamentos instalados não entram no cálculo
+                    if (instalado) {
+                        return;
+                    }
 
-                        if (dataPosicao >= limiteOnline) {
+                    if (!item.ultimaPosicao) {
 
-                            online++;
+                        offline++;
+                        return;
 
-                            if (item.gateway) {
-                                gatewaysSet.add(item.gateway);
-                            }
+                    }
 
+                    const dataPosicao =
+                        this.converterDataBr(
+                            item.ultimaPosicao
+                        );
+
+                    if (dataPosicao >= limiteOnline) {
+
+                        online++;
+
+                        if (item.gateway) {
+                            gatewaysSet.add(item.gateway);
                         }
+
+                    } else {
+
+                        offline++;
 
                     }
 
                 });
-
-                const offline =
-                    dadosFiltrados.length - online;
                 const gruposNormais = [];
                 const gruposEspeciais = [];
 
@@ -751,8 +822,101 @@ sap.ui.define([
                     this.gerarDetalhesTagsDesatualizadas(
                         dadosFiltrados
                     );
+                const mapaVeiculosDashboard = {};
+
+                veiculos.forEach(v => {
+
+                    const existente =
+                        mapaVeiculosDashboard[v.Veiculo];
+
+                    if (
+                        !existente ||
+                        new Date(v.DataAtualizacao) >
+                        new Date(existente.DataAtualizacao)
+                    ) {
+
+                        mapaVeiculosDashboard[v.Veiculo] = v;
+
+                    }
+
+                });
+
+                const veiculosUnicosDashboard =
+                    Object.values(
+                        mapaVeiculosDashboard
+                    );
+
+                const dashboardVeiculos = [];
 
 
+                for (const veiculo of veiculosUnicosDashboard) {
+
+                    const equipamentosVeiculo = dadosFiltrados.filter(
+                        item =>
+                            item.grupoAtual ===
+                            `Instalado no ${veiculo.Veiculo}`
+                    );
+                    const responseEsperados = await fetch(
+                        `http://localhost:4000/equipamentos/local/${encodeURIComponent(
+                            veiculo.Veiculo
+                        )}`
+                    );
+
+                    const gruposEsperados = await responseEsperados.json();
+
+                    const conferencia = [];
+
+                    let divergente = false;
+                    Object.entries(gruposEsperados).forEach(
+                        ([grupoEsperado, quantidadeEsperada]) => {
+
+                            const instalado = equipamentosVeiculo.filter(
+                                item =>
+                                    this.normalizarGrupo(
+                                        item.descEquipamento
+                                    ) === grupoEsperado
+                            ).length;
+
+
+                            if (instalado !== quantidadeEsperada) {
+                                divergente = true;
+                            }
+
+                            conferencia.push(
+                                `${instalado === quantidadeEsperada ? "✅" : "❌"} ${grupoEsperado}: ${instalado}/${quantidadeEsperada}`
+                            );
+
+                        }
+                    );
+
+
+                    dashboardVeiculos.push({
+
+                        veiculo: veiculo.Veiculo,
+
+                        imagem: "img/793D.png",
+
+                        conferencia: conferencia.join("\n"),
+
+                        status: divergente
+                            ? "Divergente"
+                            : "Conforme",
+
+                        state: divergente
+                            ? "Error"
+                            : "Success"
+
+                    });
+
+                }
+
+                sap.m.MessageBox.information(
+                    JSON.stringify(
+                        dashboardVeiculos.slice(0, 5),
+                        null,
+                        2
+                    )
+                );
                 this.getView()
                     .getModel("dashboard")
                     .setData({
@@ -773,8 +937,9 @@ sap.ui.define([
 
                         resumoGrupoAtual,
 
-                        detalhesTagsDesatualizadas
+                        detalhesTagsDesatualizadas,
 
+                        dashboardVeiculos
                     });
 
                 this.byId("htmlMapa").setContent(`
@@ -786,7 +951,7 @@ sap.ui.define([
 
                 sap.ui.getCore().applyChanges();
 
-                setTimeout(() => {
+                setTimeout(async () => {
                     let dadosMapa = dadosFiltrados;
 
                     if (this._grupoSelecionado) {
@@ -1124,6 +1289,7 @@ sap.ui.define([
             </details>
         </div>
     `);
+
                         marker.on("dblclick", () => {
 
                             const gatewayMarker =
@@ -1201,6 +1367,9 @@ sap.ui.define([
 
                     Object.values(mapaVeiculos)
                         .forEach(v => veiculosUnicos.push(v));
+
+
+
                     veiculosUnicos.forEach(veiculo => {
                         const resumo =
                             this.gerarResumoVeiculo(
@@ -1212,6 +1381,58 @@ sap.ui.define([
                                 item.grupoAtual ===
                                 `Instalado no ${veiculo.Veiculo}`
                             );
+
+                        let htmlDetalhes = "";
+
+                        equipamentosVeiculo.forEach(item => {
+
+                            const dataPosicao =
+                                this.converterDataBr(
+                                    item.ultimaPosicao
+                                );
+
+                            const online =
+                                dataPosicao >= limiteOnline;
+
+                            const indicador =
+                                online
+                                    ? "🟢"
+                                    : "🟡";
+
+                            htmlDetalhes += `
+        <div style="
+    margin:6px 0;
+    padding:4px 0;
+    border-bottom:1px solid #eee;
+    font-size:12px;
+">
+    ${indicador}
+    <b>${item.identificador}</b>
+    -
+    <span style="
+        display:inline-block;
+        max-width:380px;
+        white-space:nowrap;     
+        overflow:hidden;
+        text-overflow:ellipsis;
+        vertical-align:bottom;
+    ">
+        ${item.descEquipamento || ""}
+    </span>
+
+    <br>
+
+    <span style="
+        color:#666;
+        font-size:12px;
+    ">
+        Última atualização:
+        ${item.ultimaPosicao || "Não informada"}
+    </span>
+</div>
+    `;
+
+                        });
 
                         const totalEquipamentos =
                             Object.values(resumo)
@@ -1227,9 +1448,9 @@ sap.ui.define([
                             .forEach(tipo => {
 
                                 htmlResumo += `
-                <b>${tipo}:</b>
-                ${resumo[tipo]}<br>
-            `;
+            <b>${tipo}:</b>
+            ${resumo[tipo]}<br>
+        `;
 
                             });
                         const lat = parseFloat(veiculo.Latitude);
@@ -1273,7 +1494,7 @@ sap.ui.define([
                                 })
                             }
                         ).bindPopup(`
-    <div style="min-width:320px;">
+        <div style="min-width:320px;">
 
         <div style="
             text-align:right;
@@ -1300,44 +1521,118 @@ sap.ui.define([
         ${veiculo.LOCAL_INSTALACAO}<br>
 
         <b>Equipamentos embarcados:</b>
-        ${totalEquipamentos}<br><br>
+        ${totalEquipamentos}<br>
 
             
 
 
     <hr>
 
-    <div style="
-    text-align:right;
-    margin-bottom:10px;
-">
-    <button
-        title="Copiar resumo dos equipamentos embarcados"
-        onclick="
-            navigator.clipboard.writeText('${textoResumo}');
-            sap.m.MessageToast.show('✅ Resumo copiado');
-        "
-        style="
-            cursor:pointer;
-            padding:6px 10px;
-        ">
-        📋 Copiar Resumo
-    </button>
-</div>
 
-    ${htmlResumo}
 
-    <div style="
-        text-align:center;
-        margin-top:10px;
+<details
+    id="resumo_${veiculo.Veiculo}"
+    data-veiculo="${veiculo.Veiculo}"
+    ontoggle="
+        const detalhes =
+            document.getElementById(
+                'conteudoDetalhes_${veiculo.Veiculo}'
+            );
+
+        if (detalhes) {
+            detalhes.style.display =
+                this.open ? 'none' : 'block';
+        }
     ">
-    
+
+    <summary style="
+        cursor:pointer;
+        font-weight:bold;
+    ">
+        Ver Resumo
+    </summary>
+
+    <div
+        id="conteudoResumo_${veiculo.Veiculo}"
+        style="margin-top:10px;">
+
+        ${htmlResumo}
+
+        <div style="
+            text-align:right;
+            margin-top:10px;
+        ">
+            <button
+                title="Copiar resumo dos equipamentos embarcados"
+                onclick="
+                    navigator.clipboard.writeText('${textoResumo}');
+                    sap.m.MessageToast.show('✅ Resumo copiado');
+                "
+                style="
+                    cursor:pointer;
+                    padding:6px 10px;
+                ">
+                📋 Copiar Resumo
+            </button>
+        </div>
+
     </div>
 
-    <hr>
+</details>
 
-    <b>Atualização:</b>
-    ${new Date(veiculo.DataAtualizacao)
+<details
+    id="detalhes_${veiculo.Veiculo}"
+    data-veiculo="${veiculo.Veiculo}"
+    ontoggle="
+        const resumo =
+            document.getElementById(
+                'conteudoResumo_${veiculo.Veiculo}'
+            );
+
+        if (resumo) {
+            resumo.style.display =
+                this.open ? 'none' : 'block';
+        }
+    ">
+
+    <summary style="
+        cursor:pointer;
+        font-weight:bold;
+    ">
+        Detalhes
+    </summary>
+
+    <div
+        id="conteudoDetalhes_${veiculo.Veiculo}"
+        style="margin-top:10px;">
+
+
+        ${htmlDetalhes}
+
+        <div style="
+            text-align:center;
+            margin-top:10px;
+        ">
+            <button
+                id="btnExportar_${veiculo.Veiculo}"
+                style="
+                    cursor:pointer;
+                    padding:6px 10px;
+                    width:95%;
+                    box-sizing:border-box;
+                ">
+                📊 Exportar Excel
+            </button>
+        </div>
+
+    </div>
+
+</details>
+
+<hr>
+
+<b>Atualização:</b>
+${new Date(veiculo.DataAtualizacao)
                                 .toLocaleString("pt-BR", {
                                     day: "2-digit",
                                     month: "2-digit",
@@ -1348,25 +1643,46 @@ sap.ui.define([
                                 })
                                 .replace(",", "")}
 
-        </div>
-        <div style="
-        text-align:center;
-        margin-top:10px;
-    ">
-    <button
-        id="btnExportar_${veiculo.Veiculo}"
-            style="
-                cursor:pointer;
-                padding:6px 10px;
-                width:95%;
-                box-sizing:border-box;
-            ">
-            📊 Exportar Excel
-        </button>
-    </div>
+</div>
     `);
                         markers.addLayer(marker);
                         marker.on("popupopen", () => {
+
+                            const resumo = document.getElementById(
+                                `resumo_${veiculo.Veiculo}`
+                            );
+
+                            const detalhes = document.getElementById(
+                                `detalhes_${veiculo.Veiculo}`
+                            );
+
+                            if (resumo) {
+
+                                resumo.addEventListener("toggle", () => {
+
+                                    if (resumo.open) {
+
+                                        this.centralizarPopup(marker);
+
+                                    }
+
+                                });
+
+                            }
+
+                            if (detalhes) {
+
+                                detalhes.addEventListener("toggle", () => {
+
+                                    if (detalhes.open) {
+
+                                        this.centralizarPopup(marker);
+
+                                    }
+
+                                });
+
+                            }
 
                             setTimeout(() => {
 
@@ -1413,7 +1729,8 @@ sap.ui.define([
 
                                         dataSource: dadosExcel,
 
-                                        fileName: `Veiculo_${veiculo.Veiculo}.xlsx`
+                                        fileName:
+                                            `Veiculo_${veiculo.Veiculo}.xlsx`
 
                                     });
 

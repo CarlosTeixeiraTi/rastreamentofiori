@@ -364,6 +364,68 @@
                     </Table>
 
                 </Panel>
+                <Panel
+                    headerText="Conferência de Componentes Embarcados"
+                    class="sapUiMediumMarginTop">
+
+                    <Table
+                        items="{dashboard>/dashboardVeiculos}">
+
+                        <columns>
+
+                            <Column width="7rem">
+                                <Text text="Imagem" />
+                            </Column>
+
+                            <Column width="10rem">
+                                <Text text="Veículo" />
+                            </Column>
+
+                            <Column width="40rem">
+                                <Text text="Conferência" />
+                            </Column>
+
+                            <Column width="8rem">
+                                <Text text="Status" />
+                            </Column>
+
+                        </columns>
+
+                        <items>
+
+
+                            <ColumnListItem>
+                                <cells>
+
+
+                                    <Image
+                                        src="{dashboard>imagem}"
+                                        width="" />
+
+
+                                    <Text
+                                        text="{dashboard>veiculo}" />
+
+                                    <Text
+                                        text="{dashboard>conferencia}" />
+
+                                    <ObjectStatus
+                                        text="{dashboard>status}"
+                                        state="{dashboard>state}" />
+
+
+                                </cells>
+
+
+                            </ColumnListItem>
+
+
+                        </items>
+
+                    </Table>
+
+                </Panel>
+
             </VBox>
 
         </content>
