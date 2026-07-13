@@ -27,7 +27,6 @@
       }
     }
   },
-
   "sap.ui": {
     "technology": "UI5",
     "icons": {
@@ -44,27 +43,23 @@
       "phone": true
     }
   },
-
   "sap.ui5": {
     "flexEnabled": false,
-
     "dependencies": {
-  "minUI5Version": "1.149.1",
-  "libs": {
-    "sap.m": {},
-    "sap.ui.core": {},
-    "sap.ui.layout": {},
-    "sap.f": {},
-    "sap.ui.export": {},
-    "sap.viz": {}
-  }
-},
-
+      "minUI5Version": "1.149.1",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.ui.layout": {},
+        "sap.f": {},
+        "sap.ui.export": {},
+        "sap.viz": {}
+      }
+    },
     "contentDensities": {
       "compact": true,
       "cozy": true
     },
-
     "models": {
       "i18n": {
         "type": "sap.ui.model.resource.ResourceModel",
@@ -72,7 +67,6 @@
           "bundleName": "br.com.smartpcm.rastreamento.zrastreio.i18n.i18n"
         }
       },
-
       "": {
         "dataSource": "mainService",
         "preload": true,
@@ -83,7 +77,6 @@
         }
       }
     },
-
     "resources": {
       "css": [
         {
@@ -91,7 +84,6 @@
         }
       ]
     },
-
     "routing": {
       "config": {
         "routerClass": "sap.m.routing.Router",
@@ -104,7 +96,6 @@
         "async": true,
         "viewPath": "br.com.smartpcm.rastreamento.zrastreio.view"
       },
-
       "routes": [
         {
           "name": "RouteRastreamento",
@@ -114,7 +105,6 @@
           ]
         }
       ],
-
       "targets": {
         "TargetRastreamento": {
           "id": "Rastreamento",
@@ -122,7 +112,6 @@
         }
       }
     },
-
     "rootView": {
       "viewName": "br.com.smartpcm.rastreamento.zrastreio.view.App",
       "type": "XML",
