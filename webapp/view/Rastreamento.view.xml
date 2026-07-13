@@ -3,7 +3,11 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
-    xmlns:l="sap.ui.layout">
+    xmlns:l="sap.ui.layout"
+    xmlns:viz="sap.viz.ui5.controls"
+    xmlns:viz.data="sap.viz.ui5.data"
+    xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
+>
 
     <Page
         id="dashboardPage"
@@ -425,7 +429,137 @@
                     </Table>
 
                 </Panel>
+                <Panel
+                    headerText="Resumo por Fornecedor e Frota"
+                    class="sapUiMediumMarginTop">
 
+                    <Table
+                        items="{dashboard>/resumoFrotas}">
+
+                        <columns>
+
+                            <Column width="8rem">
+                                <Text text="Imagem" />
+                            </Column>
+
+                            <Column width="10rem">
+                                <Text text="Fornecedor" />
+                            </Column>
+
+                            <Column width="6rem">
+                                <Text text="Frota" />
+                            </Column>
+
+                            <Column hAlign="Center">
+                                <Text text="Comando Final" />
+                            </Column>
+
+                            <Column hAlign="Center">
+                                <Text text="Transmissão" />
+                            </Column>
+
+                            <Column hAlign="Center">
+                                <Text text="Conversor de Torque" />
+                            </Column>
+
+                            <Column hAlign="Center">
+                                <Text text="Diferencial" />
+                            </Column>
+
+                            <Column hAlign="Center">
+                                <Text text="Motor" />
+                            </Column>
+
+                            <Column hAlign="Center">
+                                <Text text="Total" />
+                            </Column>
+
+                        </columns>
+
+                        <items>
+                            <ColumnListItem
+                                highlight="{=
+        ${dashboard>fornecedor} === 'TOTAL'
+            ? 'Warning'
+            : 'None'
+    }">
+
+                                <cells>
+                                    <Image
+                                        src="{dashboard>imagem}"
+                                        width="" />
+                                    <Text
+                                        text="{dashboard>fornecedor}" />
+
+                                    <Text
+                                        text="{dashboard>frota}" />
+
+                                    <ObjectNumber
+                                        number="{dashboard>comandoFinal}" />
+
+                                    <ObjectNumber
+                                        number="{dashboard>transmissao}" />
+
+                                    <ObjectNumber
+                                        number="{dashboard>conversorTorque}" />
+
+                                    <ObjectNumber
+                                        number="{dashboard>diferencial}" />
+
+                                    <ObjectNumber
+                                        number="{dashboard>motor}" />
+
+                                    <ObjectNumber
+                                        number="{dashboard>total}" />
+
+                                </cells>
+
+                            </ColumnListItem>
+
+                        </items>
+
+                    </Table>
+
+                </Panel>
+                <Panel
+                    headerText="Status dos Componentes por Tipo"
+                    class="sapUiMediumMarginTop">
+
+                    <viz:VizFrame
+                        id="idTipoStatusVizFrame"
+                        vizType="stacked_column"
+                        width="100%"
+                        height="500px">
+
+                    </viz:VizFrame>
+
+                </Panel>
+                <Panel
+                    headerText="Reformados por Oficina"
+                    class="sapUiMediumMarginTop">
+
+                    <viz:VizFrame
+                        id="idReformadosOficinaVizFrame"
+                        vizType="stacked_bar"
+                        width="100%"
+                        height="500px" />
+
+                </Panel>
+                <Panel
+                    headerText="Instalação dos Rastreadores"
+                    class="sapUiMediumMarginTop">
+
+                    <viz:VizFrame
+                        id="idInstalacaoVizFrame"
+                        vizType="donut"
+                        width="100%"
+                        height="400px" />
+
+                </Panel>
+                <Panel>
+
+                    
+                </Panel>
             </VBox>
 
         </content>

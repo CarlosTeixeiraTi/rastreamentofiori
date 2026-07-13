@@ -160,3 +160,12 @@
     left: 8px !important;
     right: auto !important;
 }
+
+.linhaTotal.sapMListTblRow {
+    background-color: #fff8e1 !important;
+}
+
+.linhaTotal .sapMText,
+.linhaTotal .sapMObjectNumberText {
+    font-weight: bold !important;
+}

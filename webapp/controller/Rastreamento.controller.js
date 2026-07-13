@@ -16,6 +16,8 @@ sap.ui.define([
 
             onInit() {
 
+                this.resumoTipoStatus = [];
+
                 const oDashboardModel = new JSONModel({
                     totalEquipamentos: 0,
                     online: 0,
@@ -23,7 +25,8 @@ sap.ui.define([
                     gateways: 0,
                     grupos: [],
                     ultimasLeituras: [],
-                    dashboardVeiculos: []
+                    dashboardVeiculos: [],
+                    resumoFrotas: []
                 });
 
                 this.getView().setModel(
@@ -34,7 +37,6 @@ sap.ui.define([
                 this._grupoSelecionado = null;
 
                 this.carregarDashboard();
-
             },
             determinarGrupo(item) {
 
@@ -438,7 +440,191 @@ sap.ui.define([
                 return resultado;
 
             },
+            gerarResumoTipoStatus(dados) {
 
+                const resumo = {};
+
+                dados.forEach(item => {
+
+                    const tipo =
+                        item.tipo || "OUTROS";
+
+                    if (!resumo[tipo]) {
+
+                        resumo[tipo] = {
+
+                            tipo,
+
+                            instalado: 0,
+
+                            reformaInterna: 0,
+
+                            reformaExterna: 0,
+
+                            reformado: 0,
+
+                            aReformar: 0
+
+                        };
+
+                    }
+
+                    const status =
+                        (item.status || "").toUpperCase();
+
+                    if (status.includes("INSTALADO")) {
+
+                        resumo[tipo].instalado++;
+
+                    } else if (
+                        status.includes("REFORMA INTERNA")
+                    ) {
+
+                        resumo[tipo].reformaInterna++;
+
+                    } else if (
+                        status.includes("REFORMA EXTERNA")
+                    ) {
+
+                        resumo[tipo].reformaExterna++;
+
+                    } else if (
+                        status.includes("REFORMADO")
+                    ) {
+
+                        resumo[tipo].reformado++;
+
+                    } else if (
+                        status.includes("A REFORMAR")
+                    ) {
+
+                        resumo[tipo].aReformar++;
+
+                    }
+
+                });
+
+                return Object.values(resumo);
+
+            },
+            gerarResumoFrotas(dados) {
+
+                const resumo = {};
+
+                dados.forEach(item => {
+
+                    if (!item.fornecedor || !item.fornecedor.trim()) {
+                        return;
+                    }
+
+                    const chave =
+                        `${item.fornecedor}|${item.frota}`;
+
+                    if (!resumo[chave]) {
+
+                        resumo[chave] = {
+
+                            fornecedor: item.fornecedor,
+
+                            frota: item.frota,
+
+                            imagem: "img/componente_peq.png",
+
+                            comandoFinal: 0,
+
+                            transmissao: 0,
+
+                            conversorTorque: 0,
+
+                            diferencial: 0,
+
+                            motor: 0,
+
+                            total: 0
+
+                        };
+
+                    }
+
+                    resumo[chave].total++;
+
+                    switch (item.tipo) {
+
+                        case "COMANDO FINAL":
+                            resumo[chave].comandoFinal++;
+                            break;
+
+                        case "TRANSMISSAO":
+                            resumo[chave].transmissao++;
+                            break;
+
+                        case "CONVERSOR DE TORQUE":
+                            resumo[chave].conversorTorque++;
+                            break;
+
+                        case "DIFERENCIAL":
+                            resumo[chave].diferencial++;
+                            break;
+
+                        case "MOTOR":
+                            resumo[chave].motor++;
+                            break;
+
+                    }
+
+                });
+                const resultado = Object.values(resumo)
+                    .sort((a, b) =>
+                        a.frota.localeCompare(b.frota)
+                    );
+
+                resultado.push({
+
+                    imagem: "",
+
+                    fornecedor: "TOTAL",
+
+                    frota: "",
+
+                    comandoFinal: resultado.reduce(
+                        (s, x) => s + x.comandoFinal,
+                        0
+                    ),
+
+                    transmissao: resultado.reduce(
+                        (s, x) => s + x.transmissao,
+                        0
+                    ),
+
+                    conversorTorque: resultado.reduce(
+                        (s, x) => s + x.conversorTorque,
+                        0
+                    ),
+
+                    diferencial: resultado.reduce(
+                        (s, x) => s + x.diferencial,
+                        0
+                    ),
+
+                    motor: resultado.reduce(
+                        (s, x) => s + x.motor,
+                        0
+                    ),
+
+                    total: resultado.reduce(
+                        (s, x) => s + x.total,
+                        0
+                    )
+
+                });
+
+                return resultado;
+                return Object.values(resumo)
+                    .sort((a, b) =>
+                        a.frota.localeCompare(b.frota)
+                    );
+
+            },
             gerarResumoGrupoAtual(dados) {
 
                 const grupos = {};
@@ -655,6 +841,46 @@ sap.ui.define([
                 );
 
             },
+            gerarGraficoTipoStatus(dados) {
+
+                const resumo = {};
+
+                dados.forEach(item => {
+
+                    if (!item.tipo || !item.status) {
+                        return;
+                    }
+
+                    if (item.tipo === "OUTROS") {
+                        return;
+                    }
+
+                    let status = item.status;
+
+                    if (status.startsWith("Instalado no ")) {
+                        status = "Instalado";
+                    }
+
+                    const chave =
+                        `${item.tipo}|${status}`;
+
+                    resumo[chave] = (resumo[chave] || 0) + 1;
+
+                });
+
+                return Object.keys(resumo).map(chave => {
+
+                    const partes = chave.split("|");
+
+                    return {
+                        tipo: partes[0],
+                        status: partes[1],
+                        quantidade: resumo[chave]
+                    };
+
+                });
+
+            },
 
             async carregarDashboard() {
 
@@ -662,16 +888,30 @@ sap.ui.define([
                     "/odata/v4/smart-pcm/Rastreio"
                 );
                 const json = await response.json();
+                const responseEstrutura =
+                    await fetch(
+                        "http://localhost:4000/EquipamentosEstrutura"
+                    );
 
+                const equipamentosEstrutura =
+                    await responseEstrutura.json();
+                const resumoTipoStatus =
+                    this.gerarResumoTipoStatus(
+                        equipamentosEstrutura
+                    );
+                const resumoFrotas =
+                    this.gerarResumoFrotas(
+                        equipamentosEstrutura
+                    );
                 const responseGateway = await fetch(
                     "http://10.44.32.193:4000/Gateway"
                 );
 
                 const gateways = await responseGateway.json();
 
-                sap.m.MessageToast.show(
-                    "Gateways: " + gateways.length
-                );
+                // sap.m.MessageToast.show(
+                //     "Gateways: " + gateways.length
+                // );
 
 
                 if (!gateways.length) {
@@ -691,9 +931,9 @@ sap.ui.define([
 
                     veiculos = await responseVeiculos.json();
 
-                    sap.m.MessageToast.show(
-                        "Veículos: " + veiculos.length
-                    );
+                    // sap.m.MessageToast.show(
+                    //     "Veículos: " + veiculos.length
+                    // );
 
                 } catch (e) {
 
@@ -702,7 +942,8 @@ sap.ui.define([
                     );
 
                 }
-                sap.m.MessageToast.show("veiculos: " + veiculos.length);
+
+                // sap.m.MessageToast.show("veiculos: " + veiculos.length);
                 const dadosFiltrados = (json.value || []).filter(
                     item =>
                         item.grupoAtual !== "Tags Digitais Não Habilitadas" &&
@@ -909,14 +1150,75 @@ sap.ui.define([
                     });
 
                 }
+                const graficoTipoStatus =
+                    this.gerarGraficoTipoStatus(
+                        equipamentosEstrutura
+                    );
+                // sap.m.MessageBox.information(
+                //     JSON.stringify(
+                //         resumoFrotas.slice(0, 5),
+                //         null,
+                //         2
+                //     )
+                // );   
+                const responseReformados =
+                    await fetch(
+                        "http://localhost:4000/ReformadosPorOficina/listar"
+                    );
 
-                sap.m.MessageBox.information(
-                    JSON.stringify(
-                        dashboardVeiculos.slice(0, 5),
-                        null,
-                        2
-                    )
-                );
+                const reformadosPorOficina =
+                    await responseReformados.json();
+                reformadosPorOficina.forEach(item => {
+
+                    item.oficinaFrota =
+                        `${item.oficina} - ${item.frota}`;
+
+                });
+
+                const responseLocalizacao =
+                    await fetch(
+                        "http://localhost:4000/LocalizacaoAtual"
+                    );
+
+                const localizacaoAtual =
+                    await responseLocalizacao.json();
+
+                /*
+                 * AQUI
+                 */
+                const instalados =
+                    localizacaoAtual.filter(
+                        item => item.nota !== null
+                    ).length;
+
+                const totalRastreadores = 50;
+
+                const faltantes =
+                    totalRastreadores - instalados;
+
+                const percentualInstalado =
+                    (
+                        (instalados / totalRastreadores) * 100
+                    ).toFixed(1);
+
+                const graficoInstalacao = [
+                    {
+                        status: "Instalados",
+                        quantidade: instalados
+                    },
+                    {
+                        status: "Pendentes",
+                        quantidade: faltantes
+                    }
+                ];
+
+                // sap.m.MessageBox.information(
+                //     JSON.stringify(
+                //         graficoInstalacao,
+                //         null,
+                //         2
+                //     )
+                // );
                 this.getView()
                     .getModel("dashboard")
                     .setData({
@@ -939,16 +1241,267 @@ sap.ui.define([
 
                         detalhesTagsDesatualizadas,
 
-                        dashboardVeiculos
+                        dashboardVeiculos,
+
+                        resumoFrotas,
+
+                        resumoTipoStatus,
+
+                        graficoTipoStatus,
+
+                        reformadosPorOficina,
+
+                        graficoInstalacao,
+
+                        instalados,
+
+                        faltantes,
+
+                        percentualInstalado
+
                     });
 
-                this.byId("htmlMapa").setContent(`
-        <div
-            id="mapaEquipamentos"
-            style="height:650px;width:100%;">
-        </div>
-    `);
+                const oVizFrame =
+                    this.byId("idTipoStatusVizFrame");
 
+
+                const oDataset =
+                    new sap.viz.ui5.data.FlattenedDataset({
+
+                        dimensions: [
+
+                            {
+                                name: "Tipo",
+                                value: "{dashboard>tipo}"
+                            },
+
+                            {
+                                name: "Status",
+                                value: "{dashboard>status}"
+                            }
+
+                        ],
+
+                        measures: [
+
+                            {
+                                name: "Quantidade",
+                                value: "{dashboard>quantidade}"
+                            }
+
+                        ],
+
+                        data: {
+                            path: "dashboard>/graficoTipoStatus"
+                        }
+
+                    });
+
+                oVizFrame.setDataset(oDataset);
+
+                oVizFrame.setModel(
+                    this.getView().getModel("dashboard"),
+                    "dashboard"
+                );
+
+                oVizFrame.addFeed(
+                    new sap.viz.ui5.controls.common.feeds.FeedItem({
+                        uid: "valueAxis",
+                        type: "Measure",
+                        values: ["Quantidade"]
+                    })
+                );
+
+                oVizFrame.addFeed(
+                    new sap.viz.ui5.controls.common.feeds.FeedItem({
+                        uid: "categoryAxis",
+                        type: "Dimension",
+                        values: ["Tipo"]
+                    })
+                );
+
+                oVizFrame.addFeed(
+                    new sap.viz.ui5.controls.common.feeds.FeedItem({
+                        uid: "color",
+                        type: "Dimension",
+                        values: ["Status"]
+                    })
+                );
+                oVizFrame.setVizProperties({
+
+                    plotArea: {
+
+                        dataLabel: {
+                            visible: true
+                        }
+
+                    },
+
+                    title: {
+                        visible: false
+                    }
+
+                });
+
+                const oVizFrameReformados =
+                    this.byId("idReformadosOficinaVizFrame");
+
+                const oDatasetReformados =
+                    new sap.viz.ui5.data.FlattenedDataset({
+
+                        dimensions: [
+
+                            {
+                                name: "Oficina",
+                                value: "{dashboard>oficina}"
+                            },
+
+                            {
+                                name: "Tipo",
+                                value: "{dashboard>tipo}"
+                            }
+
+                        ],
+
+                        measures: [
+
+                            {
+                                name: "Quantidade",
+                                value: "{dashboard>quantidade}"
+                            }
+
+                        ],
+
+                        data: {
+                            path: "dashboard>/reformadosPorOficina"
+                        }
+
+                    });
+
+                oVizFrameReformados.setDataset(
+                    oDatasetReformados
+                );
+
+                oVizFrameReformados.setModel(
+                    this.getView().getModel("dashboard"),
+                    "dashboard"
+                );
+
+                oVizFrameReformados.addFeed(
+                    new sap.viz.ui5.controls.common.feeds.FeedItem({
+                        uid: "valueAxis",
+                        type: "Measure",
+                        values: ["Quantidade"]
+                    })
+                );
+
+                oVizFrameReformados.addFeed(
+                    new sap.viz.ui5.controls.common.feeds.FeedItem({
+                        uid: "categoryAxis",
+                        type: "Dimension",
+                        values: ["Oficina"]
+                    })
+                );
+
+                oVizFrameReformados.addFeed(
+                    new sap.viz.ui5.controls.common.feeds.FeedItem({
+                        uid: "color",
+                        type: "Dimension",
+                        values: ["Tipo"]
+                    })
+                );
+
+                oVizFrameReformados.setVizProperties({
+
+                    plotArea: {
+                        dataLabel: {
+                            visible: true
+                        }
+                    },
+
+                    title: {
+                        visible: false
+                    }
+
+                });
+
+                const oVizFrameInstalacao =
+                    this.byId("idInstalacaoVizFrame");
+
+                const oDatasetInstalacao =
+                    new sap.viz.ui5.data.FlattenedDataset({
+
+                        dimensions: [
+                            {
+                                name: "Status",
+                                value: "{dashboard>status}"
+                            }
+                        ],
+
+                        measures: [
+                            {
+                                name: "Quantidade",
+                                value: "{dashboard>quantidade}"
+                            }
+                        ],
+
+                        data: {
+                            path: "dashboard>/graficoInstalacao"
+                        }
+
+                    });
+
+                oVizFrameInstalacao.setDataset(
+                    oDatasetInstalacao
+                );
+
+                oVizFrameInstalacao.setModel(
+                    this.getView().getModel("dashboard"),
+                    "dashboard"
+                );
+
+                oVizFrameInstalacao.addFeed(
+                    new sap.viz.ui5.controls.common.feeds.FeedItem({
+                        uid: "size",
+                        type: "Measure",
+                        values: ["Quantidade"]
+                    })
+                );
+
+                oVizFrameInstalacao.addFeed(
+                    new sap.viz.ui5.controls.common.feeds.FeedItem({
+                        uid: "color",
+                        type: "Dimension",
+                        values: ["Status"]
+                    })
+                );
+
+                oVizFrameInstalacao.setVizProperties({
+
+                    title: {
+                        visible: true,
+                        text:
+                            `Instalados: ${instalados}/50 (${percentualInstalado}%)`
+                    },
+
+                    legend: {
+                        visible: true
+                    },
+
+                    plotArea: {
+                        dataLabel: {
+                            visible: true
+                        }
+                    }
+
+                });
+
+                this.byId("htmlMapa").setContent(`
+    <div
+        id="mapaEquipamentos"
+        style="height:650px;width:100%;">
+    </div>
+`);
                 sap.ui.getCore().applyChanges();
 
                 setTimeout(async () => {
@@ -1041,18 +1594,18 @@ sap.ui.define([
                             L.DomUtil.create("div");
 
                         div.innerHTML = `
-                        <button
-                            style="
-                                background:white;
-                                border:1px solid #ccc;
-                                padding:8px;
-                                cursor:pointer;
-                                font-size:16px;
-                                font-weight:bold;">
-                            📏 Medir
-                        </button>
-                    `;
-
+    <button
+        style="
+            background:white;
+            border:1px solid #ccc;
+            padding:8px;
+            cursor:pointer;
+            font-size:16px;
+            font-weight:bold;
+        ">
+        📏 Medir
+    </button>
+`;
                         div.onclick = () => {
 
                             this._modoMedicao =
@@ -1241,36 +1794,35 @@ sap.ui.define([
                                     className: "",
                                     html: ehInstalado
                                         ? `
-                            <div style="
-                                width:16px;
-                                height:16px;
-                                background:#ff6347;
-                                border:3px solid white;
-                                border-radius:50%;
-                                box-shadow:
-                                    0 0 0 4px rgba(255,99,71,0.25),
-                                    0 0 10px rgba(255,99,71,0.8);
-                            "></div>
-                        
-                        `
+                    <div style="
+                        width:16px;
+                        height:16px;
+                        background:#ff6347;
+                        border:3px solid white;
+                        border-radius:50%;
+                        box-shadow:
+                            0 0 0 4px rgba(255,99,71,0.25),
+                            0 0 10px rgba(255,99,71,0.8);
+                    "></div>
+                `
                                         : `
-                            <div style="
-                                width:16px;
-                                height:16px;
-                                background:${cor};
-                                border:3px solid white;
-                                border-radius:50%;
-                                box-shadow:
-                                    0 0 0 4px ${halo},
-                                    0 0 10px ${sombra};
-                            "></div>
-                        `,
+                    <div style="
+                        width:16px;
+                        height:16px;
+                        background:${cor};
+                        border:3px solid white;
+                        border-radius:50%;
+                        box-shadow:
+                            0 0 0 4px ${halo},
+                            0 0 10px ${sombra};
+                    "></div>
+                `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         ).bindPopup(`
-        <div style="min-width:280px;">
+                    < div style = "min-width:280px;" >
             <b>${item.identificador}</b><br>
             <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
             <b>Local:</b> ${item.localInstalacao || ''}<br>
@@ -1287,7 +1839,7 @@ sap.ui.define([
                 <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
                 <b>Oficina:</b> ${item.oficina || 'Não informado'}
             </details>
-        </div>
+        </>
     `);
 
                         marker.on("dblclick", () => {
@@ -1747,8 +2299,8 @@ ${new Date(veiculo.DataAtualizacao)
                         bounds.push([lat, lng]);
 
                     });
-
-
+                    var oVizFrame =
+                        this.byId("idTipoStatusVizFrame");
                     sap.m.MessageToast.show(
                         "Markers gateway: " +
                         gatewaysLayer.getLayers().length
