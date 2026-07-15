@@ -2,20 +2,25 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
-    "sap/ui/export/Spreadsheet"
+    "sap/ui/export/Spreadsheet",
+    "sap/m/BusyDialog"
 ], (
     Controller,
     JSONModel,
-    Spreadsheet
+    Spreadsheet,
+    BusyDialog
 ) => {
+
     "use strict";
 
     return Controller.extend(
         "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento",
         {
-
             onInit() {
-
+                this._busyDialog = new BusyDialog({
+                    title: "Carregando",
+                    text: "Reconstruindo mapa..."
+                });
                 this.resumoTipoStatus = [];
 
                 const oDashboardModel = new JSONModel({
@@ -36,7 +41,18 @@ sap.ui.define([
 
                 this._grupoSelecionado = null;
 
+                // this.carregarDashboard();   
+            },
+            onAfterRendering() {
+
+                if (this._dashboardCarregado) {
+                    return;
+                }
+
+                this._dashboardCarregado = true;
+
                 this.carregarDashboard();
+
             },
             determinarGrupo(item) {
 
@@ -507,6 +523,38 @@ sap.ui.define([
                 return Object.values(resumo);
 
             },
+
+            onTabSelecionada(oEvent) {
+
+                const oItem =
+                    oEvent.getParameter("item");
+
+                if (
+                    oItem &&
+                    oItem.getKey() === "geo"
+                ) {
+
+                    this._busyDialog.open();
+
+                    setTimeout(() => {
+
+                        if (this._map) {
+
+                            this._map.remove();
+                            this._map = null;
+
+                        }
+
+                        this.carregarDashboard();
+
+                    }, 500);
+
+                }
+
+            },
+
+
+
             gerarResumoFrotas(dados) {
 
                 const resumo = {};
@@ -1184,8 +1232,8 @@ sap.ui.define([
                     await responseLocalizacao.json();
 
                 /*
-                 * AQUI
-                 */
+                * AQUI
+                */
                 const instalados =
                     localizacaoAtual.filter(
                         item => item.nota !== null
@@ -1260,248 +1308,261 @@ sap.ui.define([
                         percentualInstalado
 
                     });
-
                 const oVizFrame =
                     this.byId("idTipoStatusVizFrame");
 
+                if (oVizFrame) {
 
-                const oDataset =
-                    new sap.viz.ui5.data.FlattenedDataset({
 
-                        dimensions: [
+                    const oDataset =
+                        new sap.viz.ui5.data.FlattenedDataset({
 
-                            {
-                                name: "Tipo",
-                                value: "{dashboard>tipo}"
-                            },
+                            dimensions: [
 
-                            {
-                                name: "Status",
-                                value: "{dashboard>status}"
+                                {
+                                    name: "Tipo",
+                                    value: "{dashboard>tipo}"
+                                },
+
+                                {
+                                    name: "Status",
+                                    value: "{dashboard>status}"
+                                }
+
+                            ],
+
+                            measures: [
+
+                                {
+                                    name: "Quantidade",
+                                    value: "{dashboard>quantidade}"
+                                }
+
+                            ],
+
+                            data: {
+                                path: "dashboard>/graficoTipoStatus"
                             }
 
-                        ],
+                        });
 
-                        measures: [
+                    oVizFrame.setDataset(oDataset);
 
-                            {
-                                name: "Quantidade",
-                                value: "{dashboard>quantidade}"
+                    oVizFrame.setModel(
+                        this.getView().getModel("dashboard"),
+                        "dashboard"
+                    );
+
+                    oVizFrame.addFeed(
+                        new sap.viz.ui5.controls.common.feeds.FeedItem({
+                            uid: "valueAxis",
+                            type: "Measure",
+                            values: ["Quantidade"]
+                        })
+                    );
+
+                    oVizFrame.addFeed(
+                        new sap.viz.ui5.controls.common.feeds.FeedItem({
+                            uid: "categoryAxis",
+                            type: "Dimension",
+                            values: ["Tipo"]
+                        })
+                    );
+
+                    oVizFrame.addFeed(
+                        new sap.viz.ui5.controls.common.feeds.FeedItem({
+                            uid: "color",
+                            type: "Dimension",
+                            values: ["Status"]
+                        })
+                    );
+                    oVizFrame.setVizProperties({
+
+                        plotArea: {
+                            dataLabel: {
+                                visible: true,
+                                style: {
+                                    fontSize: "16px",
+                                    fontWeight: "bold"
+                                }
                             }
+                        },
 
-                        ],
+                        legend: {
+                            title: {
+                                visible: false
+                            }
+                        },
 
-                        data: {
-                            path: "dashboard>/graficoTipoStatus"
+                        title: {
+                            visible: false
                         }
 
                     });
 
-                oVizFrame.setDataset(oDataset);
-
-                oVizFrame.setModel(
-                    this.getView().getModel("dashboard"),
-                    "dashboard"
-                );
-
-                oVizFrame.addFeed(
-                    new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "valueAxis",
-                        type: "Measure",
-                        values: ["Quantidade"]
-                    })
-                );
-
-                oVizFrame.addFeed(
-                    new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "categoryAxis",
-                        type: "Dimension",
-                        values: ["Tipo"]
-                    })
-                );
-
-                oVizFrame.addFeed(
-                    new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "color",
-                        type: "Dimension",
-                        values: ["Status"]
-                    })
-                );
-                oVizFrame.setVizProperties({
-
-                    plotArea: {
-
-                        dataLabel: {
-                            visible: true
-                        }
-
-                    },
-
-                    title: {
-                        visible: false
-                    }
-
-                });
-
+                }
                 const oVizFrameReformados =
                     this.byId("idReformadosOficinaVizFrame");
 
-                const oDatasetReformados =
-                    new sap.viz.ui5.data.FlattenedDataset({
+                if (oVizFrameReformados) {
 
-                        dimensions: [
+                    const oDatasetReformados =
+                        new sap.viz.ui5.data.FlattenedDataset({
 
-                            {
-                                name: "Oficina",
-                                value: "{dashboard>oficina}"
-                            },
+                            dimensions: [
 
-                            {
-                                name: "Tipo",
-                                value: "{dashboard>tipo}"
+                                {
+                                    name: "Oficina",
+                                    value: "{dashboard>oficina}"
+                                },
+
+                                {
+                                    name: "Tipo",
+                                    value: "{dashboard>tipo}"
+                                }
+
+                            ],
+
+                            measures: [
+
+                                {
+                                    name: "Quantidade",
+                                    value: "{dashboard>quantidade}"
+                                }
+
+                            ],
+
+                            data: {
+                                path: "dashboard>/reformadosPorOficina"
                             }
 
-                        ],
+                        });
 
-                        measures: [
+                    oVizFrameReformados.setDataset(
+                        oDatasetReformados
+                    );
 
-                            {
-                                name: "Quantidade",
-                                value: "{dashboard>quantidade}"
+                    oVizFrameReformados.setModel(
+                        this.getView().getModel("dashboard"),
+                        "dashboard"
+                    );
+
+                    oVizFrameReformados.addFeed(
+                        new sap.viz.ui5.controls.common.feeds.FeedItem({
+                            uid: "valueAxis",
+                            type: "Measure",
+                            values: ["Quantidade"]
+                        })
+                    );
+
+                    oVizFrameReformados.addFeed(
+                        new sap.viz.ui5.controls.common.feeds.FeedItem({
+                            uid: "categoryAxis",
+                            type: "Dimension",
+                            values: ["Oficina"]
+                        })
+                    );
+
+                    oVizFrameReformados.addFeed(
+                        new sap.viz.ui5.controls.common.feeds.FeedItem({
+                            uid: "color",
+                            type: "Dimension",
+                            values: ["Tipo"]
+                        })
+                    );
+
+                    oVizFrameReformados.setVizProperties({
+
+                        plotArea: {
+                            dataLabel: {
+                                visible: true
                             }
+                        },
 
-                        ],
-
-                        data: {
-                            path: "dashboard>/reformadosPorOficina"
+                        title: {
+                            visible: false
                         }
 
                     });
-
-                oVizFrameReformados.setDataset(
-                    oDatasetReformados
-                );
-
-                oVizFrameReformados.setModel(
-                    this.getView().getModel("dashboard"),
-                    "dashboard"
-                );
-
-                oVizFrameReformados.addFeed(
-                    new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "valueAxis",
-                        type: "Measure",
-                        values: ["Quantidade"]
-                    })
-                );
-
-                oVizFrameReformados.addFeed(
-                    new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "categoryAxis",
-                        type: "Dimension",
-                        values: ["Oficina"]
-                    })
-                );
-
-                oVizFrameReformados.addFeed(
-                    new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "color",
-                        type: "Dimension",
-                        values: ["Tipo"]
-                    })
-                );
-
-                oVizFrameReformados.setVizProperties({
-
-                    plotArea: {
-                        dataLabel: {
-                            visible: true
-                        }
-                    },
-
-                    title: {
-                        visible: false
-                    }
-
-                });
-
+                }
                 const oVizFrameInstalacao =
                     this.byId("idInstalacaoVizFrame");
+                if (oVizFrameInstalacao) {
+                    const oDatasetInstalacao =
+                        new sap.viz.ui5.data.FlattenedDataset({
 
-                const oDatasetInstalacao =
-                    new sap.viz.ui5.data.FlattenedDataset({
+                            dimensions: [
+                                {
+                                    name: "Status",
+                                    value: "{dashboard>status}"
+                                }
+                            ],
 
-                        dimensions: [
-                            {
-                                name: "Status",
-                                value: "{dashboard>status}"
+                            measures: [
+                                {
+                                    name: "Quantidade",
+                                    value: "{dashboard>quantidade}"
+                                }
+                            ],
+
+                            data: {
+                                path: "dashboard>/graficoInstalacao"
                             }
-                        ],
 
-                        measures: [
-                            {
-                                name: "Quantidade",
-                                value: "{dashboard>quantidade}"
+                        });
+
+                    oVizFrameInstalacao.setDataset(
+                        oDatasetInstalacao
+                    );
+
+                    oVizFrameInstalacao.setModel(
+                        this.getView().getModel("dashboard"),
+                        "dashboard"
+                    );
+
+                    oVizFrameInstalacao.addFeed(
+                        new sap.viz.ui5.controls.common.feeds.FeedItem({
+                            uid: "size",
+                            type: "Measure",
+                            values: ["Quantidade"]
+                        })
+                    );
+
+                    oVizFrameInstalacao.addFeed(
+                        new sap.viz.ui5.controls.common.feeds.FeedItem({
+                            uid: "color",
+                            type: "Dimension",
+                            values: ["Status"]
+                        })
+                    );
+
+                    oVizFrameInstalacao.setVizProperties({
+
+                        title: {
+                            visible: true,
+                            text:
+                                `Instalados: ${instalados}/50 (${percentualInstalado}%)`
+                        },
+
+                        legend: {
+                            visible: true
+                        },
+
+                        plotArea: {
+                            dataLabel: {
+                                visible: true
                             }
-                        ],
-
-                        data: {
-                            path: "dashboard>/graficoInstalacao"
                         }
 
                     });
-
-                oVizFrameInstalacao.setDataset(
-                    oDatasetInstalacao
-                );
-
-                oVizFrameInstalacao.setModel(
-                    this.getView().getModel("dashboard"),
-                    "dashboard"
-                );
-
-                oVizFrameInstalacao.addFeed(
-                    new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "size",
-                        type: "Measure",
-                        values: ["Quantidade"]
-                    })
-                );
-
-                oVizFrameInstalacao.addFeed(
-                    new sap.viz.ui5.controls.common.feeds.FeedItem({
-                        uid: "color",
-                        type: "Dimension",
-                        values: ["Status"]
-                    })
-                );
-
-                oVizFrameInstalacao.setVizProperties({
-
-                    title: {
-                        visible: true,
-                        text:
-                            `Instalados: ${instalados}/50 (${percentualInstalado}%)`
-                    },
-
-                    legend: {
-                        visible: true
-                    },
-
-                    plotArea: {
-                        dataLabel: {
-                            visible: true
-                        }
-                    }
-
-                });
+                }
 
                 this.byId("htmlMapa").setContent(`
-    <div
-        id="mapaEquipamentos"
-        style="height:650px;width:100%;">
-    </div>
-`);
+        <div
+            id="mapaEquipamentos"
+            style="height:650px;width:100%;">
+        </div>
+    `);
                 sap.ui.getCore().applyChanges();
 
                 setTimeout(async () => {
@@ -1530,6 +1591,31 @@ sap.ui.define([
                         });
 
                     }
+                    if (this._grupoSelecionado) {
+
+                        dadosMapa = dadosFiltrados.filter(item => {
+
+                            let localizacao =
+                                this.determinarGrupo(item);
+
+                            if (
+                                localizacao ===
+                                "Tags Digitais desatualizadas"
+                            ) {
+                                localizacao = "Fora de zona";
+                            }
+
+                            if (localizacao.startsWith("Instalado no ")) {
+                                localizacao = "Instalados";
+                            }
+
+                            return localizacao === this._grupoSelecionado;
+
+                        });
+
+                    }
+
+                    this._dadosMapa = dadosMapa;
                     const equipamentos = dadosMapa.filter(item => {
 
                         if (
@@ -1580,9 +1666,16 @@ sap.ui.define([
                             attribution: "Tiles © Esri"
                         }
                     );
-
                     this._map = L.map("mapaEquipamentos", {
                         layers: [satelite]
+                    });
+
+                    this._map.whenReady(() => {
+
+                        setTimeout(() => {
+                            this._map.invalidateSize(true);
+                        }, 500);
+
                     });
                     const botaoMedir = L.control({
                         position: "topleft"
@@ -1594,18 +1687,18 @@ sap.ui.define([
                             L.DomUtil.create("div");
 
                         div.innerHTML = `
-    <button
-        style="
-            background:white;
-            border:1px solid #ccc;
-            padding:8px;
-            cursor:pointer;
-            font-size:16px;
-            font-weight:bold;
-        ">
-        📏 Medir
-    </button>
-`;
+        <button
+            style="
+                background:white;
+                border:1px solid #ccc;
+                padding:8px;
+                cursor:pointer;
+                font-size:16px;
+                font-weight:bold;
+            ">
+            📏 Medir
+        </button>
+    `;
                         div.onclick = () => {
 
                             this._modoMedicao =
@@ -1794,53 +1887,53 @@ sap.ui.define([
                                     className: "",
                                     html: ehInstalado
                                         ? `
-                    <div style="
-                        width:16px;
-                        height:16px;
-                        background:#ff6347;
-                        border:3px solid white;
-                        border-radius:50%;
-                        box-shadow:
-                            0 0 0 4px rgba(255,99,71,0.25),
-                            0 0 10px rgba(255,99,71,0.8);
-                    "></div>
-                `
+                        <div style="
+                            width:16px;
+                            height:16px;
+                            background:#ff6347;
+                            border:3px solid white;
+                            border-radius:50%;
+                            box-shadow:
+                                0 0 0 4px rgba(255,99,71,0.25),
+                                0 0 10px rgba(255,99,71,0.8);
+                        "></div>
+                    `
                                         : `
-                    <div style="
-                        width:16px;
-                        height:16px;
-                        background:${cor};
-                        border:3px solid white;
-                        border-radius:50%;
-                        box-shadow:
-                            0 0 0 4px ${halo},
-                            0 0 10px ${sombra};
-                    "></div>
-                `,
+                        <div style="
+                            width:16px;
+                            height:16px;
+                            background:${cor};
+                            border:3px solid white;
+                            border-radius:50%;
+                            box-shadow:
+                                0 0 0 4px ${halo},
+                                0 0 10px ${sombra};
+                        "></div>
+                    `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         ).bindPopup(`
-                    < div style = "min-width:280px;" >
-            <b>${item.identificador}</b><br>
-            <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
-            <b>Local:</b> ${item.localInstalacao || ''}<br>
-            <b>Nota:</b> ${item.nota || 'Não informado'}<br>
-            <b>Gateway:</b> ${item.gateway || ''}<br>
-            <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
+                        < div style = "min-width:280px;" >
+                <b>${item.identificador}</b><br>
+                <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
+                <b>Local:</b> ${item.localInstalacao || ''}<br>
+                <b>Nota:</b> ${item.nota || 'Não informado'}<br>
+                <b>Gateway:</b> ${item.gateway || ''}<br>
+                <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
 
-            <details>
-                <summary><b>Ver detalhes</b></summary>
-                <br>
-                <b>Grupo:</b> ${item.grupoAtual || ''}<br>
-                <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
-                <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
-                <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
-                <b>Oficina:</b> ${item.oficina || 'Não informado'}
-            </details>
-        </>
-    `);
+                <details>
+                    <summary><b>Ver detalhes</b></summary>
+                    <br>
+                    <b>Grupo:</b> ${item.grupoAtual || ''}<br>
+                    <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
+                    <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
+                    <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
+                    <b>Oficina:</b> ${item.oficina || 'Não informado'}
+                </details>
+            </>
+        `);
 
                         marker.on("dblclick", () => {
 
@@ -1952,37 +2045,37 @@ sap.ui.define([
                                     : "🟡";
 
                             htmlDetalhes += `
-        <div style="
-    margin:6px 0;
-    padding:4px 0;
-    border-bottom:1px solid #eee;
-    font-size:12px;
-">
-    ${indicador}
-    <b>${item.identificador}</b>
-    -
-    <span style="
-        display:inline-block;
-        max-width:380px;
-        white-space:nowrap;     
-        overflow:hidden;
-        text-overflow:ellipsis;
-        vertical-align:bottom;
-    ">
-        ${item.descEquipamento || ""}
-    </span>
-
-    <br>
-
-    <span style="
-        color:#666;
+            <div style="
+        margin:6px 0;
+        padding:4px 0;
+        border-bottom:1px solid #eee;
         font-size:12px;
     ">
-        Última atualização:
-        ${item.ultimaPosicao || "Não informada"}
-    </span>
-</div>
-    `;
+        ${indicador}
+        <b>${item.identificador}</b>
+        -
+        <span style="
+            display:inline-block;
+            max-width:380px;
+            white-space:nowrap;     
+            overflow:hidden;
+            text-overflow:ellipsis;
+            vertical-align:bottom;
+        ">
+            ${item.descEquipamento || ""}
+        </span>
+
+        <br>
+
+        <span style="
+            color:#666;
+            font-size:12px;
+        ">
+            Última atualização:
+            ${item.ultimaPosicao || "Não informada"}
+        </span>
+    </div>
+        `;
 
                         });
 
@@ -2000,9 +2093,9 @@ sap.ui.define([
                             .forEach(tipo => {
 
                                 htmlResumo += `
-            <b>${tipo}:</b>
-            ${resumo[tipo]}<br>
-        `;
+                <b>${tipo}:</b>
+                ${resumo[tipo]}<br>
+            `;
 
                             });
                         const lat = parseFloat(veiculo.Latitude);
@@ -2030,161 +2123,161 @@ sap.ui.define([
                                 icon: L.divIcon({
                                     className: "",
                                     html: `
-                    <div style="
-                        width:16px;
-                        height:16px;
-                        background:#ff6347;
-                        border:3px solid white;
-                        border-radius:50%;
-                        box-shadow:
-                            0 0 0 4px rgba(255,99,71,0.25),
-                            0 0 10px rgba(255,99,71,0.8);
-                    "></div>
-                `,
+                        <div style="
+                            width:16px;
+                            height:16px;
+                            background:#ff6347;
+                            border:3px solid white;
+                            border-radius:50%;
+                            box-shadow:
+                                0 0 0 4px rgba(255,99,71,0.25),
+                                0 0 10px rgba(255,99,71,0.8);
+                        "></div>
+                    `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         ).bindPopup(`
-        <div style="min-width:320px;">
+            <div style="min-width:320px;">
 
-        <div style="
-            text-align:right;
-            margin-bottom:10px;
+            <div style="
+                text-align:right;
+                margin-bottom:10px;
+            ">
+    <button
+        title="Copiar local de instalação"
+        onclick="
+            navigator.clipboard.writeText('${veiculo.LOCAL_INSTALACAO}');
+            sap.m.MessageToast.show('✅ Local copiado');
+        "
+        style="
+            cursor:pointer;
+            padding:6px 10px;
         ">
-<button
-    title="Copiar local de instalação"
-    onclick="
-        navigator.clipboard.writeText('${veiculo.LOCAL_INSTALACAO}');
-        sap.m.MessageToast.show('✅ Local copiado');
-    "
-    style="
-        cursor:pointer;
-        padding:6px 10px;
-    ">
-    📋 Copiar Local
-</button>
+        📋 Copiar Local
+    </button>
+            </div>
+
+            <b>Veículo:</b>
+            ${veiculo.Veiculo}<br>
+
+            <b>Local:</b>
+            ${veiculo.LOCAL_INSTALACAO}<br>
+
+            <b>Equipamentos embarcados:</b>
+            ${totalEquipamentos}<br>
+
+                
+
+
+        <hr>
+
+
+
+    <details
+        id="resumo_${veiculo.Veiculo}"
+        data-veiculo="${veiculo.Veiculo}"
+        ontoggle="
+            const detalhes =
+                document.getElementById(
+                    'conteudoDetalhes_${veiculo.Veiculo}'
+                );
+
+            if (detalhes) {
+                detalhes.style.display =
+                    this.open ? 'none' : 'block';
+            }
+        ">
+
+        <summary style="
+            cursor:pointer;
+            font-weight:bold;
+        ">
+            Ver Resumo
+        </summary>
+
+        <div
+            id="conteudoResumo_${veiculo.Veiculo}"
+            style="margin-top:10px;">
+
+            ${htmlResumo}
+
+            <div style="
+                text-align:right;
+                margin-top:10px;
+            ">
+                <button
+                    title="Copiar resumo dos equipamentos embarcados"
+                    onclick="
+                        navigator.clipboard.writeText('${textoResumo}');
+                        sap.m.MessageToast.show('✅ Resumo copiado');
+                    "
+                    style="
+                        cursor:pointer;
+                        padding:6px 10px;
+                    ">
+                    📋 Copiar Resumo
+                </button>
+            </div>
+
         </div>
 
-        <b>Veículo:</b>
-        ${veiculo.Veiculo}<br>
+    </details>
 
-        <b>Local:</b>
-        ${veiculo.LOCAL_INSTALACAO}<br>
+    <details
+        id="detalhes_${veiculo.Veiculo}"
+        data-veiculo="${veiculo.Veiculo}"
+        ontoggle="
+            const resumo =
+                document.getElementById(
+                    'conteudoResumo_${veiculo.Veiculo}'
+                );
 
-        <b>Equipamentos embarcados:</b>
-        ${totalEquipamentos}<br>
+            if (resumo) {
+                resumo.style.display =
+                    this.open ? 'none' : 'block';
+            }
+        ">
 
-            
+        <summary style="
+            cursor:pointer;
+            font-weight:bold;
+        ">
+            Detalhes
+        </summary>
 
+        <div
+            id="conteudoDetalhes_${veiculo.Veiculo}"
+            style="margin-top:10px;">
+
+
+            ${htmlDetalhes}
+
+            <div style="
+                text-align:center;
+                margin-top:10px;
+            ">
+                <button
+                    id="btnExportar_${veiculo.Veiculo}"
+                    style="
+                        cursor:pointer;
+                        padding:6px 10px;
+                        width:95%;
+                        box-sizing:border-box;
+                    ">
+                    📊 Exportar Excel
+                </button>
+            </div>
+
+        </div>
+
+    </details>
 
     <hr>
 
-
-
-<details
-    id="resumo_${veiculo.Veiculo}"
-    data-veiculo="${veiculo.Veiculo}"
-    ontoggle="
-        const detalhes =
-            document.getElementById(
-                'conteudoDetalhes_${veiculo.Veiculo}'
-            );
-
-        if (detalhes) {
-            detalhes.style.display =
-                this.open ? 'none' : 'block';
-        }
-    ">
-
-    <summary style="
-        cursor:pointer;
-        font-weight:bold;
-    ">
-        Ver Resumo
-    </summary>
-
-    <div
-        id="conteudoResumo_${veiculo.Veiculo}"
-        style="margin-top:10px;">
-
-        ${htmlResumo}
-
-        <div style="
-            text-align:right;
-            margin-top:10px;
-        ">
-            <button
-                title="Copiar resumo dos equipamentos embarcados"
-                onclick="
-                    navigator.clipboard.writeText('${textoResumo}');
-                    sap.m.MessageToast.show('✅ Resumo copiado');
-                "
-                style="
-                    cursor:pointer;
-                    padding:6px 10px;
-                ">
-                📋 Copiar Resumo
-            </button>
-        </div>
-
-    </div>
-
-</details>
-
-<details
-    id="detalhes_${veiculo.Veiculo}"
-    data-veiculo="${veiculo.Veiculo}"
-    ontoggle="
-        const resumo =
-            document.getElementById(
-                'conteudoResumo_${veiculo.Veiculo}'
-            );
-
-        if (resumo) {
-            resumo.style.display =
-                this.open ? 'none' : 'block';
-        }
-    ">
-
-    <summary style="
-        cursor:pointer;
-        font-weight:bold;
-    ">
-        Detalhes
-    </summary>
-
-    <div
-        id="conteudoDetalhes_${veiculo.Veiculo}"
-        style="margin-top:10px;">
-
-
-        ${htmlDetalhes}
-
-        <div style="
-            text-align:center;
-            margin-top:10px;
-        ">
-            <button
-                id="btnExportar_${veiculo.Veiculo}"
-                style="
-                    cursor:pointer;
-                    padding:6px 10px;
-                    width:95%;
-                    box-sizing:border-box;
-                ">
-                📊 Exportar Excel
-            </button>
-        </div>
-
-    </div>
-
-</details>
-
-<hr>
-
-<b>Atualização:</b>
-${new Date(veiculo.DataAtualizacao)
+    <b>Atualização:</b>
+    ${new Date(veiculo.DataAtualizacao)
                                 .toLocaleString("pt-BR", {
                                     day: "2-digit",
                                     month: "2-digit",
@@ -2195,8 +2288,8 @@ ${new Date(veiculo.DataAtualizacao)
                                 })
                                 .replace(",", "")}
 
-</div>
-    `);
+    </div>
+        `);
                         markers.addLayer(marker);
                         marker.on("popupopen", () => {
 
@@ -2299,8 +2392,8 @@ ${new Date(veiculo.DataAtualizacao)
                         bounds.push([lat, lng]);
 
                     });
-                    var oVizFrame =
-                        this.byId("idTipoStatusVizFrame");
+                    // var oVizFrame =
+                    //     this.byId("idTipoStatusVizFrame");
                     sap.m.MessageToast.show(
                         "Markers gateway: " +
                         gatewaysLayer.getLayers().length
@@ -2335,17 +2428,17 @@ ${new Date(veiculo.DataAtualizacao)
                                 icon: L.divIcon({
                                     className: "",
                                     html: `
-                        <div style="
-                            width:16px;
-                            height:16px;
-                            background:#3498db;
-                            border:3px solid white;
-                            border-radius:50%;
-                            box-shadow:
-                                0 0 0 5px rgba(52,152,219,0.25),
-                                0 0 12px rgba(52,152,219,0.8);
-                        "></div>
-                    `,
+                            <div style="
+                                width:16px;
+                                height:16px;
+                                background:#3498db;
+                                border:3px solid white;
+                                border-radius:50%;
+                                box-shadow:
+                                    0 0 0 5px rgba(52,152,219,0.25),
+                                    0 0 12px rgba(52,152,219,0.8);
+                            "></div>
+                        `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
@@ -2354,11 +2447,11 @@ ${new Date(veiculo.DataAtualizacao)
 
                             .bindTooltip(gw.identificador)
                             .bindPopup(`
-            <b>${gw.identificador}</b><br>
-            Gateway ID: ${gw.gatewayId}<br>
-            Localidade: ${gw.localidade}<br>
-            Condição: ${gw.condicao}
-        `);
+                <b>${gw.identificador}</b><br>
+                Gateway ID: ${gw.gatewayId}<br>
+                Localidade: ${gw.localidade}<br>
+                Condição: ${gw.condicao}
+            `);
 
                         marker.on("click", () => {
 
@@ -2389,6 +2482,9 @@ ${new Date(veiculo.DataAtualizacao)
                             padding: [30, 30]
                         });
 
+                    }
+                    if (this._busyDialog) {
+                        this._busyDialog.close();
                     }
 
                 }, 1000);
@@ -2460,11 +2556,11 @@ ${new Date(veiculo.DataAtualizacao)
                         meioLng
                     ])
                     .setContent(`
-                                            <b>
-                                                ${(distancia / 1000)
+                                                <b>
+                                                    ${(distancia / 1000)
                             .toFixed(2)} km
-                                            </b>
-                                            `)
+                                                </b>
+                                                `)
                     .openOn(this._map);
 
                 this._pontosMedicao = [];
