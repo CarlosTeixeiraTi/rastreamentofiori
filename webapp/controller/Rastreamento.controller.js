@@ -17,10 +17,19 @@ sap.ui.define([
         "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento",
         {
             onInit() {
+
                 this._busyDialog = new BusyDialog({
                     title: "Carregando",
                     text: "Reconstruindo mapa..."
                 });
+
+                this._busyMapaInicial = new BusyDialog({
+                    title: "Carregando",
+                    text: "Montando mapa..."
+                });
+
+                this._primeiraCargaMapa = true;
+
                 this.resumoTipoStatus = [];
 
                 const oDashboardModel = new JSONModel({
@@ -41,7 +50,7 @@ sap.ui.define([
 
                 this._grupoSelecionado = null;
 
-                // this.carregarDashboard();   
+                // this.carregarDashboard();
             },
             onAfterRendering() {
 
@@ -889,6 +898,180 @@ sap.ui.define([
                 );
 
             },
+            criarMarcadorMina(
+                texto,
+                lat,
+                lng
+            ) {
+
+                return L.marker(
+                    [lat, lng],
+                    {
+                        icon: L.divIcon({
+                            className: "",
+                            html: `
+                    <div style="
+                        display:flex;
+                        align-items:center;
+                        white-space:nowrap;
+                    ">
+
+                        <div style="
+                            width:18px;
+                            height:18px;
+                            background:#95a5a6;
+                            border-radius:50%;
+                            border:3px solid white;
+                            box-shadow:0 0 6px rgba(0,0,0,.5);
+                        ">
+                        </div>
+
+                        <span style="
+                            margin-left:6px;
+                            color:white;
+                            font-weight:bold;
+                            font-size:14px;
+                            text-shadow:
+                                2px 2px 4px black;
+                        ">
+                            ${texto}
+                        </span>
+
+                    </div>
+                `,
+                            iconSize: [220, 24],
+                            iconAnchor: [9, 9]
+                        })
+                    }
+                );
+
+            },
+            criarLabel(
+                texto,
+                lat,
+                lng,
+                classe
+            ) {
+
+                return L.marker(
+                    [lat, lng],
+                    {
+                        opacity: 0
+                    }
+                ).bindTooltip(
+                    texto,
+                    {
+                        permanent: true,
+                        direction: "center",
+                        className: classe
+                    }
+                );
+
+            },
+            atualizarLabels() {
+
+                if (!this._layerLabels) {
+                    return;
+                }
+
+                this._layerLabels.clearLayers();
+
+                const zoom = this._map.getZoom();
+
+                // Cidade
+                this.criarLabel(
+                    "ITABIRA",
+                    -19.6191,
+                    -43.2266,
+                    "cityLabel"
+                ).addTo(this._layerLabels);
+
+                if (zoom >= 14) {
+
+                    [
+                        ["CENTRO", -19.624, -43.226],
+                        ["PARÁ", -19.620, -43.233],
+                        ["BELA VISTA", -19.618, -43.212],
+                        ["NOVA VISTA", -19.620, -43.202],
+                        ["SÃO PEDRO", -19.624, -43.218],
+                        ["JUCA ROSA", -19.635, -43.213],
+                        ["COLINA DA PRAIA", -19.645, -43.205],
+                        ["PEDREIRA", -19.642, -43.245],
+                        ["MACHADO", -19.665, -43.240],
+                        ["JOÃO XXIII", -19.678, -43.233],
+                        ["VILA BETHÂNIA", -19.678, -43.218],
+                        ["GABIROBA", -19.683, -43.185],
+                        ["FÊNIX", -19.695, -43.242],
+                        ["VALE DO SOL", -19.655, -43.165]
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "bairroLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
+                if (zoom >= 14) {
+
+                    [
+
+
+                        ["PDE PERIQUITO", -19.648, -43.279],
+                        ["DIQUE DE IPOEMA", -19.567, -43.305],
+                        ["BARRAGEM DO QUINZINHO", -19.565, -43.280],
+                        ["PEDREIRA DO INSTITUTO", -19.545, -43.165],
+
+
+                        ["MINA CAUÊ", -19.599252, -43.218690],
+
+                        ["MINA CONCEIÇÃO", -19.640000, -43.270000],
+
+                        ["MINA PERIQUITO", -19.630067, -43.245444],
+
+                        ["PDE BORRACHUDO", -19.600, -43.285],
+
+                        ["PEDREIRA DETALHE", -19.620, -43.258],
+
+                        ["DIQUE DE IPOEMA", -19.567, -43.305],
+
+
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "operacaoValeLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
+                if (zoom >= 14) {
+
+                    [
+                        ["MINA CONCEIÇÃO", -19.669, -43.270],
+                        // ["MINA CAUÊ", -19.592, -43.205]
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "operacaoValeLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
+            },
             gerarGraficoTipoStatus(dados) {
 
                 const resumo = {};
@@ -929,8 +1112,57 @@ sap.ui.define([
                 });
 
             },
+            onExportarConferenciaExcel() {
+
+                const dados =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/dashboardVeiculos");
+
+                const oSpreadsheet = new Spreadsheet({
+
+                    workbook: {
+
+                        columns: [
+
+                            {
+                                label: "Veículo",
+                                property: "veiculo"
+                            },
+
+                            {
+                                label: "Status",
+                                property: "status"
+                            },
+
+                            {
+                                label: "Conferência",
+                                property: "conferencia"
+                            }
+
+                        ]
+
+                    },
+
+                    dataSource: dados,
+
+                    fileName:
+                        "Conferencia_Componentes_Embarcados.xlsx"
+
+                });
+
+                oSpreadsheet.build()
+                    .finally(() => {
+                        oSpreadsheet.destroy();
+                    });
+
+            },
 
             async carregarDashboard() {
+
+                if (this._primeiraCargaMapa) {
+                    this._busyMapaInicial.open();
+                }
 
                 const response = await fetch(
                     "/odata/v4/smart-pcm/Rastreio"
@@ -958,9 +1190,18 @@ sap.ui.define([
                 const gateways = await responseGateway.json();
 
                 // sap.m.MessageToast.show(
-                //     "Gateways: " + gateways.length
+                //     "Passou aqui 1"
                 // );
 
+                const mapaGatewayDescricao = {};
+
+                gateways.forEach(gw => {
+
+                    mapaGatewayDescricao[
+                        gw.gatewayId
+                    ] = gw.identificador;
+
+                });
 
                 if (!gateways.length) {
 
@@ -979,24 +1220,21 @@ sap.ui.define([
 
                     veiculos = await responseVeiculos.json();
 
-                    // sap.m.MessageToast.show(
-                    //     "Veículos: " + veiculos.length
-                    // );
-
                 } catch (e) {
 
                     sap.m.MessageBox.error(
                         e.toString()
                     );
-
                 }
 
-                // sap.m.MessageToast.show("veiculos: " + veiculos.length);
                 const dadosFiltrados = (json.value || []).filter(
                     item =>
                         item.grupoAtual !== "Tags Digitais Não Habilitadas" &&
                         item.identificador !== "11039948"
                 );
+
+
+
                 this._dadosFiltrados = dadosFiltrados;
                 const gatewaysSet = new Set();
                 const gruposMap = {};
@@ -1211,17 +1449,14 @@ sap.ui.define([
                 // );   
                 const responseReformados =
                     await fetch(
-                        "http://localhost:4000/ReformadosPorOficina/listar"
+                        "http://localhost:4000/ReformadosDescLocal/listar"
                     );
 
                 const reformadosPorOficina =
                     await responseReformados.json();
-                reformadosPorOficina.forEach(item => {
 
-                    item.oficinaFrota =
-                        `${item.oficina} - ${item.frota}`;
-
-                });
+                // const reformadosPorLocal =
+                //     await responseReformados.json();
 
                 const responseLocalizacao =
                     await fetch(
@@ -1266,19 +1501,39 @@ sap.ui.define([
                 //         null,
                 //         2
                 //     )
-                // );
+                const totalEquipamentos = dadosFiltrados.length;
+
+                online = totalEquipamentos - offline;
+
+                const percentualOnline =
+                    totalEquipamentos > 0
+                        ? ((online / totalEquipamentos) * 100).toFixed(1)
+                        : "0.0";
+
+                const percentualOffline =
+                    totalEquipamentos > 0
+                        ? ((offline / totalEquipamentos) * 100).toFixed(1)
+                        : "0.0";
+                const percentualEquipamentos =
+                    ((totalEquipamentos / 50) * 100).toFixed(1);
+                const percentualGateway =
+                    ((gateways.length / 8) * 100).toFixed(1) + "%";
                 this.getView()
                     .getModel("dashboard")
                     .setData({
 
-                        totalEquipamentos: dadosFiltrados.length,
-
+                        totalEquipamentos,
+                        percentualEquipamentos,
                         online,
 
                         offline,
 
-                        gateways: gateways.length,
+                        percentualOnline,
 
+                        percentualOffline,
+
+                        gateways: gateways.length,
+                        percentualGateway,
                         grupos,
 
                         ultimasLeituras,
@@ -1313,6 +1568,11 @@ sap.ui.define([
 
                 if (oVizFrame) {
 
+                    oVizFrame.destroyFeeds();
+
+                    if (oVizFrame.getDataset()) {
+                        oVizFrame.destroyDataset();
+                    }
 
                     const oDataset =
                         new sap.viz.ui5.data.FlattenedDataset({
@@ -1406,14 +1666,20 @@ sap.ui.define([
 
                 if (oVizFrameReformados) {
 
+                    oVizFrameReformados.destroyFeeds();
+
+                    if (oVizFrameReformados.getDataset()) {
+                        oVizFrameReformados.destroyDataset();
+                    }
+
                     const oDatasetReformados =
                         new sap.viz.ui5.data.FlattenedDataset({
 
                             dimensions: [
 
                                 {
-                                    name: "Oficina",
-                                    value: "{dashboard>oficina}"
+                                    name: "Descrição do local",
+                                    value: "{dashboard>descLocalInstalacao}"
                                 },
 
                                 {
@@ -1435,6 +1701,7 @@ sap.ui.define([
                             data: {
                                 path: "dashboard>/reformadosPorOficina"
                             }
+
 
                         });
 
@@ -1459,7 +1726,7 @@ sap.ui.define([
                         new sap.viz.ui5.controls.common.feeds.FeedItem({
                             uid: "categoryAxis",
                             type: "Dimension",
-                            values: ["Oficina"]
+                            values: ["Descrição do local"]
                         })
                     );
 
@@ -1475,7 +1742,11 @@ sap.ui.define([
 
                         plotArea: {
                             dataLabel: {
-                                visible: true
+                                visible: true,
+                                style: {
+                                    fontSize: "16px",
+                                    fontWeight: "bold"
+                                }
                             }
                         },
 
@@ -1488,6 +1759,13 @@ sap.ui.define([
                 const oVizFrameInstalacao =
                     this.byId("idInstalacaoVizFrame");
                 if (oVizFrameInstalacao) {
+
+                    oVizFrameInstalacao.destroyFeeds();
+
+                    if (oVizFrameInstalacao.getDataset()) {
+                        oVizFrameInstalacao.destroyDataset();
+                    }
+
                     const oDatasetInstalacao =
                         new sap.viz.ui5.data.FlattenedDataset({
 
@@ -1558,14 +1836,15 @@ sap.ui.define([
                 }
 
                 this.byId("htmlMapa").setContent(`
-        <div
-            id="mapaEquipamentos"
-            style="height:650px;width:100%;">
-        </div>
-    `);
+    <div
+        id="mapaEquipamentos"
+        style="height:850px;width:100%;">
+    </div>
+`);
                 sap.ui.getCore().applyChanges();
 
                 setTimeout(async () => {
+
                     let dadosMapa = dadosFiltrados;
 
                     if (this._grupoSelecionado) {
@@ -1616,6 +1895,9 @@ sap.ui.define([
                     }
 
                     this._dadosMapa = dadosMapa;
+
+
+
                     const equipamentos = dadosMapa.filter(item => {
 
                         if (
@@ -1666,17 +1948,85 @@ sap.ui.define([
                             attribution: "Tiles © Esri"
                         }
                     );
+
+                    const labels = L.tileLayer(
+                        "https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+                    );
+
                     this._map = L.map("mapaEquipamentos", {
                         layers: [satelite]
                     });
 
-                    this._map.whenReady(() => {
+                    this._layerLabels = L.layerGroup().addTo(this._map);
 
-                        setTimeout(() => {
-                            this._map.invalidateSize(true);
-                        }, 500);
+                    this.atualizarLabels();
+
+                    this._map.on("zoomend", () => {
+
+                        this.atualizarLabels();
+
+                        const zoom = this._map.getZoom();
+
+                        if (zoom >= 17) {
+
+                            // this._layerDetalhes.addTo(this._map);
+
+                        } else {
+
+                            // this._map.removeLayer(this._layerDetalhes);
+
+                        }
 
                     });
+
+
+
+                    // this._layerCidades = L.layerGroup();
+
+                    // L.marker([-19.6191, -43.2266], {
+                    //     opacity: 0
+                    // })
+                    //     .bindTooltip("ITABIRA", {
+                    //         permanent: true,
+                    //         direction: "center",
+                    //         className: "cityLabel"
+                    //     })
+                    //     .addTo(this._layerCidades);
+
+                    // L.marker([-19.8123, -43.1735], {
+                    //     opacity: 0
+                    // })
+                    //     .bindTooltip("JOÃO MONLEVADE", {
+                    //         permanent: true,
+                    //         direction: "center",
+                    //         className: "cityLabel"
+                    //     })
+                    //     .addTo(this._layerCidades);
+
+                    // const atualizarCamadas = () => {
+
+                    //     const zoom = this._map.getZoom();
+
+                    //     if (zoom >= 13) {
+
+                    //         if (!this._map.hasLayer(this._layerCidades)) {
+                    //             this._map.addLayer(this._layerCidades);
+                    //         }
+
+                    //     } else {
+
+                    //         if (this._map.hasLayer(this._layerCidades)) {
+                    //             this._map.removeLayer(this._layerCidades);
+                    //         }
+
+                    //     }
+                    // };
+
+                    // atualizarCamadas();
+
+                    // this._map.on("zoomend", atualizarCamadas);
+
+                    // this._layerCidades.addTo(this._map);
                     const botaoMedir = L.control({
                         position: "topleft"
                     });
@@ -1687,18 +2037,18 @@ sap.ui.define([
                             L.DomUtil.create("div");
 
                         div.innerHTML = `
-        <button
-            style="
-                background:white;
-                border:1px solid #ccc;
-                padding:8px;
-                cursor:pointer;
-                font-size:16px;
-                font-weight:bold;
-            ">
-            📏 Medir
-        </button>
-    `;
+                        <button
+                            style="
+                                background:white;
+                                border:1px solid #ccc;
+                                padding:8px;
+                                cursor:pointer;
+                                font-size:16px;
+                                font-weight:bold;
+                            ">
+                            📏 Medir
+                        </button>
+                    `;
                         div.onclick = () => {
 
                             this._modoMedicao =
@@ -1843,7 +2193,8 @@ sap.ui.define([
 
 
                     equipamentos.forEach(item => {
-
+                        const descricaoGateway =
+                            mapaGatewayDescricao[item.gateway];
                         const lat = parseFloat(item.latitude);
                         const lng = parseFloat(item.longitude);
                         const dataPosicao =
@@ -1915,25 +2266,28 @@ sap.ui.define([
                                 })
                             }
                         ).bindPopup(`
-                        < div style = "min-width:280px;" >
-                <b>${item.identificador}</b><br>
-                <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
-                <b>Local:</b> ${item.localInstalacao || ''}<br>
-                <b>Nota:</b> ${item.nota || 'Não informado'}<br>
-                <b>Gateway:</b> ${item.gateway || ''}<br>
-                <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
+    <div style="min-width:280px;">
+        <b>${item.identificador}</b><br>
+        <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
+        <b>Local:</b> ${item.localInstalacao || ''}<br>
+        <b>Nota:</b> ${item.nota || 'Não informado'}<br>
+        📡 Gateway:
+<b>
+    ${descricaoGateway || item.gateway || "Não informado"}
+</b>
+        <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
 
-                <details>
-                    <summary><b>Ver detalhes</b></summary>
-                    <br>
-                    <b>Grupo:</b> ${item.grupoAtual || ''}<br>
-                    <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
-                    <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
-                    <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
-                    <b>Oficina:</b> ${item.oficina || 'Não informado'}
-                </details>
-            </>
-        `);
+        <details>
+            <summary><b>Ver detalhes</b></summary>
+            <br>
+            <b>Grupo:</b> ${item.grupoAtual || ''}<br>
+            <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
+            <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
+            <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
+            <b>Oficina:</b> ${item.oficina || 'Não informado'}
+        </details>
+    </div>
+`);
 
                         marker.on("dblclick", () => {
 
@@ -1970,18 +2324,18 @@ sap.ui.define([
                                     : distancia.toFixed(0) + " m";
                             const gatewayInfo =
                                 this._gatewayInfo[item.gateway];
-                            sap.m.MessageBox.information(
+                            // sap.m.MessageBox.information(
 
-                                "Gateway: " +
-                                item.gateway +
+                            //     "Gateway: " +
+                            //     item.gateway +
 
-                                "\nDescrição: " +
-                                (gatewayInfo?.identificador || "N/A") +
+                            //     "\nDescrição: " +
+                            //     (gatewayInfo?.identificador || "N/A") +
 
-                                "\nDistância estimada: " +
-                                textoDistancia
+                            //     "\nDistância estimada: " +
+                            //     textoDistancia
 
-                            );
+                            // );
 
                         });
 
@@ -2016,6 +2370,11 @@ sap.ui.define([
 
 
                     veiculosUnicos.forEach(veiculo => {
+
+                        // sap.m.MessageToast.show(
+                        //     "Passou aqui 2"
+                        // );
+
                         const resumo =
                             this.gerarResumoVeiculo(
                                 veiculo.Veiculo,
@@ -2031,6 +2390,9 @@ sap.ui.define([
 
                         equipamentosVeiculo.forEach(item => {
 
+                            const descricaoGateway =
+                                mapaGatewayDescricao[item.gateway];
+
                             const dataPosicao =
                                 this.converterDataBr(
                                     item.ultimaPosicao
@@ -2043,7 +2405,8 @@ sap.ui.define([
                                 online
                                     ? "🟢"
                                     : "🟡";
-
+                            const gatewayInfo =
+                                this._gatewayInfo?.[item.gateway];
                             htmlDetalhes += `
             <div style="
         margin:6px 0;
@@ -2067,15 +2430,28 @@ sap.ui.define([
 
         <br>
 
-        <span style="
-            color:#666;
-            font-size:12px;
-        ">
-            Última atualização:
-            ${item.ultimaPosicao || "Não informada"}
-        </span>
-    </div>
-        `;
+       <span style="
+    color:#666;
+    font-size:12px;
+">
+    Última atualização:
+    ${item.ultimaPosicao || "Não informada"}
+</span>
+
+<br>
+
+<span style="
+    color:#3498db;
+    font-size:12px;
+">
+    📡 Gateway:
+    <b>
+        ${descricaoGateway || item.gateway || "Não informado"}
+    </b>
+</span>
+
+</div>
+`;
 
                         });
 
@@ -2483,6 +2859,14 @@ sap.ui.define([
                         });
 
                     }
+                    if (this._primeiraCargaMapa) {
+
+                        this._busyMapaInicial.close();
+
+                        this._primeiraCargaMapa = false;
+
+                    }
+
                     if (this._busyDialog) {
                         this._busyDialog.close();
                     }

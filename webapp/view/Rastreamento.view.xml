@@ -8,10 +8,32 @@
     xmlns:viz.data="sap.viz.ui5.data"
     xmlns:viz.feeds="sap.viz.ui5.controls.common.feeds"
 >
-
     <Page
-        id="dashboardPage"
-        title="Rastreamento de ativos">
+        id="idDashboardPage">
+
+        <customHeader>
+
+            <Bar>
+
+                <contentMiddle>
+
+                    <HBox alignItems="Center">
+
+                        <Image
+                            src="img/SAP.png"
+                            height="50px"
+                            class="sapUi" />
+
+                        <Title
+                            text="Rastreamento de ativos" />
+
+                    </HBox>
+
+                </contentMiddle>
+
+            </Bar>
+
+        </customHeader>
 
         <content>
 
@@ -31,12 +53,21 @@
                             class="sapUiMediumMarginBottom">
 
                             <Panel
-                                width="350px"
+                                width="450px"
                                 class="sapUiSmallMargin kpiCard kpiTotal">
 
                                 <VBox
                                     alignItems="Center"
                                     class="sapUiSmallMargin">
+
+                                    <HBox
+                                        width="100%"
+                                        justifyContent="End">
+                                        <Text
+                                            text="{= ${dashboard>/percentualEquipamentos} + '%' }"
+                                            class="kpiPercentual" />
+
+                                    </HBox>
 
                                     <Title
                                         text="{dashboard>/totalEquipamentos}"
@@ -59,6 +90,15 @@
                                     alignItems="Center"
                                     class="sapUiSmallMargin">
 
+                                    <HBox
+                                        width="100%"
+                                        justifyContent="End">
+
+                                        <Text
+                                            text="{= ${dashboard>/percentualOnline} + '%' }" />
+
+                                    </HBox>
+
                                     <Title
                                         text="{dashboard>/online}"
                                         level="H1"
@@ -79,6 +119,15 @@
                                 <VBox
                                     alignItems="Center"
                                     class="sapUiSmallMargin">
+
+                                    <HBox
+                                        width="100%"
+                                        justifyContent="End">
+
+                                        <Text
+                                            text="{dashboard>/percentualOffline}%" />
+
+                                    </HBox>
 
                                     <Title
                                         text="{dashboard>/offline}"
@@ -101,6 +150,16 @@
                                     alignItems="Center"
                                     class="sapUiSmallMargin">
 
+                                    <HBox
+                                        width="100%"
+                                        justifyContent="End">
+
+                                        <Text
+                                            text="{dashboard>/percentualGateway}"
+                                            class="kpiPercentual" />
+
+                                    </HBox>
+
                                     <Title
                                         text="{dashboard>/gateways}"
                                         level="H1"
@@ -113,7 +172,6 @@
                                 </VBox>
 
                             </Panel>
-
                         </HBox>
                         <HBox
                             width="100%"
@@ -153,7 +211,7 @@
                                 <Panel
                                     id="panelMapa"
                                     width="100%"
-                                    height="560px"
+                                    height="800px"
                                     class="painelMapa"
                                     headerText="">
 
@@ -180,13 +238,13 @@
                             class="painelPrincipal">
                             <HBox
                                 width="100%"
-                                alignItems="Start"
+                                alignItems="Stretch"
                                 justifyContent="Start">
 
                                 <Panel
                                     width="600px"
                                     headerText="Instalação dos Rastreadores"
-                                    class="sapUiMinimumMarginTop sapUiMediumMarginEnd">
+                                    class="sapUiMediumMarginEnd">
 
                                     <viz:VizFrame
                                         id="idInstalacaoVizFrame"
@@ -195,33 +253,47 @@
                                         height="400px" />
 
                                 </Panel>
-
                                 <Panel
-                                    width="calc(101% - 12px)"
-                                    headerText="Conferência de Componentes Embarcados"
-                                    class="sapUiMediumMarginTop">
+                                    width="100%">
+
+                                    <headerToolbar>
+
+                                        <Toolbar>
+
+                                            <Title
+                                                text="Conferência de Componentes Embarcados" />
+
+                                            <ToolbarSpacer />
+
+                                            <Button
+                                                text="Exportar Excel"
+                                                icon="sap-icon://excel-attachment"
+                                                type="Emphasized"
+                                                press=".onExportarConferenciaExcel" />
+
+                                        </Toolbar>
+
+                                    </headerToolbar>
+
+
                                     <Table
                                         items="{dashboard>/dashboardVeiculos}">
-
 
                                         <columns>
 
                                             <Column width="10rem">
                                                 <Text text="Imagem" />
                                             </Column>
-                                            <Column
-                                                width="19rem"
-                                                hAlign="Center">
 
+                                            <Column width="19rem" hAlign="Center">
                                                 <Text text="Veículo" />
-
                                             </Column>
 
-                                            <Column width="23rem">
+                                            <Column width="20rem">
                                                 <Text text="Conferência" />
                                             </Column>
 
-                                            <Column width="11rem">
+                                            <Column width="6rem">
                                                 <Text text="Status" />
                                             </Column>
 
@@ -229,16 +301,12 @@
 
                                         <items>
 
-
                                             <ColumnListItem>
+
                                                 <cells>
-
-
                                                     <Image
                                                         src="{dashboard>imagem}"
                                                         width="" />
-
-
                                                     <Text
                                                         text="{dashboard>veiculo}" />
 
@@ -249,18 +317,16 @@
                                                         text="{dashboard>status}"
                                                         state="{dashboard>state}" />
 
-
                                                 </cells>
 
-
                                             </ColumnListItem>
-
 
                                         </items>
 
                                     </Table>
 
                                 </Panel>
+
                             </HBox>
                             <HBox
                                 width="100%"
@@ -283,7 +349,7 @@
                                 </Panel>
 
                                 <Panel
-                                    headerText="Reformados por Oficina"
+                                    headerText="Reformados por localização"
                                     class="sapUiMediumMarginTop">
 
                                     <layoutData>
@@ -314,9 +380,9 @@
                                 width="100%"
                                 fitContainer="true"
                                 alignItems="Start">
-
                                 <Panel
                                     width="95%"
+                                    height="340px"
                                     headerText="Resumo por Tipo de Equipamento"
                                     class="sapUiMediumMarginTop sapUiSmallMarginEnd">
 
@@ -393,6 +459,7 @@
 
                                 <Panel
                                     width="100%"
+                                    height="340px"
                                     headerText="Resumo por Grupo Atual"
                                     class="sapUiMediumMarginTop">
 
