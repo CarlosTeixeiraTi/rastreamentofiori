@@ -17,7 +17,9 @@ sap.ui.define([
         "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento",
         {
             onInit() {
-
+                sap.ui.require(["sap/ui/thirdparty/jquery"], function ($) {
+                    $("body").css("zoom", "75%");
+                });
                 this._busyDialog = new BusyDialog({
                     title: "Carregando",
                     text: "Reconstruindo mapa..."
@@ -53,6 +55,13 @@ sap.ui.define([
                 // this.carregarDashboard();
             },
             onAfterRendering() {
+
+                if (!this._zoomAplicado) {
+
+                    document.body.style.zoom = "75%";
+                    this._zoomAplicado = true;
+
+                }
 
                 if (this._dashboardCarregado) {
                     return;
@@ -340,6 +349,7 @@ sap.ui.define([
                 }
 
             },
+
             gerarResumoEquipamentos(dados) {
 
                 const resumo = {};
@@ -979,13 +989,17 @@ sap.ui.define([
                 const zoom = this._map.getZoom();
 
                 // Cidade
-                this.criarLabel(
-                    "ITABIRA",
-                    -19.6191,
-                    -43.2266,
-                    "cityLabel"
-                ).addTo(this._layerLabels);
+                // Cidade
+                if (zoom <= 14) {
 
+                    this.criarLabel(
+                        "ITABIRA",
+                        -19.605478,
+                        -43.239840,
+                        "cityLabel"
+                    ).addTo(this._layerLabels);
+
+                }
                 if (zoom >= 14) {
 
                     [
@@ -1020,25 +1034,40 @@ sap.ui.define([
 
                     [
 
-
-                        ["PDE PERIQUITO", -19.648, -43.279],
                         ["DIQUE DE IPOEMA", -19.567, -43.305],
                         ["BARRAGEM DO QUINZINHO", -19.565, -43.280],
                         ["PEDREIRA DO INSTITUTO", -19.545, -43.165],
-
-
-                        ["MINA CAUÊ", -19.599252, -43.218690],
-
-                        ["MINA CONCEIÇÃO", -19.640000, -43.270000],
-
-                        ["MINA PERIQUITO", -19.630067, -43.245444],
 
                         ["PDE BORRACHUDO", -19.600, -43.285],
 
                         ["PEDREIRA DETALHE", -19.620, -43.258],
 
-                        ["DIQUE DE IPOEMA", -19.567, -43.305],
+                        ["DIQUE DE IPOEMA", -19.567, -43.305]
 
+
+
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "bairroLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
+                if (zoom >= 14) {
+
+                    [
+
+                        ["MINA CAUÊ", -19.599252, -43.218690],
+
+                        ["MINA CONCEIÇÃO", -19.657580, -43.269398],
+
+                        ["MINA PERIQUITO", -19.632715, -43.254261]
 
                     ]
                         .forEach(item => {
@@ -1053,11 +1082,13 @@ sap.ui.define([
                         });
 
                 }
-                if (zoom >= 14) {
+                if (zoom >= 14 && zoom < 16) {
 
                     [
-                        ["MINA CONCEIÇÃO", -19.669, -43.270],
-                        // ["MINA CAUÊ", -19.592, -43.205]
+
+                        ["OFICINA CENTRAL", -19.601106, -43.214199],
+
+                        ["POSTO", -19.632648, -43.242334]
                     ]
                         .forEach(item => {
 
@@ -1065,7 +1096,57 @@ sap.ui.define([
                                 item[0],
                                 item[1],
                                 item[2],
-                                "operacaoValeLabel"
+                                "gatewayLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
+                if (zoom >= 16) {
+
+                    [
+
+                        ["ÁREA 23", -19.604498, -43.211828],
+
+                        ["ÁREA 27", -19.601748, -43.209649],
+
+                        ["OFICINA CENTRAL", -19.601106, -43.214199],
+
+                        ["PORTARIA PRINCIPAL", -19.604328, -43.216655],
+
+                        ["PORTARIA VALER", -19.604723, -43.214709],
+
+                        ["POSTO PERIQUITO", -19.632648, -43.242334]
+
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "gatewayLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
+                if (zoom >= 17) {
+
+                    [
+
+
+                        ["OFICINA DE LUBRIFICAÇÃO", -19.601286, -43.215671],
+
+
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "gatewayLabel"
                             ).addTo(this._layerLabels);
 
                         });
@@ -1404,18 +1485,29 @@ sap.ui.define([
                                     ) === grupoEsperado
                             ).length;
 
-
                             if (instalado !== quantidadeEsperada) {
                                 divergente = true;
                             }
 
-                            conferencia.push(
-                                `${instalado === quantidadeEsperada ? "✅" : "❌"} ${grupoEsperado}: ${instalado}/${quantidadeEsperada}`
-                            );
+                            conferencia.push({
+
+                                tipo: grupoEsperado,
+
+                                rastreadoresInstalados: instalado,
+
+                                cadastradosSap: quantidadeEsperada,
+
+                                aderenciaSap:
+                                    quantidadeEsperada > 0
+                                        ? Math.round(
+                                            (instalado / quantidadeEsperada) * 100
+                                        )
+                                        : 0
+
+                            });
 
                         }
                     );
-
 
                     dashboardVeiculos.push({
 
@@ -1423,7 +1515,7 @@ sap.ui.define([
 
                         imagem: "img/793D.png",
 
-                        conferencia: conferencia.join("\n"),
+                        conferencia,
 
                         status: divergente
                             ? "Divergente"
@@ -1434,6 +1526,7 @@ sap.ui.define([
                             : "Success"
 
                     });
+
 
                 }
                 const graficoTipoStatus =
@@ -1957,6 +2050,11 @@ sap.ui.define([
                         layers: [satelite]
                     });
 
+                    this._map.setView(
+                        [-19.604498, -43.211828],
+                        9
+                    );
+
                     this._layerLabels = L.layerGroup().addTo(this._map);
 
                     this.atualizarLabels();
@@ -2288,6 +2386,21 @@ sap.ui.define([
         </details>
     </div>
 `);
+
+                        marker.on("click", (e) => {
+
+                            if (this._modoMedicao) {
+
+                                this.processarMedicao(
+                                    lat,
+                                    lng,
+                                    item.identificador
+                                );
+
+                                e.target.closePopup();
+                            }
+
+                        });
 
                         marker.on("dblclick", () => {
 
@@ -2666,6 +2779,20 @@ sap.ui.define([
 
     </div>
         `);
+                        marker.on("click", (e) => {
+
+                            if (this._modoMedicao) {
+
+                                this.processarMedicao(
+                                    lat,
+                                    lng,
+                                    veiculo.Veiculo
+                                );
+
+                                e.target.closePopup();
+                            }
+
+                        });
                         markers.addLayer(marker);
                         marker.on("popupopen", () => {
 
@@ -2829,13 +2956,18 @@ sap.ui.define([
                 Condição: ${gw.condicao}
             `);
 
-                        marker.on("click", () => {
+                        marker.on("click", (e) => {
 
-                            this.processarMedicao(
-                                lat,
-                                lng,
-                                gw.identificador
-                            );
+                            if (this._modoMedicao) {
+
+                                this.processarMedicao(
+                                    lat,
+                                    lng,
+                                    gw.identificador
+                                );
+
+                                e.target.closePopup();
+                            }
 
                         });
 
@@ -2856,6 +2988,14 @@ sap.ui.define([
 
                         this._map.fitBounds(bounds, {
                             padding: [30, 30]
+                        });
+
+                        this._map.once("moveend", () => {
+
+
+
+
+
                         });
 
                     }

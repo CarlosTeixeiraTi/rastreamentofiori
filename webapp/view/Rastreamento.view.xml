@@ -64,8 +64,13 @@
                                         width="100%"
                                         justifyContent="End">
                                         <Text
-                                            text="{= ${dashboard>/percentualEquipamentos} + '%' }"
+                                            text="{= '('
+        + ${dashboard>/totalEquipamentos}
+        + ' / 50) '
+        + ${dashboard>/percentualEquipamentos}
+        + '%' }"
                                             class="kpiPercentual" />
+
 
                                     </HBox>
 
@@ -75,12 +80,24 @@
                                         class="kpiNumero" />
 
                                     <Text
-                                        text="Equipamentos"
+                                        text="Componentes rastreados"
                                         class="kpiTexto" />
 
                                 </VBox>
 
                             </Panel>
+
+                            <VBox
+                                justifyContent="Center"
+                                alignItems="Center"
+                                height="200px"
+                                class="sapUiSmallMarginBegin sapUiSmallMarginEnd">
+
+                                <Text
+                                    text="="
+                                    class="operadorDashboard" />
+
+                            </VBox>
 
                             <Panel
                                 width="350px"
@@ -95,7 +112,14 @@
                                         justifyContent="End">
 
                                         <Text
-                                            text="{= ${dashboard>/percentualOnline} + '%' }" />
+                                            text="{= '('
+        + ${dashboard>/online}
+        + ' / '
+        + ${dashboard>/totalEquipamentos}
+        + ') '
+        + ${dashboard>/percentualOnline}
+        + '%' }"
+                                            class="kpiPercentual" />
 
                                     </HBox>
 
@@ -112,6 +136,18 @@
 
                             </Panel>
 
+                            <VBox
+                                justifyContent="Center"
+                                alignItems="Center"
+                                height="200px"
+                                class="sapUiSmallMarginBegin sapUiSmallMarginEnd">
+
+                                <Text
+                                    text="+"
+                                    class="operadorDashboard" />
+
+                            </VBox>
+
                             <Panel
                                 width="400px"
                                 class="sapUiSmallMargin kpiCard kpiOffline">
@@ -123,9 +159,15 @@
                                     <HBox
                                         width="100%"
                                         justifyContent="End">
-
                                         <Text
-                                            text="{dashboard>/percentualOffline}%" />
+                                            text="{= '('
+        + ${dashboard>/offline}
+        + ' / '
+        + ${dashboard>/totalEquipamentos}
+        + ') '
+        + ${dashboard>/percentualOffline}
+        + '%' }"
+                                            class="kpiPercentual" />
 
                                     </HBox>
 
@@ -155,8 +197,12 @@
                                         justifyContent="End">
 
                                         <Text
-                                            text="{dashboard>/percentualGateway}"
+                                            text="{= '('
+        + ${dashboard>/gateways}
+        + ' / 8) '
+        + ${dashboard>/percentualGateway} }"
                                             class="kpiPercentual" />
+
 
                                     </HBox>
 
@@ -182,8 +228,14 @@
 
                             <Panel
                                 width="320px"
-                                class="sapUiSmallMarginEnd painelGrupos"
-                                headerText="Equipamentos">
+                                class="sapUiSmallMarginEnd painelGrupos">
+
+                                <headerToolbar>
+                                    <Toolbar>
+                                        <Title
+                                            text="{= 'Rastreados por fase (Total: ' + ${dashboard>/totalEquipamentos} + ')' }" />
+                                    </Toolbar>
+                                </headerToolbar>
 
                                 <List
                                     items="{dashboard>/grupos}">
@@ -203,7 +255,7 @@
 
                                 <SearchField
                                     id="idPesquisaRastreador"
-                                    width="300px"
+                                    width="450px"
                                     placeholder="Pesquisar rastreador"
                                     search=".onPesquisarRastreador"
                                     class="sapUiSmallMarginBottom pesquisaRastreador" />
@@ -280,24 +332,22 @@
                                         items="{dashboard>/dashboardVeiculos}">
 
                                         <columns>
-
-                                            <Column width="10rem">
-                                                <Text text="Imagem" />
+                                            <Column width="8rem">
+                                                <Label text="Imagem" design="Bold" />
                                             </Column>
-
-                                            <Column width="19rem" hAlign="Center">
-                                                <Text text="Veículo" />
+                                            <Column width="8rem">
+                                                <Label text="Veículo" design="Bold" />
                                             </Column>
-
-                                            <Column width="20rem">
-                                                <Text text="Conferência" />
+                                            <Column width="30rem">
+                                                <Label
+                                                    text="Aderência dos componentes rastreados em relação à árvore SAP"
+                                                    design="Bold" />
                                             </Column>
-
                                             <Column width="6rem">
-                                                <Text text="Status" />
+                                                <Label text="Status" design="Bold" />
                                             </Column>
-
                                         </columns>
+
 
                                         <items>
 
@@ -309,10 +359,70 @@
                                                         width="" />
                                                     <Text
                                                         text="{dashboard>veiculo}" />
+                                                    <VBox>
 
-                                                    <Text
-                                                        text="{dashboard>conferencia}" />
+                                                        <HBox
+                                                            width="100%"
+                                                            class="sapUiTinyMarginBottom">
 
+                                                            <Text width="16rem" text="Tipo" />
+
+                                                            <Text
+                                                                width="8rem"
+                                                                text="Rastreadores"
+                                                                textAlign="Center" />
+
+                                                            <Text
+                                                                width="8rem"
+                                                                text="SAP"
+                                                                textAlign="Center" />
+
+
+                                                            <Text
+                                                                width="8rem"
+                                                                text="Check"
+                                                                textAlign="Center" />
+
+                                                        </HBox>
+
+                                                        <List
+                                                            items="{dashboard>conferencia}"
+                                                            showSeparators="None">
+
+                                                            <CustomListItem>
+
+                                                                <HBox
+                                                                    width="100%"
+                                                                    justifyContent="Start">
+
+                                                                    <Text
+                                                                        width="16rem"
+                                                                        text="{dashboard>tipo}"
+                                                                        wrapping="false" />
+
+                                                                    <Text
+                                                                        width="8rem"
+                                                                        text="{dashboard>rastreadoresInstalados}"
+                                                                        textAlign="Center" />
+
+                                                                    <Text
+                                                                        width="8rem"
+                                                                        text="{dashboard>cadastradosSap}"
+                                                                        textAlign="Center" />
+
+                                                                    <core:Icon
+                                                                        width="8rem"
+                                                                        src="{= ${dashboard>aderenciaSap} === 100 ? 'sap-icon://accept' : 'sap-icon://decline' }"
+                                                                        color="{= ${dashboard>aderenciaSap} === 100 ? '#008000' : '#FF0000' }" />
+
+
+                                                                </HBox>
+
+                                                            </CustomListItem>
+
+                                                        </List>
+
+                                                    </VBox>
                                                     <ObjectStatus
                                                         text="{dashboard>status}"
                                                         state="{dashboard>state}" />
