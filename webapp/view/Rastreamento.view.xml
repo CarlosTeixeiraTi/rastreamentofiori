@@ -317,11 +317,12 @@
 
                                             <ToolbarSpacer />
 
-                                            <Button
-                                                text="Exportar Excel"
-                                                icon="sap-icon://excel-attachment"
-                                                type="Emphasized"
-                                                press=".onExportarConferenciaExcel" />
+<Button
+    text="Detalhamento"
+    icon="sap-icon://excel-attachment"
+    type="Emphasized"
+    press=".onExportarDetalhamento"
+/>
 
                                         </Toolbar>
 
