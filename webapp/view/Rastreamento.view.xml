@@ -336,7 +336,9 @@
                                             <Column width="8rem">
                                                 <Label text="Imagem" design="Bold" />
                                             </Column>
-                                            <Column width="8rem">
+                                            <Column
+                                                width="8rem"
+                                                hAlign="Center">
                                                 <Label text="Veículo" design="Bold" />
                                             </Column>
                                             <Column width="30rem">
@@ -359,7 +361,9 @@
                                                         src="{dashboard>imagem}"
                                                         width="" />
                                                     <Text
-                                                        text="{dashboard>veiculo}" />
+                                                        text="{dashboard>veiculo}"
+                                                        textAlign="Center"
+                                                        width="100%" />
                                                     <VBox>
 
                                                         <HBox

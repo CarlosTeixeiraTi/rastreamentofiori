@@ -2417,12 +2417,12 @@ sap.ui.define([
                             "<span style='display:inline-block;" +
                             "width:8px;" +
                             "height:8px;" +
-                            "background:#ff6347;" +
+                            "background:#9B6DFF;" +
                             "border:3px solid white;" +
                             "border-radius:50%;" +
-                            "box-shadow:0 0 0 4px rgba(255,99,71,0.25),0 0 10px rgba(255,99,71,0.8);" +
+                            "box-shadow:0 0 0 4px rgba(155,109,255,0.25),0 0 10px rgba(155,109,255,0.8);" +
                             "vertical-align:middle;" +
-                            "margin-right:8px;'></span> Instalado";
+                            "margin-right:8px;'></span> Instalados";
 
                         return div;
                     };
@@ -2486,15 +2486,15 @@ sap.ui.define([
                                     html: ehInstalado
                                         ? `
                             <div style="
-                                width:16px;
-                                height:16px;
-                                background:#ff6347;
-                                border:3px solid white;
-                                border-radius:50%;
-                                box-shadow:
-                                    0 0 0 4px rgba(255,99,71,0.25),
-                                    0 0 10px rgba(255,99,71,0.8);
-                            "></div>
+    width:16px;
+    height:16px;
+    background:#9B6DFF;
+    border:3px solid white;
+    border-radius:50%;
+    box-shadow:
+        0 0 0 4px rgba(155,109,255,0.25),
+        0 0 10px rgba(155,109,255,0.8);
+"></div>
                         `
                                         : `
                             <div style="
@@ -2749,7 +2749,7 @@ sap.ui.define([
                             .map(tipo =>
                                 `${tipo}: ${resumo[tipo]}`
                             )
-                            .join('\\n');
+                            .join("\\n");
 
                         const textoResumoHtml =
                             textoResumo.replace(/'/g, "\\'");
@@ -2764,7 +2764,7 @@ sap.ui.define([
                             <div style="
                                 width:16px;
                                 height:16px;
-                                background:#ff6347;
+          background:#9B6DFF;
                                 border:3px solid white;
                                 border-radius:50%;
                                 box-shadow:
@@ -2777,140 +2777,93 @@ sap.ui.define([
                                 })
                             }
                         ).bindPopup(`
-                <div style="min-width:320px;">
 
-                <div style="
-                    text-align:right;
-                    margin-bottom:10px;
-                ">
-        <button
-            title="Copiar local de instalação"
-            onclick="
-                navigator.clipboard.writeText('${veiculo.LOCAL_INSTALACAO}');
-                sap.m.MessageToast.show('✅ Local copiado');
-            "
-            style="
-                cursor:pointer;
-                padding:6px 10px;
-            ">
-            📋 Copiar Local
-        </button>
-                </div>
-
-                <b>Veículo:</b>
-                ${veiculo.Veiculo}<br>
-
-                <b>Local:</b>
-                ${veiculo.LOCAL_INSTALACAO}<br>
-
-                <b>Equipamentos embarcados:</b>
-                ${totalEquipamentos}<br>
-
-                    
+<div
+    id="imagemVeiculoPopup_${veiculo.Veiculo}"
+        <div style="text-align:center">
 
 
-            <hr>
+    <img
+        src="img/793D_default.png"
+     
+        style="max-width:220px;height:auto;"/>
+</div>
+                 
+           <hr>
+<div style="
+    text-align:left;
+    margin-bottom:10px;
+">
 
+    <b>Veículo:</b>
+    ${veiculo.Veiculo}
+    <br>
+
+    <b>Local de Instalação:</b>
+    ${veiculo.LOCAL_INSTALACAO || "Não informado"}
+    <br>
+
+    <b>Equipamentos Embarcados:</b>
+    ${totalEquipamentos}
+    <hr>
+</div>
 
 
         <details
-            id="resumo_${veiculo.Veiculo}"
-            data-veiculo="${veiculo.Veiculo}"
-            ontoggle="
-                const detalhes =
-                    document.getElementById(
-                        'conteudoDetalhes_${veiculo.Veiculo}'
-                    );
+    id="resumo_${veiculo.Veiculo}"
+    data-veiculo="${veiculo.Veiculo}">
 
-                if (detalhes) {
-                    detalhes.style.display =
-                        this.open ? 'none' : 'block';
-                }
-            ">
+    <summary style="
+        cursor:pointer;
+        font-weight:bold;
+    ">
+        Ver Resumo
+    </summary>
+<hr>
+    <div
+        id="conteudoResumo_${veiculo.Veiculo}"
+        style="margin-top:10px;">
 
-            <summary style="
-                cursor:pointer;
-                font-weight:bold;
-            ">
-                Ver Resumo
-            </summary>
+        ${htmlResumo}
 
-            <div
-                id="conteudoResumo_${veiculo.Veiculo}"
-                style="margin-top:10px;">
+    </div>
 
-                ${htmlResumo}
+</details>
 
-                <div style="
-                    text-align:right;
-                    margin-top:10px;
-                ">
-                    <button
-                        title="Copiar resumo dos equipamentos embarcados"
-                        onclick="
-                            navigator.clipboard.writeText('${textoResumo}');
-                            sap.m.MessageToast.show('✅ Resumo copiado');
-                        "
-                        style="
-                            cursor:pointer;
-                            padding:6px 10px;
-                        ">
-                        📋 Copiar Resumo
-                    </button>
-                </div>
+<details
+    id="detalhes_${veiculo.Veiculo}"
+    data-veiculo="${veiculo.Veiculo}">
 
-            </div>
+    <summary style="
+        cursor:pointer;
+        font-weight:bold;
+    ">
+        Detalhes
+    </summary>
 
-        </details>
+    <div
+    id="conteudoDetalhes_${veiculo.Veiculo}"
+    style="
+        margin-top:10px;
+        max-height:350px;
+        overflow-y:auto;
+    ">
 
-        <details
-            id="detalhes_${veiculo.Veiculo}"
-            data-veiculo="${veiculo.Veiculo}"
-            ontoggle="
-                const resumo =
-                    document.getElementById(
-                        'conteudoResumo_${veiculo.Veiculo}'
-                    );
+        ${htmlDetalhes}
 
-                if (resumo) {
-                    resumo.style.display =
-                        this.open ? 'none' : 'block';
-                }
-            ">
+        <div style="
+            text-align:center;
+            margin-top:10px;
+        ">
+            <button
+                id="btnExportar_${veiculo.Veiculo}">
+                📊 Exportar Excel
+            </button>
+        </div>
 
-            <summary style="
-                cursor:pointer;
-                font-weight:bold;
-            ">
-                Detalhes
-            </summary>
+    </div>
 
-            <div
-                id="conteudoDetalhes_${veiculo.Veiculo}"
-                style="margin-top:10px;">
-
-
-                ${htmlDetalhes}
-
-                <div style="
-                    text-align:center;
-                    margin-top:10px;
-                ">
-                    <button
-                        id="btnExportar_${veiculo.Veiculo}"
-                        style="
-                            cursor:pointer;
-                            padding:6px 10px;
-                            width:95%;
-                            box-sizing:border-box;
-                        ">
-                        📊 Exportar Excel
-                    </button>
-                </div>
-
-            </div>
-
-        </details>
+</details>
 
         <hr>
 
@@ -2926,8 +2879,12 @@ sap.ui.define([
                                 })
                                 .replace(",", "")}
 
-        </div>
-            `);
+</div>
+</div>
+            `, {
+                            minWidth: 350,
+                            maxWidth: 450
+                        });
                         marker.on("click", (e) => {
 
                             if (this._modoMedicao) {
