@@ -736,6 +736,203 @@ sap.ui.define([
                 return resultado;
 
             },
+            gerarAnaliseInstaladosDesatualizados(dados) {
+
+                const agora = new Date();
+
+                const limite72h = new Date(
+                    agora.getTime() - (72 * 60 * 60 * 1000)
+                );
+
+                const resultado = [];
+
+                dados.forEach(item => {
+
+                    if (
+                        !item.grupoAtual ||
+                        !item.grupoAtual.startsWith("Instalado no ")
+                    ) {
+                        return;
+                    }
+
+                    if (!item.ultimaPosicao) {
+                        return;
+                    }
+
+                    const dataPosicao =
+                        this.converterDataBr(
+                            item.ultimaPosicao
+                        );
+
+
+                    if (dataPosicao >= limite72h) {
+                        return;
+                    }
+
+                    const veiculo =
+                        item.grupoAtual.replace(
+                            "Instalado no ",
+                            ""
+                        );
+
+                    const equipamentosMesmoVeiculo =
+                        dados.filter(x =>
+                            x.grupoAtual ===
+                            `Instalado no ${veiculo}`
+                        );
+
+                    let dataMaisRecente = null;
+
+                    let equipamentoMaisRecente = "";
+
+                    let gatewayMaisRecente = "";
+
+                    equipamentosMesmoVeiculo.forEach(eq => {
+
+                        if (!eq.ultimaPosicao) {
+                            return;
+                        }
+
+                        const data =
+                            this.converterDataBr(
+                                eq.ultimaPosicao
+                            );
+
+                        if (
+                            !dataMaisRecente ||
+                            data > dataMaisRecente
+                        ) {
+
+                            dataMaisRecente = data;
+
+                            equipamentoMaisRecente =
+                                eq.descEquipamento || "";
+
+                            gatewayMaisRecente =
+                                eq.gateway || "";
+
+                        }
+
+                    });
+
+                    const gapDias =
+                        dataMaisRecente
+                            ? Math.floor(
+                                (dataMaisRecente - dataPosicao) /
+                                (1000 * 60 * 60 * 24)
+                            )
+                            : 0;
+                    const diasSemAtualizacao =
+                        Math.floor(
+                            (agora - dataPosicao) /
+                            (1000 * 60 * 60 * 24)
+                        );
+                    if (
+                        diasSemAtualizacao <= 3 ||
+                        gapDias <= 2
+                    ) {
+                        return;
+                    }
+                    const existeAtualizacaoVeiculo =
+                        dataMaisRecente !== null;
+
+                    let conclusao = "";
+
+                    if (!existeAtualizacaoVeiculo) {
+
+                        conclusao =
+                            "Sem evidência suficiente";
+
+                    } else if (gapDias <= 2) {
+
+                        conclusao =
+                            "Baixa criticidade";
+
+                    } else if (gapDias <= 7) {
+
+                        conclusao =
+                            "Possível falha individual";
+
+                    } else {
+
+                        conclusao =
+                            "Forte evidência de falha individual";
+
+                    }
+                    let motivoConclusao = "";
+
+                    if (!existeAtualizacaoVeiculo) {
+
+                        motivoConclusao =
+                            "Não foi encontrada atualização de outro rastreador do mesmo veículo que permitisse comparação.";
+
+                    } else {
+
+                        motivoConclusao =
+                            `O equipamento analisado apresentou sua última atualização em ${item.ultimaPosicao}. `
+                            + `No mesmo veículo (${veiculo}), a atualização mais recente identificada ocorreu em `
+                            + `${dataMaisRecente.toLocaleString("pt-BR")} `
+                            + `através do equipamento "${equipamentoMaisRecente}". `
+                            + `Foi identificado um GAP de ${gapDias} dia(s) entre os registros, `
+                            + `diferença utilizada como base para a classificação "${conclusao}".`;
+
+                    }
+                    const racional =
+                        diasSemAtualizacao > 3
+                            ? motivoConclusao
+                            : "";
+                    resultado.push({
+
+                        veiculo,
+
+                        identificador:
+                            item.identificador,
+
+                        equipamento:
+                            item.descEquipamento,
+
+                        gateway:
+                            item.gateway,
+
+                        ultimaAtualizacao:
+                            item.ultimaPosicao,
+
+                        quantidadeEquipamentosVeiculo:
+                            equipamentosMesmoVeiculo.length,
+
+                        ultimaAtualizacaoVeiculo:
+                            dataMaisRecente
+                                ? dataMaisRecente.toLocaleString("pt-BR")
+                                : "",
+
+                        equipamentoMaisRecente,
+
+                        gatewayMaisRecente,
+
+                        gapDias:
+                            diasSemAtualizacao > 3
+                                ? gapDias
+                                : "",
+
+                        existeAtualizacaoVeiculo:
+                            existeAtualizacaoVeiculo
+                                ? "Sim"
+                                : "Não",
+
+                        conclusao,
+
+                        motivoConclusao: racional
+
+                    });
+
+                });
+
+                resultado.sort(
+                    (a, b) => b.gapDias - a.gapDias
+                );
+
+                return resultado;
+            },
             gerarDetalhesTagsDesatualizadas(dados) {
 
                 const agora = new Date();
@@ -1579,6 +1776,13 @@ sap.ui.define([
                     this.gerarDetalhesTagsDesatualizadas(
                         dadosFiltrados
                     );
+                const analiseInstaladosDesatualizados =
+                    this.gerarAnaliseInstaladosDesatualizados(
+                        dadosFiltrados
+                    );
+                sap.m.MessageToast.show(
+                    analiseInstaladosDesatualizados.length + " registros"
+                );
                 const mapaVeiculosDashboard = {};
 
                 veiculos.forEach(v => {
@@ -1786,6 +1990,8 @@ sap.ui.define([
 
                         detalhesTagsDesatualizadas,
 
+                        analiseInstaladosDesatualizados,
+
                         dashboardVeiculos,
 
                         resumoFrotas,
@@ -1802,7 +2008,9 @@ sap.ui.define([
 
                         faltantes,
 
-                        percentualInstalado
+                        percentualInstalado,
+
+
 
                     });
                 const oVizFrame =
@@ -2478,6 +2686,27 @@ sap.ui.define([
                         const ehInstalado =
                             item.grupoAtual &&
                             item.grupoAtual.startsWith("Instalado no ");
+
+                        const descricaoEquipamento =
+                            (item.descEquipamento || '').toLowerCase();
+
+                        let imagemEquipamento = "img/793D_default.png";
+
+                        if (descricaoEquipamento.includes("motor")) {
+                            imagemEquipamento = "img/MOTOR.png";
+                        } else if (descricaoEquipamento.includes("conversor")) {
+                            imagemEquipamento = "img/CONVERSOR.png";
+                        } else if (descricaoEquipamento.includes("comando")) {
+                            imagemEquipamento = "img/COMANDO.png";
+                        } else if (descricaoEquipamento.includes("diferencial")) {
+                            imagemEquipamento = "img/MOTOR.png";
+                        } else if (
+                            descricaoEquipamento.includes("transmissao") ||
+                            descricaoEquipamento.includes("transmissão")
+                        ) {
+                            imagemEquipamento = "img/TRANSMISSAO.png";
+                        }
+
                         const marker = L.marker(
                             [lat, lng],
                             {
@@ -2513,6 +2742,25 @@ sap.ui.define([
                                 })
                             }
                         ).bindPopup(`
+
+<div
+    id="imagemVeiculoPopup_${item.identificador}"
+        <div style="text-align:center">
+
+
+    <img
+        src= "${imagemEquipamento}"
+     
+style="max-width:220px;height:auto;"/>
+</div>
+                 
+           <hr>
+<div style="
+    text-align:left;
+    margin-bottom:10px;
+">
+
+
         <div style="min-width:280px;">
             <b>${item.identificador}</b><br>
             <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
@@ -2838,7 +3086,7 @@ sap.ui.define([
         cursor:pointer;
         font-weight:bold;
     ">
-        Detalhes
+        Ver detalhes
     </summary>
 
     <div

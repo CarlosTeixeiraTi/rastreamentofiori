@@ -100,7 +100,7 @@
                             </VBox>
 
                             <Panel
-                                width="350px"
+                                width="450px"
                                 class="sapUiSmallMargin kpiCard kpiOnline">
 
                                 <VBox
@@ -149,7 +149,7 @@
                             </VBox>
 
                             <Panel
-                                width="400px"
+                                width="450px"
                                 class="sapUiSmallMargin kpiCard kpiOffline">
 
                                 <VBox
@@ -185,7 +185,7 @@
                             </Panel>
 
                             <Panel
-                                width="350px"
+                                width="450px"
                                 class="sapUiSmallMargin kpiCard kpiGateway">
 
                                 <VBox
@@ -717,75 +717,52 @@
                                 class="sapUiMediumMarginTop">
 
                                 <Table
-                                    items="{dashboard>/detalhesTagsDesatualizadas}">
+                                    items="{dashboard>/analiseInstaladosDesatualizados}">
 
                                     <columns>
 
-                                        <Column width="5rem">
-                                            <Text text="Identificador" />
+                                        <Column>
+                                            <Text text="Veículo" />
                                         </Column>
 
-                                        <Column width="10rem">
+                                        <Column>
                                             <Text text="Equipamento" />
                                         </Column>
 
-                                        <Column width="12rem">
-                                            <Text text="Local de Instalação" />
-                                        </Column>
-
-                                        <Column width="7rem">
-                                            <Text text="Grupo Atual" />
-                                        </Column>
-
-                                        <Column width="6rem">
+                                        <Column>
                                             <Text text="Última Atualização" />
                                         </Column>
-                                        <Column
-                                            width="2rem"
-                                            hAlign="End">
-                                            <Text text="Dias" />
+
+                                        <Column>
+                                            <Text text="GAP" />
                                         </Column>
 
-                                        <Column width="20rem">
-                                            <Text text="Dedução" />
+                                        <Column>
+                                            <Text text="Conclusão" />
                                         </Column>
 
                                     </columns>
 
                                     <items>
 
-                                        <ColumnListItem
-                                            highlight="{
-                                        = ${dashboard>grupoAtual} === 'Reformado'
-                                            ? 'Warning'
-                                            : 'None'
-                                    }">
+                                        <ColumnListItem>
 
                                             <cells>
 
-                                                <Text
-                                                    text="{dashboard>identificador}" />
+                                                <Text text="{dashboard>veiculo}" />
 
-                                                <Text
-                                                    text="{dashboard>equipamento}" />
+                                                <Text text="{dashboard>equipamento}" />
 
-                                                <Text
-                                                    text="{dashboard>localInstalacao}" />
-
-                                                <Text
-                                                    text="{dashboard>grupoAtual}" />
-
-                                                <Text
-                                                    text="{dashboard>ultimaPosicao}" />
+                                                <Text text="{dashboard>ultimaAtualizacao}" />
 
                                                 <ObjectNumber
-                                                    number="{dashboard>diasSemAtualizacao}"
-                                                    textAlign="End" />
+                                                    number="{dashboard>gapDias}" />
 
                                                 <ObjectStatus
-                                                    text="{dashboard>deducao}"
-                                                    state="Information" />
+                                                    text="{dashboard>conclusao}" />
+
                                             </cells>
+
                                         </ColumnListItem>
 
                                     </items>
@@ -797,7 +774,89 @@
                         </VBox>
 
                     </IconTabFilter>
+                    <IconTabFilter
+                        key="informacoes"
+                        text="Informações">
 
+                        <VBox class="sapUiMediumMargin">
+
+                            <Title
+                                text="Informações do Sistema"
+                                level="H2" />
+
+                            <Text
+                                text="Dashboard de rastreamento de ativos SmartPCM." />
+
+                            <Text
+                                text="Monitora componentes rastreados, localização em mapa, gateways, indicadores e análises operacionais." />
+
+                            <Panel headerText="Análise de Rastreadores Instalados">
+                                <Text
+                                    text="{= 'Registros: ' + ${dashboard>/analiseInstaladosDesatualizados}.length }" />
+                                <Table
+                                    items="{dashboard>/analiseInstaladosDesatualizados}">
+
+                                    <columns>
+
+                                        <Column>
+                                            <Text text="Veículo" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text text="Equipamento" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text text="Última Atualização" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text text="GAP" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text text="Conclusão" />
+                                        </Column>
+                                        <Column width="50rem">
+                                            <Text text="Racional" />
+                                        </Column>
+                                    </columns>
+
+                                    <items>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <Text text="{dashboard>veiculo}" />
+
+                                                <Text text="{dashboard>equipamento}" />
+
+                                                <Text text="{dashboard>ultimaAtualizacao}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>gapDias}" />
+
+                                                <ObjectStatus
+                                                    text="{dashboard>conclusao}" />
+
+                                                <Text
+                                                    text="{dashboard>motivoConclusao}"
+                                                    maxLines="4"
+                                                    wrapping="true" />
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                    </items>
+
+                                </Table>
+
+                            </Panel>
+
+                        </VBox>
+
+                    </IconTabFilter>
                 </items>
 
             </IconTabBar>
