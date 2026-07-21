@@ -739,9 +739,8 @@ sap.ui.define([
             gerarAnaliseInstaladosDesatualizados(dados) {
 
                 const agora = new Date();
-
                 const limite72h = new Date(
-                    agora.getTime() - (72 * 60 * 60 * 1000)
+                    agora.getTime() - (3 * 24 * 60 * 60 * 1000)
                 );
 
                 const resultado = [];
@@ -938,12 +937,19 @@ sap.ui.define([
                 const agora = new Date();
 
                 const limiteOnline = new Date(
-                    agora.getTime() - (72 * 60 * 60 * 1000)
+                    agora.getTime() - (7 * 24 * 60 * 60 * 1000)
                 );
 
                 const resultado = [];
 
                 dados.forEach(item => {
+
+                    if (
+                        item.grupoAtual &&
+                        item.grupoAtual.startsWith("Instalado no ")
+                    ) {
+                        return;
+                    }
 
                     if (!item.ultimaPosicao) {
                         return;
@@ -965,33 +971,36 @@ sap.ui.define([
                         const grupoAtual =
                             this.determinarGrupo(item);
 
+                        const local =
+                            (item.localInstalacao || "")
+                                .toUpperCase();
+
                         let deducao = "";
 
-                        if (
-                            grupoAtual.startsWith("Instalado no ")
-                        ) {
+                        if (local.includes("_EMREF_EXT")) {
 
                             deducao =
-                                "Equipamento em operação. Avaliar necessidade de gateway na área.";
+                                "Equipamento vinculado à reforma externa em Vespasiano. A ausência de comunicação pode ser compatível com a localização operacional registrada.";
 
-                        } else if (
-                            grupoAtual === "Reforma externa"
-                        ) {
+                        } else if (local.startsWith("FEBR")) {
 
                             deducao =
-                                "Equipamento enviado para reforma externa. Ausência de leituras é esperada.";
+                                "Equipamento vinculado à Mina de Brucutu. A ausência de comunicação pode ser explicada pela indisponibilidade de cobertura da infraestrutura RFID de Itabira.";
 
-                        } else if (
-                            grupoAtual === "Reformado"
-                        ) {
+                        } else if (local.startsWith("PPIC")) {
 
                             deducao =
-                                "Equipamento reformado sem leituras recentes. Avaliar necessidade de gateway na área.";
+                                "Equipamento vinculado à Mina do Pico. A ausência de comunicação pode ser compatível com a localização operacional registrada.";
+
+                        } else if (!local.includes("FEIT")) {
+
+                            deducao =
+                                "Equipamento localizado fora das áreas atendidas pela infraestrutura RFID de Itabira. A ausência de comunicação pode ser compatível com a localização registrada.";
 
                         } else {
 
                             deducao =
-                                "Verificar condição operacional e conectividade do equipamento.";
+                                "A última comunicação ocorreu em área com potencial cobertura dos gateways de Itabira. A ausência de novas comunicações pode indicar falha do rastreador, perda de alimentação ou movimentação não registrada.";
 
                         }
 
@@ -1009,12 +1018,17 @@ sap.ui.define([
                             grupoAtual:
                                 grupoAtual,
 
-
                             ultimaPosicao:
                                 item.ultimaPosicao,
 
                             diasSemAtualizacao:
                                 dias,
+
+                            ultimoLocalConhecido:
+                                `${item.localInstalacao || "Sem local"}`
+                                + (item.gateway
+                                    ? ` | Gateway: ${item.gateway}`
+                                    : ""),
 
                             deducao:
                                 deducao
@@ -1195,7 +1209,36 @@ sap.ui.define([
                         "cityLabel"
                     ).addTo(this._layerLabels);
 
+
+
+                    this.criarLabel(
+                        "JOÃO MONLEVADE",
+                        -19.812300,
+                        -43.173500,
+                        "cityLabel"
+                    ).addTo(this._layerLabels);
+
+
+
                 }
+                if (zoom >= 14) {
+                    this.criarLabel(
+                        "VESPASIANO",
+                        -19.708891,
+                        -43.908532,
+
+                        "cityLabel"
+                    ).addTo(this._layerLabels);
+                                        this.criarLabel(
+                        "ITABIRITO",
+                        -20.209063,
+                        -43.862584,
+
+
+                        "cityLabel"
+                    ).addTo(this._layerLabels);
+                }
+
                 if (zoom >= 14) {
 
                     [
@@ -1224,6 +1267,16 @@ sap.ui.define([
                             ).addTo(this._layerLabels);
 
                         });
+
+                }
+                if (zoom >= 13) {
+
+                    this.criarLabel(
+                        "SÃO GONÇALO ...",
+                        -19.8220,
+                        -43.3660,
+                        "cityLabel"
+                    ).addTo(this._layerLabels);
 
                 }
                 if (zoom >= 14) {
@@ -1264,6 +1317,27 @@ sap.ui.define([
                         ["MINA CONCEIÇÃO", -19.657580, -43.269398],
 
                         ["MINA PERIQUITO", -19.632715, -43.254261]
+
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "operacaoValeLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
+                if (zoom >= 13) {
+
+                    [
+
+                        ["MINA DE BRUCUTU", -19.870131, -43.398402],
+                        ["MINA DO PICO", -20.217185, -43.864846],
+                        ["SOTREQ", -19.707564, -43.898527]
 
                     ]
                         .forEach(item => {
@@ -1669,7 +1743,7 @@ sap.ui.define([
                 const agora = new Date();
 
                 const limiteOnline = new Date(
-                    agora.getTime() - (72 * 60 * 60 * 1000)
+                    agora.getTime() - (7 * 24 * 60 * 60 * 1000)
                 );
 
                 let online = 0;
@@ -1780,9 +1854,7 @@ sap.ui.define([
                     this.gerarAnaliseInstaladosDesatualizados(
                         dadosFiltrados
                     );
-                sap.m.MessageToast.show(
-                    analiseInstaladosDesatualizados.length + " registros"
-                );
+
                 const mapaVeiculosDashboard = {};
 
                 veiculos.forEach(v => {
@@ -2407,11 +2479,6 @@ sap.ui.define([
                         layers: [satelite]
                     });
 
-                    this._map.setView(
-                        [-19.604498, -43.211828],
-                        9
-                    );
-
                     this._layerLabels = L.layerGroup().addTo(this._map);
 
                     this.atualizarLabels();
@@ -2550,12 +2617,15 @@ sap.ui.define([
                             collapsed: false
                         }
                     ).addTo(this._map);
+
                     setTimeout((a) => {
 
                         const controleLayers =
                             document.querySelector(".leaflet-control-layers");
 
                         if (controleLayers) {
+
+                            controleLayers.style.width = "260px";
 
                             controleLayers.style.fontSize = "18px";
 
@@ -2584,12 +2654,20 @@ sap.ui.define([
                         div.style.boxShadow = "0 1px 6px rgba(0,0,0,.4)";
                         div.style.fontSize = "18px";
                         div.style.lineHeight = "20px";
-                        div.style.minWidth = "68px";
+                        div.style.width = "260px";
                         div.style.color = "#333";
                         div.style.marginTop = "6px";
                         div.style.textAlign = "left";
-
                         div.innerHTML =
+
+                            "<div style='" +
+                            "font-weight:bold;" +
+                            "margin-bottom:4px;" +
+                            "text-align:center;" +
+                            "border-bottom:1px solid #ddd;" +
+                            "'>" +
+                            "Status" +
+                            "</div>" +
 
                             "<span style='display:inline-block;" +
                             "width:8px;" +
@@ -2636,6 +2714,89 @@ sap.ui.define([
                     };
 
                     legenda.addTo(this._map);
+                    const cidades = L.control({ position: 'topright' });
+
+                    cidades.onAdd = () => {
+                        const div = L.DomUtil.create('div', 'map-cities');
+
+                        div.style.background = 'white';
+                        div.style.padding = '6px 8px';
+                        div.style.borderRadius = '6px';
+                        div.style.boxShadow = '0 1px 6px rgba(0,0,0,.4)';
+                        div.style.fontSize = '16px';
+                        div.style.lineHeight = '24px';
+                        div.style.width = '260px';
+                        div.style.color = '#333';
+                        div.style.marginTop = '6px';
+
+                        div.innerHTML = `
+        <div style="font-weight:bold; margin-bottom:4px; text-align:center; border-bottom:1px solid #ddd;">
+            Cidades (MG)
+        </div>
+        <a href="#" id="cidadeItabira">Itabira</a><br>
+            <a href="#" id="cidadeItabirito">Itabirito</a><br>
+        <a href="#" id="cidadeSaoGoncalo">São Gonçalo do Rio Abaixo</a><br>
+        <a href="#" id="cidadeVespasiano"> Vespasiano</a>
+    `;
+
+                        L.DomEvent.disableClickPropagation(div);
+
+                        setTimeout(() => {
+                            document.getElementById('cidadeItabira')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-19.605478, -43.239840],
+                                        13
+                                    );
+
+                                });
+                            document.getElementById('cidadeItabirito')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-20.246341, -43.800918],
+                                        13
+                                    );
+
+                                });
+
+                            document.getElementById('cidadeSaoGoncalo')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-19.8468, -43.3825],
+                                        13
+                                    );
+
+                                });
+                            document.getElementById('cidadeVespasiano')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-19.719942, -43.944133],
+                                        13
+                                    );
+
+                                });
+                        }, 100);
+
+                        return div;
+                    };
+
+                    cidades.addTo(this._map);
+                    this._layerOnline = L.layerGroup();
+                    this._layerOffline = L.layerGroup();
+                    this._layerGateway = L.layerGroup();
+                    this._layerInstalados = L.layerGroup();
                     const markers = L.layerGroup();
                     const gatewaysLayer = L.layerGroup();
                     const bounds = [];
@@ -2650,8 +2811,102 @@ sap.ui.define([
                     equipamentos.forEach(item => {
                         const descricaoGateway =
                             mapaGatewayDescricao[item.gateway];
-                        const lat = parseFloat(item.latitude);
-                        const lng = parseFloat(item.longitude);
+                        let lat = parseFloat(item.latitude);
+                        let lng = parseFloat(item.longitude);
+                        const localInstalacao =
+                            (item.localInstalacao || "")
+                                .toUpperCase();
+
+                        const descricaoEquipamentoMapa =
+                            (item.descEquipamento || "")
+                                .toUpperCase();
+
+                        if (
+                            localInstalacao.includes("_EMREF_EXT")
+                        ) {
+
+                            lat = -19.707443;
+                            lng = -43.900855;
+
+                        }
+
+                        if (
+                            localInstalacao.startsWith("FEBR")
+                        ) {
+
+                            // Mina de Brucutu
+                            lat = -19.871612;
+                            lng = -43.392883;
+
+                        }
+                        if (
+                            localInstalacao.startsWith("FEBR")
+                        ) {
+
+                            // Mina de Brucutu
+                            lat = -19.871612;
+                            lng = -43.392883;
+
+                        }
+                        else if (
+                            localInstalacao.startsWith("PPIC")
+                        ) {
+
+                            // Mina do Pico
+                            lat = -20.220578;
+                            lng = -43.871146;
+
+                        }
+                        else if (
+                            localInstalacao.includes(
+                                "FEIT-LES-MVC-AMACC-MINA-REFO"
+                            )
+                        ) {
+
+                            const ehMotorOuComandoFinal =
+                                descricaoEquipamentoMapa.includes("MOTOR") ||
+                                descricaoEquipamentoMapa.includes("COMANDO FINAL");
+
+                            if (ehMotorOuComandoFinal) {
+
+                                // Área 23
+                                lat = -19.604498;
+                                lng = -43.211828;
+
+                            } else {
+
+                                // Área 27
+                                lat = -19.601748;
+                                lng = -43.209649;
+
+                            }
+
+                        }
+                        else if (
+                            localInstalacao.includes(
+                                "FEIT-LES-MVC-AMACC-MINA-REFO"
+                            )
+                        ) {
+
+                            const ehMotorOuComandoFinal =
+                                descricaoEquipamentoMapa.includes("MOTOR") ||
+                                descricaoEquipamentoMapa.includes("COMANDO FINAL");
+
+                            if (ehMotorOuComandoFinal) {
+
+                                // Área 23
+                                lat = -19.604498;
+                                lng = -43.211828;
+
+                            } else {
+
+                                // Área 27
+                                lat = -19.601748;
+                                lng = -43.209649;
+
+                            }
+
+                        }
                         const dataPosicao =
                             this.converterDataBr(item.ultimaPosicao);
 
@@ -2714,75 +2969,64 @@ sap.ui.define([
                                     className: "",
                                     html: ehInstalado
                                         ? `
-                            <div style="
-    width:16px;
-    height:16px;
-    background:#9B6DFF;
-    border:3px solid white;
-    border-radius:50%;
-    box-shadow:
-        0 0 0 4px rgba(155,109,255,0.25),
-        0 0 10px rgba(155,109,255,0.8);
-"></div>
-                        `
+        <div style="
+            width:16px;
+            height:16px;
+            background:#9B6DFF;
+            border:3px solid white;
+            border-radius:50%;
+            box-shadow:
+                0 0 0 4px rgba(155,109,255,0.25),
+                0 0 10px rgba(155,109,255,0.8);
+        "></div>
+    `
                                         : `
-                            <div style="
-                                width:16px;
-                                height:16px;
-                                background:${cor};
-                                border:3px solid white;
-                                border-radius:50%;
-                                box-shadow:
-                                    0 0 0 4px ${halo},
-                                    0 0 10px ${sombra};
-                            "></div>
-                        `,
+        <div style="
+            width:16px;
+            height:16px;
+            background:${cor};
+            border:3px solid white;
+            border-radius:50%;
+            box-shadow:
+                0 0 0 4px ${halo},
+                0 0 10px ${sombra};
+        "></div>
+    `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         ).bindPopup(`
 
-<div
-    id="imagemVeiculoPopup_${item.identificador}"
-        <div style="text-align:center">
-
-
-    <img
-        src= "${imagemEquipamento}"
-     
-style="max-width:220px;height:auto;"/>
+                                       <div id="imagemVeiculoPopup_${item.identificador}" style="text-align: center;">
+    <img 
+        src="${imagemEquipamento}" 
+        style="max-width: 220px; height: auto; display: block; margin: 0 auto;" />
 </div>
-                 
-           <hr>
-<div style="
-    text-align:left;
-    margin-bottom:10px;
-">
 
+<hr>
 
-        <div style="min-width:280px;">
-            <b>${item.identificador}</b><br>
-            <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
-            <b>Local:</b> ${item.localInstalacao || ''}<br>
-            <b>Nota:</b> ${item.nota || 'Não informado'}<br>
-            📡 Gateway:
-    <b>
-        ${descricaoGateway || item.gateway || "Não informado"}
-    </b>
-            <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
+<div style="text-align: left; margin-bottom: 10px; min-width: 280px;">
+    <b>${item.identificador}</b><br>
+    <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
+    <b>Local:</b> ${item.localInstalacao || ''}<br>
+    <b>Nota:</b> ${item.nota || 'Não informado'}<br>
+    📡 Gateway: <b>${descricaoGateway || item.gateway || "Não informado"}</b><br>
+    <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
 
-            <details>
-                <summary><b>Ver detalhes</b></summary>
-                <br>
-                <b>Grupo:</b> ${item.grupoAtual || ''}<br>
-                <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
-                <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
-                <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
-                <b>Oficina:</b> ${item.oficina || 'Não informado'}
-            </details>
+    <details>
+        <summary style="cursor: pointer;"><b>Ver detalhes</b></summary>
+        <div style="margin-top: 10px;">
+            <b>Grupo:</b> ${item.grupoAtual || ''}<br>
+            <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
+            <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
+            <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
+            <b>Oficina:</b> ${item.oficina || 'Não informado'}
         </div>
-    `);
+    </details>
+</div>
+`);
+
 
                         marker.on("click", (e) => {
 
@@ -2855,6 +3099,20 @@ style="max-width:220px;height:auto;"/>
 
                         markers.addLayer(marker);
 
+                        if (ehInstalado) {
+
+                            this._layerInstalados.addLayer(marker);
+
+                        } else if (online) {
+
+                            this._layerOnline.addLayer(marker);
+
+                        } else {
+
+                            this._layerOffline.addLayer(marker);
+
+                        }
+
                     });
                     const veiculosUnicos = [];
 
@@ -2918,16 +3176,16 @@ style="max-width:220px;height:auto;"/>
                             const gatewayInfo =
                                 this._gatewayInfo?.[item.gateway];
                             htmlDetalhes += `
-                <div style="
+                                                                                        <div style="
             margin:6px 0;
             padding:4px 0;
             border-bottom:1px solid #eee;
             font-size:12px;
         ">
-            ${indicador}
-            <b>${item.identificador}</b>
-            -
-            <span style="
+                                                                                            ${indicador}
+                                                                                            <b>${item.identificador}</b>
+                                                                                            -
+                                                                                            <span style="
                 display:inline-block;
                 max-width:380px;
                 white-space:nowrap;     
@@ -2935,33 +3193,33 @@ style="max-width:220px;height:auto;"/>
                 text-overflow:ellipsis;
                 vertical-align:bottom;
             ">
-                ${item.descEquipamento || ""}
-            </span>
+                                                                                                ${item.descEquipamento || ""}
+                                                                                            </span>
 
-            <br>
+                                                                                            <br>
 
-        <span style="
+                                                                                                <span style="
         color:#666;
         font-size:12px;
     ">
-        Última atualização:
-        ${item.ultimaPosicao || "Não informada"}
-    </span>
+                                                                                                    Última atualização:
+                                                                                                    ${item.ultimaPosicao || "Não informada"}
+                                                                                                </span>
 
-    <br>
+                                                                                                <br>
 
-    <span style="
+                                                                                                    <span style="
         color:#3498db;
         font-size:12px;
     ">
-        📡 Gateway:
-        <b>
-            ${descricaoGateway || item.gateway || "Não informado"}
-        </b>
-    </span>
+                                                                                                        📡 Gateway:
+                                                                                                        <b>
+                                                                                                            ${descricaoGateway || item.gateway || "Não informado"}
+                                                                                                        </b>
+                                                                                                    </span>
 
-    </div>
-    `;
+                                                                                                </div>
+                                                                                                `;
 
                         });
 
@@ -3009,7 +3267,7 @@ style="max-width:220px;height:auto;"/>
                                 icon: L.divIcon({
                                     className: "",
                                     html: `
-                            <div style="
+                                                                                                <div style="
                                 width:16px;
                                 height:16px;
           background:#9B6DFF;
@@ -3019,104 +3277,104 @@ style="max-width:220px;height:auto;"/>
                                     0 0 0 4px rgba(255,99,71,0.25),
                                     0 0 10px rgba(255,99,71,0.8);
                             "></div>
-                        `,
+                                                                                                `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         ).bindPopup(`
 
-<div
-    id="imagemVeiculoPopup_${veiculo.Veiculo}"
+                                                                                                <div
+                                                                                                    id="imagemVeiculoPopup_${veiculo.Veiculo}"
         <div style="text-align:center">
 
 
-    <img
-        src="img/793D_default.png"
-     
-        style="max-width:220px;height:auto;"/>
-</div>
-                 
-           <hr>
-<div style="
+                                                                                                    <img
+                                                                                                        src="img/793D_default.png"
+
+                                                                                                        style="max-width:220px;height:auto;" />
+                                                                                                </div>
+
+                                                                                                <hr>
+                                                                                                    <div style="
     text-align:left;
     margin-bottom:10px;
 ">
 
-    <b>Veículo:</b>
-    ${veiculo.Veiculo}
-    <br>
+                                                                                                        <b>Veículo:</b>
+                                                                                                        ${veiculo.Veiculo}
+                                                                                                        <br>
 
-    <b>Local de Instalação:</b>
-    ${veiculo.LOCAL_INSTALACAO || "Não informado"}
-    <br>
+                                                                                                            <b>Local de Instalação:</b>
+                                                                                                            ${veiculo.LOCAL_INSTALACAO || "Não informado"}
+                                                                                                            <br>
 
-    <b>Equipamentos Embarcados:</b>
-    ${totalEquipamentos}
-    <hr>
-</div>
+                                                                                                                <b>Equipamentos Embarcados:</b>
+                                                                                                                ${totalEquipamentos}
+                                                                                                                <hr>
+                                                                                                                </div>
 
 
-        <details
-    id="resumo_${veiculo.Veiculo}"
-    data-veiculo="${veiculo.Veiculo}">
+                                                                                                                <details
+                                                                                                                    id="resumo_${veiculo.Veiculo}"
+                                                                                                                    data-veiculo="${veiculo.Veiculo}">
 
-    <summary style="
+                                                                                                                    <summary style="
         cursor:pointer;
         font-weight:bold;
     ">
-        Ver Resumo
-    </summary>
-<hr>
-    <div
-        id="conteudoResumo_${veiculo.Veiculo}"
-        style="margin-top:10px;">
+                                                                                                                        Ver Resumo
+                                                                                                                    </summary>
+                                                                                                                    <hr>
+                                                                                                                        <div
+                                                                                                                            id="conteudoResumo_${veiculo.Veiculo}"
+                                                                                                                            style="margin-top:10px;">
 
-        ${htmlResumo}
+                                                                                                                            ${htmlResumo}
 
-    </div>
+                                                                                                                        </div>
 
-</details>
+                                                                                                                </details>
 
-<details
-    id="detalhes_${veiculo.Veiculo}"
-    data-veiculo="${veiculo.Veiculo}">
+                                                                                                                <details
+                                                                                                                    id="detalhes_${veiculo.Veiculo}"
+                                                                                                                    data-veiculo="${veiculo.Veiculo}">
 
-    <summary style="
+                                                                                                                    <summary style="
         cursor:pointer;
         font-weight:bold;
     ">
-        Ver detalhes
-    </summary>
+                                                                                                                        Ver detalhes
+                                                                                                                    </summary>
 
-    <div
-    id="conteudoDetalhes_${veiculo.Veiculo}"
-    style="
+                                                                                                                    <div
+                                                                                                                        id="conteudoDetalhes_${veiculo.Veiculo}"
+                                                                                                                        style="
         margin-top:10px;
         max-height:350px;
         overflow-y:auto;
     ">
 
-        ${htmlDetalhes}
+                                                                                                                        ${htmlDetalhes}
 
-        <div style="
+                                                                                                                        <div style="
             text-align:center;
             margin-top:10px;
         ">
-            <button
-                id="btnExportar_${veiculo.Veiculo}">
-                📊 Exportar Excel
-            </button>
-        </div>
+                                                                                                                            <button
+                                                                                                                                id="btnExportar_${veiculo.Veiculo}">
+                                                                                                                                📊 Exportar Excel
+                                                                                                                            </button>
+                                                                                                                        </div>
 
-    </div>
+                                                                                                                    </div>
 
-</details>
+                                                                                                                </details>
 
-        <hr>
+                                                                                                                <hr>
 
-        <b>Atualização:</b>
-        ${new Date(veiculo.DataAtualizacao)
+                                                                                                                    <b>Atualização:</b>
+                                                                                                                    ${new Date(veiculo.DataAtualizacao)
                                 .toLocaleString("pt-BR", {
                                     day: "2-digit",
                                     month: "2-digit",
@@ -3127,9 +3385,9 @@ style="max-width:220px;height:auto;"/>
                                 })
                                 .replace(",", "")}
 
-</div>
-</div>
-            `, {
+                                                                                                                </div>
+                                                                                                            </div>
+                                                                                                            `, {
                             minWidth: 350,
                             maxWidth: 450
                         });
@@ -3285,7 +3543,7 @@ style="max-width:220px;height:auto;"/>
                                 icon: L.divIcon({
                                     className: "",
                                     html: `
-                                <div style="
+                                                                                                            <div style="
                                     width:16px;
                                     height:16px;
                                     background:#3498db;
@@ -3295,7 +3553,7 @@ style="max-width:220px;height:auto;"/>
                                         0 0 0 5px rgba(52,152,219,0.25),
                                         0 0 12px rgba(52,152,219,0.8);
                                 "></div>
-                            `,
+                                                                                                            `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
@@ -3304,11 +3562,11 @@ style="max-width:220px;height:auto;"/>
 
                             .bindTooltip(gw.identificador)
                             .bindPopup(`
-                    <b>${gw.identificador}</b><br>
-                    Gateway ID: ${gw.gatewayId}<br>
-                    Localidade: ${gw.localidade}<br>
-                    Condição: ${gw.condicao}
-                `);
+                                                                                                            <b>${gw.identificador}</b><br>
+                                                                                                                Gateway ID: ${gw.gatewayId}<br>
+                                                                                                                    Localidade: ${gw.localidade}<br>
+                                                                                                                        Condição: ${gw.condicao}
+                                                                                                                        `);
 
                         marker.on("click", (e) => {
 
@@ -3434,11 +3692,11 @@ style="max-width:220px;height:auto;"/>
                         meioLng
                     ])
                     .setContent(`
-                                                    <b>
-                                                        ${(distancia / 1000)
+                                                                                                                        <b>
+                                                                                                                            ${(distancia / 1000)
                             .toFixed(2)} km
-                                                    </b>
-                                                    `)
+                                                                                                                        </b>
+                                                                                                                        `)
                     .openOn(this._map);
 
                 this._pontosMedicao = [];

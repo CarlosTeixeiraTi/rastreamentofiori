@@ -712,65 +712,6 @@
                             </Panel>
 
 
-                            <Panel
-                                headerText="Detalhes das Tags Desatualizadas (>72h)"
-                                class="sapUiMediumMarginTop">
-
-                                <Table
-                                    items="{dashboard>/analiseInstaladosDesatualizados}">
-
-                                    <columns>
-
-                                        <Column>
-                                            <Text text="Veículo" />
-                                        </Column>
-
-                                        <Column>
-                                            <Text text="Equipamento" />
-                                        </Column>
-
-                                        <Column>
-                                            <Text text="Última Atualização" />
-                                        </Column>
-
-                                        <Column>
-                                            <Text text="GAP" />
-                                        </Column>
-
-                                        <Column>
-                                            <Text text="Conclusão" />
-                                        </Column>
-
-                                    </columns>
-
-                                    <items>
-
-                                        <ColumnListItem>
-
-                                            <cells>
-
-                                                <Text text="{dashboard>veiculo}" />
-
-                                                <Text text="{dashboard>equipamento}" />
-
-                                                <Text text="{dashboard>ultimaAtualizacao}" />
-
-                                                <ObjectNumber
-                                                    number="{dashboard>gapDias}" />
-
-                                                <ObjectStatus
-                                                    text="{dashboard>conclusao}" />
-
-                                            </cells>
-
-                                        </ColumnListItem>
-
-                                    </items>
-
-                                </Table>
-
-                            </Panel>
-
                         </VBox>
 
                     </IconTabFilter>
@@ -853,7 +794,79 @@
                                 </Table>
 
                             </Panel>
+                            <Panel
+                                headerText="Tags não instaladas e desatualizadas"
+                                class="sapUiMediumMarginTop">
 
+                                <Table
+                                    items="{dashboard>/detalhesTagsDesatualizadas}">
+
+                                    <columns>
+
+                                        <Column>
+                                            <Text text="Identificador" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text text="Equipamento" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text text="Grupo" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text text="Última Atualização" />
+                                        </Column>
+
+                                     <Column  width="10rem">
+                                            <Text text="Dias sem atualização" />
+                                        </Column>
+
+                                        <Column  width="30rem">
+                                            <Text text="Último Local Conhecido" />
+                                        </Column>
+
+                                        <Column width="40rem">
+                                            <Text text="Dedução" />
+                                        </Column>
+
+                                    </columns>
+
+                                    <items>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <Text text="{dashboard>identificador}" />
+
+                                                <Text text="{dashboard>equipamento}" />
+
+                                                <Text text="{dashboard>grupoAtual}" />
+
+                                                <Text text="{dashboard>ultimaPosicao}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>diasSemAtualizacao}" />
+
+                                                <Text
+                                                    text="{dashboard>ultimoLocalConhecido}"
+                                                    wrapping="true" />
+
+                                                <Text
+                                                    text="{dashboard>deducao}"
+                                                    wrapping="true" />
+
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                    </items>
+
+                                </Table>
+
+                            </Panel>
                         </VBox>
 
                     </IconTabFilter>
