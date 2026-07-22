@@ -2440,82 +2440,82 @@ sap.ui.define([
                 const percentualGateway =
                     ((gateways.length / 8) * 100).toFixed(1) + "%";
                 this.getView()
-    .getModel("dashboard")
-    .setData({
+                    .getModel("dashboard")
+                    .setData({
 
-        totalEquipamentos,
-        percentualEquipamentos,
+                        totalEquipamentos,
+                        percentualEquipamentos,
 
-        online,
+                        online,
 
-        offline,
+                        offline,
 
-        percentualOnline,
+                        percentualOnline,
 
-        percentualOffline,
+                        percentualOffline,
 
-        gateways: gateways.length,
+                        gateways: gateways.length,
 
-        percentualGateway,
+                        percentualGateway,
 
-        grupos,
+                        grupos,
 
-        ultimasLeituras,
+                        ultimasLeituras,
 
-        resumoEquipamentos,
+                        resumoEquipamentos,
 
-        resumoGrupoAtual,
+                        resumoGrupoAtual,
 
-        detalhesTagsDesatualizadas,
+                        detalhesTagsDesatualizadas,
 
-        analiseInstaladosDesatualizados,
+                        analiseInstaladosDesatualizados,
 
-        dashboardVeiculos,
+                        dashboardVeiculos,
 
-        resumoFrotas,
+                        resumoFrotas,
 
-        resumoTipoStatus,
+                        resumoTipoStatus,
 
-        graficoTipoStatus,
+                        graficoTipoStatus,
 
-        reformadosPorOficina,
+                        reformadosPorOficina,
 
-        graficoInstalacao,
+                        graficoInstalacao,
 
-        instalados,
+                        instalados,
 
-        faltantes,
+                        faltantes,
 
-        percentualInstalado,
+                        percentualInstalado,
 
-        tempoLocalizacao:
-            valorGerado.tempoLocalizacao,
+                        tempoLocalizacao:
+                            valorGerado.tempoLocalizacao,
 
-        rastreabilidadeValorGerado:
-            valorGerado.rastreabilidade,
+                        rastreabilidadeValorGerado:
+                            valorGerado.rastreabilidade,
 
-        coberturaValorGerado:
-            valorGerado.cobertura,
+                        coberturaValorGerado:
+                            valorGerado.cobertura,
 
-        componentesMovimentados:
-            valorGerado.componentesMovimentados,
+                        componentesMovimentados:
+                            valorGerado.componentesMovimentados,
 
-        percentualMovimentados:
-            valorGerado.percentualMovimentados,
+                        percentualMovimentados:
+                            valorGerado.percentualMovimentados,
 
-        totalMovimentacoes:
-            valorGerado.totalMovimentacoes,
+                        totalMovimentacoes:
+                            valorGerado.totalMovimentacoes,
 
-        totalComponentesValorGerado:
-            valorGerado.totalComponentes,
+                        totalComponentesValorGerado:
+                            valorGerado.totalComponentes,
 
-        indiceEfetividade:
-            valorGerado.indiceEfetividade,
+                        indiceEfetividade:
+                            valorGerado.indiceEfetividade,
 
-        classificacaoEfetividade:
-            valorGerado.classificacao
+                        classificacaoEfetividade:
+                            valorGerado.classificacao
 
-    });
+                    });
                 const oVizFrame =
                     this.byId("idTipoStatusVizFrame");
 
