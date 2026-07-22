@@ -422,3 +422,13 @@
     font-weight: bold;
     color: #bdbdbd;
 }
+
+.operacaoValeLabel:before,
+.operacaoValeLabel:after {
+    display: none !important;
+}
+
+.kpiClickavel,
+.kpiClickavel * {
+    cursor: pointer !important;
+}

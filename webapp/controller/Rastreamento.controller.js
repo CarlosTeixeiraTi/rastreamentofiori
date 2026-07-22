@@ -56,6 +56,57 @@ sap.ui.define([
             },
             onAfterRendering() {
 
+                if (!this._cardEventosRegistrados) {
+
+                    this._cardEventosRegistrados = true;
+
+                    setTimeout(() => {
+
+                        const oPanel =
+                            this.byId("idTotalEquipamentosPanel");
+
+                        if (oPanel) {
+
+                            oPanel.$().css("cursor", "pointer");
+                            oPanel.$().find("*").css("cursor", "pointer");
+
+                            oPanel.$().on("click", () => {
+                                this.onCardComponentesPress();
+                            });
+
+                        }
+
+                        const oOnlinePanel =
+                            this.byId("idOnlinePanel");
+
+                        if (oOnlinePanel) {
+
+                            oOnlinePanel.$().css("cursor", "pointer");
+
+                            oOnlinePanel.$().on("click", () => {
+                                this.onCardOnlinePress();
+                            });
+
+                        }
+                        const oOfflinePanel =
+                            this.byId("idOfflinePanel");
+
+                        if (oOfflinePanel) {
+
+                            oOfflinePanel.$().css("cursor", "pointer");
+                            oOfflinePanel.$().find("*").css("cursor", "pointer");
+
+                            oOfflinePanel.$().on("click", () => {
+                                this.onCardOfflinePress();
+                            });
+
+                        }
+
+
+                    }, 500);
+
+                }
+
                 if (!this._zoomAplicado) {
 
 
@@ -69,6 +120,232 @@ sap.ui.define([
                 this._dashboardCarregado = true;
 
                 this.carregarDashboard();
+
+            },
+            async onAtualizacaoManualPress() {
+
+                const oBusyDialog = new BusyDialog({
+                    title: "Atualização Manual",
+                    text: "Atualizando dados dos rastreadores....."
+                });
+
+                oBusyDialog.open();
+
+                try {
+
+                    const response = await fetch(
+                        "http://localhost:4000/LocalizacaoAtual/processar"
+                    );
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            `Erro ${response.status}`
+                        );
+
+                    }
+
+                    sap.m.MessageToast.show(
+                        "Processamento concluído com sucesso."
+                    );
+
+                    await this.carregarDashboard();
+
+                    const oIconTabBar =
+                        this.byId("idIconTabBar");
+
+                    if (oIconTabBar) {
+
+                        oIconTabBar.setSelectedKey(
+                            "geo"
+                        );
+
+                    }
+
+                } catch (e) {
+
+                    sap.m.MessageBox.error(
+                        e.message ||
+                        "Erro ao processar atualização."
+                    );
+
+                } finally {
+
+                    oBusyDialog.close();
+
+                }
+
+            },
+            onCardOnlinePress() {
+
+                const agora = new Date();
+
+                const limiteOnline = new Date(
+                    agora.getTime() -
+                    (7 * 24 * 60 * 60 * 1000)
+                );
+
+                const dados =
+                    this._dadosFiltrados.filter(item => {
+
+                        if (!item.ultimaPosicao) {
+                            return false;
+                        }
+
+                        const dataPosicao =
+                            this.converterDataBr(
+                                item.ultimaPosicao
+                            );
+
+                        return dataPosicao >= limiteOnline;
+
+                    });
+
+                let texto = "";
+
+                texto += `Componentes Online: ${dados.length}\n\n`;
+
+                dados.forEach(item => {
+
+                    texto +=
+                        `Equipamento: ${item.identificador}\n` +
+                        `Descrição: ${item.descEquipamento}\n` +
+                        `Grupo: ${item.grupoAtual}\n` +
+                        `Gateway: ${item.gateway || "Não informado"}\n` +
+                        `Última atualização: ${item.ultimaPosicao}\n\n` +
+                        `─────────────────────────\n\n`;
+
+                });
+
+                sap.m.MessageBox.information(
+                    texto,
+                    {
+                        title: "Componentes Online"
+                    }
+                );
+
+            },
+            onCardOfflinePress() {
+
+                const agora = new Date();
+
+                const limiteOnline = new Date(
+                    agora.getTime() -
+                    (7 * 24 * 60 * 60 * 1000)
+                );
+
+                const dados =
+                    this._dadosFiltrados.filter(item => {
+
+                        if (!item.ultimaPosicao) {
+                            return true;
+                        }
+
+                        const dataPosicao =
+                            this.converterDataBr(
+                                item.ultimaPosicao
+                            );
+
+                        return dataPosicao < limiteOnline;
+
+                    });
+
+                let texto = "";
+
+                texto += `Componentes Offline: ${dados.length}\n\n`;
+
+                dados.forEach(item => {
+
+                    texto +=
+                        `Equipamento: ${item.identificador}\n` +
+                        `Descrição: ${item.descEquipamento}\n` +
+                        `Grupo: ${item.grupoAtual}\n` +
+                        `Gateway: ${item.gateway || "Não informado"}\n` +
+                        `Última atualização: ${item.ultimaPosicao || "Sem comunicação"}\n\n` +
+                        `─────────────────────────\n\n`;
+
+                });
+
+                sap.m.MessageBox.information(
+                    texto,
+                    {
+                        title: "Componentes Offline"
+                    }
+                );
+
+            },
+            onCardComponentesPress() {
+
+                const resumoGrupoAtual =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/resumoGrupoAtual");
+
+                const resumoEquipamentos =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/resumoEquipamentos");
+
+                const total =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/totalEquipamentos");
+
+                let texto = "";
+
+                texto += `Componentes rastreados: ${total}\n\n`;
+
+                texto += "Distribuição por fase\n";
+                texto += "─────────────────────\n";
+
+                resumoGrupoAtual.forEach(item => {
+
+                    texto +=
+                        `${item.grupo}: ${item.quantidade}\n`;
+
+                });
+
+                texto += "\nPrincipais famílias\n";
+                texto += "─────────────────────\n";
+
+                resumoEquipamentos
+                    .filter(item => item.familia !== "TOTAL")
+                    .sort((a, b) => b.total - a.total)
+                    .slice(0, 5)
+                    .forEach(item => {
+
+                        texto +=
+                            `${item.familia}: ${item.total}\n`;
+
+                    });
+
+                sap.m.MessageBox.information(
+                    texto,
+                    {
+                        title: "Resumo dos Componentes"
+                    }
+                );
+
+            },
+
+            criarPinLocal(nome, lat, lng) {
+
+                return L.marker(
+                    [lat, lng],
+                    {
+                        icon: L.icon({
+                            iconUrl: "img/pin-google.png",
+                            iconSize: [32, 32],
+                            iconAnchor: [16, 32],
+                            popupAnchor: [0, -32]
+                        })
+                    }
+                ).bindTooltip(nome, {
+                    permanent: true,
+                    direction: "right",
+                    offset: [10, 0],
+                    className: "operacaoValeLabel"
+                });
 
             },
             determinarGrupo(item) {
@@ -549,6 +826,89 @@ sap.ui.define([
 
                 if (
                     oItem &&
+                    oItem.getKey() === "atualizacaoManual"
+                ) {
+
+                    sap.m.MessageBox.confirm(
+
+                        "Deseja iniciar a atualização manual das localizações?",
+
+                        {
+
+                            title: "Confirmação",
+
+                            actions: [
+                                sap.m.MessageBox.Action.OK,
+                                sap.m.MessageBox.Action.CANCEL
+                            ],
+
+                            onClose: async (sAction) => {
+
+                                if (
+                                    sAction !==
+                                    sap.m.MessageBox.Action.OK
+                                ) {
+                                    return;
+                                }
+
+                                const oBusyDialog =
+                                    new BusyDialog({
+
+                                        title: "Atualização Manual",
+
+                                        text:
+                                            "Processando localizações..."
+
+                                    });
+
+                                oBusyDialog.open();
+
+                                try {
+
+                                    const response =
+                                        await fetch(
+                                            "http://localhost:4000/LocalizacaoAtual/processar"
+                                        );
+
+                                    if (!response.ok) {
+
+                                        throw new Error(
+                                            `Erro ${response.status}`
+                                        );
+
+                                    }
+
+                                    sap.m.MessageToast.show(
+                                        "Atualização concluída."
+                                    );
+
+                                    await this.carregarDashboard();
+
+                                } catch (e) {
+
+                                    sap.m.MessageBox.error(
+                                        e.message ||
+                                        "Erro ao processar atualização."
+                                    );
+
+                                } finally {
+
+                                    oBusyDialog.close();
+
+                                }
+
+                            }
+
+                        }
+
+                    );
+
+                    return;
+
+                }
+
+                if (
+                    oItem &&
                     oItem.getKey() === "geo"
                 ) {
 
@@ -739,10 +1099,9 @@ sap.ui.define([
             gerarAnaliseInstaladosDesatualizados(dados) {
 
                 const agora = new Date();
-                const limite72h = new Date(
-                    agora.getTime() - (3 * 24 * 60 * 60 * 1000)
+                const limiteOnline = new Date(
+                    agora.getTime() - (7 * 24 * 60 * 60 * 1000)
                 );
-
                 const resultado = [];
 
                 dados.forEach(item => {
@@ -764,7 +1123,7 @@ sap.ui.define([
                         );
 
 
-                    if (dataPosicao >= limite72h) {
+                    if (dataPosicao >= limiteOnline) {
                         return;
                     }
 
@@ -826,12 +1185,7 @@ sap.ui.define([
                             (agora - dataPosicao) /
                             (1000 * 60 * 60 * 24)
                         );
-                    if (
-                        diasSemAtualizacao <= 3 ||
-                        gapDias <= 2
-                    ) {
-                        return;
-                    }
+
                     const existeAtualizacaoVeiculo =
                         dataMaisRecente !== null;
 
@@ -1221,7 +1575,9 @@ sap.ui.define([
 
 
                 }
-                if (zoom >= 14) {
+                if (zoom >= 13) {
+
+
                     this.criarLabel(
                         "VESPASIANO",
                         -19.708891,
@@ -1229,7 +1585,7 @@ sap.ui.define([
 
                         "cityLabel"
                     ).addTo(this._layerLabels);
-                                        this.criarLabel(
+                    this.criarLabel(
                         "ITABIRITO",
                         -20.209063,
                         -43.862584,
@@ -1269,10 +1625,35 @@ sap.ui.define([
                         });
 
                 }
+                if (zoom >= 14) {
+
+                    [
+                        ["CENTRO", -19.6918, -43.9230],
+                        ["CAIEIRAS", -19.7005, -43.9278],
+                        ["SANTA CLARA", -19.7115, -43.9180],
+                        ["MORRO ALTO", -19.7350, -43.9070],
+                        ["NOVA PAMPULHA", -19.6985, -43.9058],
+                        ["CELEVIA", -19.7210, -43.9310],
+                        ["PARQUE JARDIM ALTEROSA", -19.7200, -43.8960],
+                        ["SERRA DOURADA", -19.7420, -43.9190],
+                        ["PARQUE JARDIM ITAÚ", -19.7310, -43.8990]
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "bairroLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
                 if (zoom >= 13) {
 
                     this.criarLabel(
-                        "SÃO GONÇALO ...",
+                        "SÃO GONÇALO",
                         -19.8220,
                         -43.3660,
                         "cityLabel"
@@ -1316,7 +1697,8 @@ sap.ui.define([
 
                         ["MINA CONCEIÇÃO", -19.657580, -43.269398],
 
-                        ["MINA PERIQUITO", -19.632715, -43.254261]
+                        ["MINA PERIQUITO", -19.632715, -43.254261],
+
 
                     ]
                         .forEach(item => {
@@ -1337,7 +1719,8 @@ sap.ui.define([
 
                         ["MINA DE BRUCUTU", -19.870131, -43.398402],
                         ["MINA DO PICO", -20.217185, -43.864846],
-                        ["SOTREQ", -19.707564, -43.898527]
+
+
 
                     ]
                         .forEach(item => {
@@ -1372,6 +1755,26 @@ sap.ui.define([
                         });
 
                 }
+                if (zoom >= 14) {
+
+                    [
+                        ["SOTREQ", -19.707404, -43.900727]
+
+
+                    ]
+                        .forEach(item => {
+
+                            this.criarLabel(
+                                item[0],
+                                item[1],
+                                item[2],
+                                "operacaoValeLabel"
+                            ).addTo(this._layerLabels);
+
+                        });
+
+                }
+
                 if (zoom >= 16) {
 
                     [
@@ -1711,6 +2114,13 @@ sap.ui.define([
                     );
 
                 }
+                const responseValorGerado =
+                    await fetch(
+                        "http://localhost:4000/ValorGerado"
+                    );
+
+                const valorGerado =
+                    await responseValorGerado.json();
                 let veiculos = [];
 
                 try {
@@ -1749,6 +2159,8 @@ sap.ui.define([
                 let online = 0;
                 let offline = 0;
 
+
+
                 dadosFiltrados.forEach(item => {
 
                     let localizacao =
@@ -1760,15 +2172,6 @@ sap.ui.define([
 
                     gruposMap[localizacao] =
                         (gruposMap[localizacao] || 0) + 1;
-
-                    const instalado =
-                        item.grupoAtual &&
-                        item.grupoAtual.startsWith("Instalado no ");
-
-                    // Equipamentos instalados não entram no cálculo
-                    if (instalado) {
-                        return;
-                    }
 
                     if (!item.ultimaPosicao) {
 
@@ -2021,7 +2424,7 @@ sap.ui.define([
                 //     )
                 const totalEquipamentos = dadosFiltrados.length;
 
-                online = totalEquipamentos - offline;
+
 
                 const percentualOnline =
                     totalEquipamentos > 0
@@ -2037,54 +2440,82 @@ sap.ui.define([
                 const percentualGateway =
                     ((gateways.length / 8) * 100).toFixed(1) + "%";
                 this.getView()
-                    .getModel("dashboard")
-                    .setData({
+    .getModel("dashboard")
+    .setData({
 
-                        totalEquipamentos,
-                        percentualEquipamentos,
-                        online,
+        totalEquipamentos,
+        percentualEquipamentos,
 
-                        offline,
+        online,
 
-                        percentualOnline,
+        offline,
 
-                        percentualOffline,
+        percentualOnline,
 
-                        gateways: gateways.length,
-                        percentualGateway,
-                        grupos,
+        percentualOffline,
 
-                        ultimasLeituras,
+        gateways: gateways.length,
 
-                        resumoEquipamentos,
+        percentualGateway,
 
-                        resumoGrupoAtual,
+        grupos,
 
-                        detalhesTagsDesatualizadas,
+        ultimasLeituras,
 
-                        analiseInstaladosDesatualizados,
+        resumoEquipamentos,
 
-                        dashboardVeiculos,
+        resumoGrupoAtual,
 
-                        resumoFrotas,
+        detalhesTagsDesatualizadas,
 
-                        resumoTipoStatus,
+        analiseInstaladosDesatualizados,
 
-                        graficoTipoStatus,
+        dashboardVeiculos,
 
-                        reformadosPorOficina,
+        resumoFrotas,
 
-                        graficoInstalacao,
+        resumoTipoStatus,
 
-                        instalados,
+        graficoTipoStatus,
 
-                        faltantes,
+        reformadosPorOficina,
 
-                        percentualInstalado,
+        graficoInstalacao,
 
+        instalados,
 
+        faltantes,
 
-                    });
+        percentualInstalado,
+
+        tempoLocalizacao:
+            valorGerado.tempoLocalizacao,
+
+        rastreabilidadeValorGerado:
+            valorGerado.rastreabilidade,
+
+        coberturaValorGerado:
+            valorGerado.cobertura,
+
+        componentesMovimentados:
+            valorGerado.componentesMovimentados,
+
+        percentualMovimentados:
+            valorGerado.percentualMovimentados,
+
+        totalMovimentacoes:
+            valorGerado.totalMovimentacoes,
+
+        totalComponentesValorGerado:
+            valorGerado.totalComponentes,
+
+        indiceEfetividade:
+            valorGerado.indiceEfetividade,
+
+        classificacaoEfetividade:
+            valorGerado.classificacao
+
+    });
                 const oVizFrame =
                     this.byId("idTipoStatusVizFrame");
 
@@ -2358,11 +2789,11 @@ sap.ui.define([
                 }
 
                 this.byId("htmlMapa").setContent(`
-        <div
-            id="mapaEquipamentos"
-            style="height:850px;width:100%;">
-        </div>
-    `);
+                    <div
+                        id="mapaEquipamentos"
+                        style="height:850px;width:100%;">
+                    </div>
+                `);
                 sap.ui.getCore().applyChanges();
 
                 setTimeout(async () => {
@@ -2449,9 +2880,6 @@ sap.ui.define([
 
                     });
 
-                    if (!equipamentos.length) {
-                        return;
-                    }
 
                     if (this._map) {
                         this._map.remove();
@@ -2478,7 +2906,31 @@ sap.ui.define([
                     this._map = L.map("mapaEquipamentos", {
                         layers: [satelite]
                     });
+                    this._map.on("click", (e) => {
 
+                        const latitude = e.latlng.lat.toFixed(6);
+                        const longitude = e.latlng.lng.toFixed(6);
+
+                        const coordenada =
+                            `${latitude}, ${longitude}`;
+
+                        navigator.clipboard.writeText(coordenada)
+                            .then(() => {
+
+                                sap.m.MessageToast.show(
+                                    `Coordenada copiada: ${coordenada}`
+                                );
+
+                            })
+                            .catch(() => {
+
+                                sap.m.MessageToast.show(
+                                    coordenada
+                                );
+
+                            });
+
+                    });
                     this._layerLabels = L.layerGroup().addTo(this._map);
 
                     this.atualizarLabels();
@@ -2625,15 +3077,15 @@ sap.ui.define([
 
                         if (controleLayers) {
 
-                            controleLayers.style.width = "260px";
+                            controleLayers.style.width = "200px";
 
-                            controleLayers.style.fontSize = "18px";
+                            controleLayers.style.fontSize = "20px";
 
                             const labels =
                                 controleLayers.querySelectorAll("label");
 
                             labels.forEach(label => {
-                                label.style.fontSize = "16px";
+                                label.style.fontSize = "20px";
                                 label.style.lineHeight = "24px";
                             });
                         }
@@ -2652,9 +3104,9 @@ sap.ui.define([
                         div.style.padding = "6px 8px";
                         div.style.borderRadius = "6px";
                         div.style.boxShadow = "0 1px 6px rgba(0,0,0,.4)";
-                        div.style.fontSize = "18px";
+                        div.style.fontSize = "20px";
                         div.style.lineHeight = "20px";
-                        div.style.width = "260px";
+                        div.style.width = "200px";
                         div.style.color = "#333";
                         div.style.marginTop = "6px";
                         div.style.textAlign = "left";
@@ -2723,21 +3175,21 @@ sap.ui.define([
                         div.style.padding = '6px 8px';
                         div.style.borderRadius = '6px';
                         div.style.boxShadow = '0 1px 6px rgba(0,0,0,.4)';
-                        div.style.fontSize = '16px';
-                        div.style.lineHeight = '24px';
-                        div.style.width = '260px';
+                        div.style.fontSize = '20px';
+                        div.style.lineHeight = '30px';
+                        div.style.width = '200px';
                         div.style.color = '#333';
                         div.style.marginTop = '6px';
 
                         div.innerHTML = `
-        <div style="font-weight:bold; margin-bottom:4px; text-align:center; border-bottom:1px solid #ddd;">
-            Cidades (MG)
-        </div>
-        <a href="#" id="cidadeItabira">Itabira</a><br>
-            <a href="#" id="cidadeItabirito">Itabirito</a><br>
-        <a href="#" id="cidadeSaoGoncalo">São Gonçalo do Rio Abaixo</a><br>
-        <a href="#" id="cidadeVespasiano"> Vespasiano</a>
-    `;
+                        <div style="font-weight:bold; margin-bottom:4px; text-align:center; border-bottom:1px solid #ddd;">
+                            Cidades (MG)
+                        </div>
+                        <a href="#" id="cidadeItabira">Itabira</a><br>
+                            <a href="#" id="cidadeItabirito">Itabirito</a><br>
+                        <a href="#" id="cidadeSaoGoncalo">São Gonçalo</a><br>
+                        <a href="#" id="cidadeVespasiano"> Vespasiano</a>
+                    `;
 
                         L.DomEvent.disableClickPropagation(div);
 
@@ -2748,7 +3200,7 @@ sap.ui.define([
                                     e.preventDefault();
 
                                     this._map.setView(
-                                        [-19.605478, -43.239840],
+                                        [-19.641510, -43.226143],
                                         13
                                     );
 
@@ -2759,8 +3211,8 @@ sap.ui.define([
                                     e.preventDefault();
 
                                     this._map.setView(
-                                        [-20.246341, -43.800918],
-                                        13
+                                        [-20.217717, -43.864048],
+                                        15
                                     );
 
                                 });
@@ -2771,7 +3223,7 @@ sap.ui.define([
                                     e.preventDefault();
 
                                     this._map.setView(
-                                        [-19.8468, -43.3825],
+                                        [-19.857575, -43.389106],
                                         13
                                     );
 
@@ -2782,8 +3234,8 @@ sap.ui.define([
                                     e.preventDefault();
 
                                     this._map.setView(
-                                        [-19.719942, -43.944133],
-                                        13
+                                        [-19.708129, -43.903523],
+                                        15
                                     );
 
                                 });
@@ -2969,29 +3421,29 @@ sap.ui.define([
                                     className: "",
                                     html: ehInstalado
                                         ? `
-        <div style="
-            width:16px;
-            height:16px;
-            background:#9B6DFF;
-            border:3px solid white;
-            border-radius:50%;
-            box-shadow:
-                0 0 0 4px rgba(155,109,255,0.25),
-                0 0 10px rgba(155,109,255,0.8);
-        "></div>
-    `
+                            <div style="
+                                width:16px;
+                                height:16px;
+                                background:#9B6DFF;
+                                border:3px solid white;
+                                border-radius:50%;
+                                box-shadow:
+                                    0 0 0 4px rgba(155,109,255,0.25),
+                                    0 0 10px rgba(155,109,255,0.8);
+                            "></div>
+                        `
                                         : `
-        <div style="
-            width:16px;
-            height:16px;
-            background:${cor};
-            border:3px solid white;
-            border-radius:50%;
-            box-shadow:
-                0 0 0 4px ${halo},
-                0 0 10px ${sombra};
-        "></div>
-    `,
+                            <div style="
+                                width:16px;
+                                height:16px;
+                                background:${cor};
+                                border:3px solid white;
+                                border-radius:50%;
+                                box-shadow:
+                                    0 0 0 4px ${halo},
+                                    0 0 10px ${sombra};
+                            "></div>
+                        `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
@@ -2999,34 +3451,83 @@ sap.ui.define([
                         ).bindPopup(`
 
                                        <div id="imagemVeiculoPopup_${item.identificador}" style="text-align: center;">
-    <img 
-        src="${imagemEquipamento}" 
-        style="max-width: 220px; height: auto; display: block; margin: 0 auto;" />
-</div>
+                                <img 
+                                    src="${imagemEquipamento}" 
+                                    style="max-width: 220px; height: auto; display: block; margin: 0 auto;" />
+                            </div>
 
-<hr>
+                            <hr>
 
-<div style="text-align: left; margin-bottom: 10px; min-width: 280px;">
-    <b>${item.identificador}</b><br>
-    <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
-    <b>Local:</b> ${item.localInstalacao || ''}<br>
-    <b>Nota:</b> ${item.nota || 'Não informado'}<br>
-    📡 Gateway: <b>${descricaoGateway || item.gateway || "Não informado"}</b><br>
-    <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
+                            <div style="text-align: left; margin-bottom: 10px; min-width: 280px;">
+                                <b>${item.identificador}</b><br>
+                                <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
+                                <b>Local:</b> ${item.localInstalacao || ''}<br>
+                                <b>Nota:</b> ${item.nota || 'Não informado'}<br>
+                                📡 Gateway: <b>${descricaoGateway || item.gateway || "Não informado"}</b><br>
+                                <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
 
-    <details>
-        <summary style="cursor: pointer;"><b>Ver detalhes</b></summary>
-        <div style="margin-top: 10px;">
-            <b>Grupo:</b> ${item.grupoAtual || ''}<br>
-            <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
-            <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
-            <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
-            <b>Oficina:</b> ${item.oficina || 'Não informado'}
-        </div>
-    </details>
-</div>
-`);
+                                <details>
+                                    <summary style="cursor: pointer;"><b>Ver detalhes</b></summary>
+                                    <div style="margin-top: 10px;">
+                                        <b>Grupo:</b> ${item.grupoAtual || ''}<br>
+                                        <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
+                                        <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
+                                        <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
+                                        <b>Oficina:</b> ${item.oficina || 'Não informado'}
+                                
+                                    </div>
+                                </details>
 
+                                <div style="
+                                    text-align:center;
+                                    margin-top:10px;
+                                ">
+                                    <button id="btnCopiar_${item.identificador}">
+                                        📋 Copiar
+                                    </button>
+                                </div>
+
+                            </div>
+                            `);
+                        marker.on("popupopen", () => {
+
+                            setTimeout(() => {
+
+                                const btn = document.getElementById(
+                                    `btnCopiar_${item.identificador}`
+                                );
+
+                                if (!btn) {
+                                    return;
+                                }
+
+                                btn.onclick = () => {
+
+                                    const texto = `
+                                    Identificador: ${item.identificador}
+                                    Equipamento: ${item.descEquipamento || ""}
+                                    Local: ${item.localInstalacao || ""}
+                                    Nota: ${item.nota || "Não informado"}
+                                    Gateway: ${descricaoGateway || item.gateway || "Não informado"}
+                                    Última Atualização: ${item.ultimaPosicao || ""}
+                                    Grupo: ${item.grupoAtual || ""}
+                                    Descrição do Local: ${item.descLocalInstalacao || ""}
+                                    Centro de Trabalho: ${item.centro_trab_resp || "Não informado"}
+                                    Centro de Localização: ${item.centro_localizacao || "Não informado"}
+                                    Oficina: ${item.oficina || "Não informado"}
+                                                `.trim();
+
+                                    navigator.clipboard.writeText(texto);
+
+                                    sap.m.MessageToast.show(
+                                        "Informações copiadas."
+                                    );
+
+                                };
+
+                            }, 100);
+
+                        });
 
                         marker.on("click", (e) => {
 
@@ -3166,53 +3667,56 @@ sap.ui.define([
                                     item.ultimaPosicao
                                 );
 
-                            const online =
-                                dataPosicao >= limiteOnline;
+                            const diasSemAtualizacao =
+                                Math.floor(
+                                    (agora - dataPosicao) /
+                                    (1000 * 60 * 60 * 24)
+                                );
 
                             const indicador =
-                                online
+                                diasSemAtualizacao <= 7
                                     ? "🟢"
                                     : "🟡";
                             const gatewayInfo =
                                 this._gatewayInfo?.[item.gateway];
                             htmlDetalhes += `
                                                                                         <div style="
-            margin:6px 0;
-            padding:4px 0;
-            border-bottom:1px solid #eee;
-            font-size:12px;
-        ">
-                                                                                            ${indicador}
-                                                                                            <b>${item.identificador}</b>
-                                                                                            -
-                                                                                            <span style="
-                display:inline-block;
-                max-width:380px;
-                white-space:nowrap;     
-                overflow:hidden;
-                text-overflow:ellipsis;
-                vertical-align:bottom;
-            ">
-                                                                                                ${item.descEquipamento || ""}
-                                                                                            </span>
+                            margin:6px 0;
+                            padding:4px 0;
+                            border-bottom:1px solid #eee;
+                            font-size:12px;
+                        ">
+                                                                                                            ${indicador}
+                                                                                                            <b>${item.identificador}</b>
+                                                                                                            -
+                                                                                                            <span style="
+                                display:inline-block;
+                                max-width:380px;
+                                white-space:nowrap;     
+                                overflow:hidden;
+                                text-overflow:ellipsis;
+                                vertical-align:bottom;
+                            ">
+                                                                                                                ${item.descEquipamento || ""}
+                                                                                                            </span>
 
-                                                                                            <br>
+                                                                                                            <br>
 
-                                                                                                <span style="
-        color:#666;
-        font-size:12px;
-    ">
-                                                                                                    Última atualização:
-                                                                                                    ${item.ultimaPosicao || "Não informada"}
-                                                                                                </span>
+                                                                                                                <span style="
+                                    color:#666;
+                                    font-size:12px;
+                                ">
+                                                                                                                                Última atualização:
+                                                                                                                ${item.ultimaPosicao || "Não informada"}
+                                                                                                            </span>
 
-                                                                                                <br>
+                                                                                                            <br>
 
-                                                                                                    <span style="
-        color:#3498db;
-        font-size:12px;
-    ">
-                                                                                                        📡 Gateway:
+                                                                                                                <span style="
+                    color:#3498db;
+                    font-size:12px;
+                ">
+                                                                                                                    📡 Gateway:
                                                                                                         <b>
                                                                                                             ${descricaoGateway || item.gateway || "Não informado"}
                                                                                                         </b>
@@ -3270,7 +3774,7 @@ sap.ui.define([
                                                                                                 <div style="
                                 width:16px;
                                 height:16px;
-          background:#9B6DFF;
+                                background:#9B6DFF;
                                 border:3px solid white;
                                 border-radius:50%;
                                 box-shadow:
@@ -3286,7 +3790,7 @@ sap.ui.define([
 
                                                                                                 <div
                                                                                                     id="imagemVeiculoPopup_${veiculo.Veiculo}"
-        <div style="text-align:center">
+                         <div style="text-align:center">
 
 
                                                                                                     <img
@@ -3357,15 +3861,22 @@ sap.ui.define([
 
                                                                                                                         ${htmlDetalhes}
 
-                                                                                                                        <div style="
-            text-align:center;
-            margin-top:10px;
-        ">
-                                                                                                                            <button
-                                                                                                                                id="btnExportar_${veiculo.Veiculo}">
-                                                                                                                                📊 Exportar Excel
-                                                                                                                            </button>
-                                                                                                                        </div>
+                                                                                                                       <div style="
+    text-align:center;
+    margin-top:10px;
+">
+
+    <button
+        id="btnCopiarVeiculo_${veiculo.Veiculo}">
+        📋 Copiar
+    </button>
+
+    <button
+        id="btnExportar_${veiculo.Veiculo}">
+        📊 Exportar Excel
+    </button>
+
+</div>
 
                                                                                                                     </div>
 
@@ -3445,7 +3956,32 @@ sap.ui.define([
                             }
 
                             setTimeout(() => {
+                                const btnCopiar = document.getElementById(
+                                    `btnCopiarVeiculo_${veiculo.Veiculo}`
+                                );
 
+                                if (btnCopiar) {
+
+                                    btnCopiar.onclick = () => {
+
+                                        const texto = `
+Veículo: ${veiculo.Veiculo}
+Local de Instalação: ${veiculo.LOCAL_INSTALACAO || "Não informado"}
+Equipamentos Embarcados: ${totalEquipamentos}
+
+Resumo:
+${textoResumo}
+        `.trim();
+
+                                        navigator.clipboard.writeText(texto);
+
+                                        sap.m.MessageToast.show(
+                                            "Informações do veículo copiadas."
+                                        );
+
+                                    };
+
+                                }
                                 const btn = document.getElementById(
                                     `btnExportar_${veiculo.Veiculo}`
                                 );
