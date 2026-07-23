@@ -895,11 +895,22 @@
                                         class="sapUiSmallMargin">
 
                                         <Title
-                                            text="{dashboard>/tempoLocalizacao}"
+                                            text="{= ${dashboard>/tempoLocalizacao} + '%' }"
                                             level="H1" />
 
-                                        <Text
-                                            text="Redução do Tempo de Localização" />
+                                        <HBox
+                                            justifyContent="Center"
+                                            alignItems="Center">
+
+                                            <Text
+                                                text="Redução do Tempo de Localização" />
+
+                                            <Button
+                                                icon="sap-icon://hint"
+                                                type="Transparent"
+                                                press=".onButtonAjudaTempoLocalizacaoPress" />
+
+                                        </HBox>
 
                                     </VBox>
 
@@ -912,13 +923,24 @@
                                     <VBox
                                         alignItems="Center"
                                         class="sapUiSmallMargin">
-
                                         <Title
-                                            text="{dashboard>/rastreabilidadeValorGerado}"
+                                            text="{= ${dashboard>/disponibilidadeMonitoramento} + '%' }"
                                             level="H1" />
 
-                                        <Text
-                                            text="Rastreabilidade do Processo" />
+                                        <HBox
+                                            justifyContent="Center"
+                                            alignItems="Center">
+
+                                            <Text
+                                                text="Disponibilidade de Monitoramento"
+                                                class="sapUiTinyMarginEnd" />
+
+                                            <Button
+                                                icon="sap-icon://hint"
+                                                type="Transparent"
+                                                press=".onButtonAjudaDisponibilidadeMonitoramentoPress" />
+
+                                        </HBox>
 
                                     </VBox>
 
@@ -935,8 +957,21 @@
                                             text="{dashboard>/componentesMovimentados}"
                                             level="H1" />
 
-                                        <Text
-                                            text="Componentes Movimentados" />
+                                        <HBox
+                                            justifyContent="Center"
+                                            alignItems="Center">
+
+                                            <Text
+                                                text="Componentes Movimentados"
+                                                class="sapUiTinyMarginEnd" />
+
+                                            <Button
+                                                icon="sap-icon://hint"
+                                                type="Transparent"
+                                                tooltip="Entender indicador"
+                                                press=".onButtonAjudaComponentesMovimentadosPress" />
+
+                                        </HBox>
 
                                     </VBox>
 
@@ -948,12 +983,25 @@
                                     <VBox
                                         alignItems="Center"
                                         class="sapUiSmallMargin">
+
                                         <Title
-                                            text="{dashboard>/coberturaValorGerado}"
+                                            text="{= ${dashboard>/coberturaValorGerado} + '%' }"
                                             level="H1" />
 
-                                        <Text
-                                            text="Cobertura do Piloto" />
+                                        <HBox
+                                            justifyContent="Center"
+                                            alignItems="Center">
+
+                                            <Text
+                                                text="Cobertura do Piloto"
+                                                class="sapUiTinyMarginEnd" />
+
+                                            <Button
+                                                icon="sap-icon://hint"
+                                                type="Transparent"
+                                                press=".onButtonAjudaCoberturaPress" />
+
+                                        </HBox>
 
                                     </VBox>
 
@@ -965,18 +1013,29 @@
                                     <VBox class="sapUiSmallMargin">
 
                                         <Text
-                                            text="✓ Redução de 66,7% no tempo médio de localização de componentes." />
+                                            text="{= '✓ Redução de '
+        + ${dashboard>/tempoLocalizacao}
+        + '% no tempo médio de localização de componentes.' }" />
 
                                         <Text
-                                            text="✓ Rastreabilidade completa dos componentes monitorados." />
+                                            text="{= '✓ Rastreabilidade de '
+        + ${dashboard>/disponibilidadeMonitoramento}
+       + '% dos componentes avaliados.' }" />
 
                                         <Text
                                             text="{= '✓ '
-                                            + ${dashboard>/componentesMovimentados}
-                                            + ' componentes apresentaram movimentações durante o piloto.' }" />
+        + ${dashboard>/componentesMovimentados}
+        + ' componentes apresentaram movimentações durante o piloto.' }" />
 
                                         <Text
-                                            text="✓ Cobertura atual de 78% da meta prevista para o piloto." />
+                                            text="{= '✓ '
+        + ${dashboard>/totalMovimentacoes}
+        + ' mudanças de localização foram identificadas automaticamente pela solução.' }" />
+
+                                        <Text
+                                            text="{= '✓ Cobertura atual de '
+        + ${dashboard>/coberturaValorGerado}
+        + '% da meta prevista para o piloto.' }" />
 
                                     </VBox>
 
@@ -989,12 +1048,24 @@
                                         alignItems="Center"
                                         class="sapUiLargeMargin">
 
-                                        <Title
-                                            text="Índice Geral de Efetividade"
-                                            level="H2" />
+                                        <HBox
+                                            justifyContent="Center"
+                                            alignItems="Center">
+
+                                            <Title
+                                                text="Índice Geral de Efetividade"
+                                                level="H2" />
+
+                                            <Button
+                                                icon="sap-icon://hint"
+                                                type="Transparent"
+                                                tooltip="Entender indicador"
+                                                press=".onButtonAjudaIndiceEfetividadePress" />
+
+                                        </HBox>
 
                                         <Title
-                                            text="{dashboard>/indiceEfetividade}"
+                                            text="{= ${dashboard>/indiceEfetividade} + '%' }"
                                             level="H1"
                                             class="kpiNumero" />
 
@@ -1020,7 +1091,7 @@
                                             state="Success" />
 
                                         <ObjectStatus
-                                            text="Localização Operacional ≥ 90%  •  Atingido"
+                                            text="Componentes movimentados > 0  •  Atingido"
                                             state="Success" />
 
                                         <ObjectStatus
@@ -1074,10 +1145,10 @@
 
                                                 <cells>
 
-                                                    <Text text="Rastreabilidade do Processo" />
+                                                    <Text text="Disponibilidade de Monitoramento" />
 
                                                     <Text
-                                                        text="{= ${dashboard>/rastreabilidadeValorGerado} + '%' }" />
+                                                        text="{= ${dashboard>/disponibilidadeMonitoramento} + '%' }" />
 
                                                     <Text
                                                         text="Indica o percentual de componentes monitorados cuja situação operacional é conhecida." />
@@ -1129,6 +1200,63 @@
 
                                                     <Text
                                                         text="Consolida os principais indicadores do piloto em um único resultado para avaliação executiva." />
+
+                                                </cells>
+
+                                            </ColumnListItem>
+
+                                        </items>
+
+                                    </Table>
+
+                                </Panel>
+                                <Panel
+                                    headerText="Evolução Semanal do Piloto"
+                                    class="sapUiMediumMarginTop">
+
+                                    <Table
+                                        items="{dashboard>/valorGeradoSemanal}">
+
+                                        <columns>
+
+                                            <Column width="8rem">
+                                                <Text text="Semana" />
+                                            </Column>
+
+
+                                            <Column width="12rem">
+                                                <Text text="Componentes Movimentados" />
+                                            </Column>
+
+                                            <Column width="14rem">
+                                                <Text text="Acumulado de Movimentações" />
+                                            </Column>
+
+                                            <Column width="10rem">
+                                                <Text text="Efetividade" />
+                                            </Column>
+
+                                        </columns>
+
+                                        <items>
+
+                                            <ColumnListItem>
+
+                                                <cells>
+
+                                                    <Text
+                                                        text="{dashboard>descricaoSemana}" />
+
+
+                                                    <ObjectNumber
+                                                        number="{dashboard>componentesMovimentados}" />
+
+                                                    <ObjectNumber
+                                                        number="{dashboard>acumuladoMovimentacoes}" />
+
+                                                    <ObjectNumber
+                                                        number="{dashboard>indiceEfetividade}"
+                                                        unit="%" />
 
                                                 </cells>
 

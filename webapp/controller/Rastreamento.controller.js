@@ -176,6 +176,122 @@ sap.ui.define([
                 }
 
             },
+
+            onButtonAjudaTempoLocalizacaoPress() {
+
+                sap.m.MessageBox.information(
+
+                    "O que mede?\n\n" +
+
+                    "Avalia a redução do tempo necessário para localizar um componente em comparação ao processo tradicional.\n\n" +
+
+                    "Como é calculado?\n\n" +
+
+                    "Compara o tempo médio de localização antes e depois da utilização da solução de rastreamento.\n\n" +
+
+                    "Por que é importante?\n\n" +
+
+                    "Quanto menor o tempo de localização, maior a produtividade das equipes de manutenção.",
+
+                    {
+                        title: "Redução do Tempo de Localização"
+                    }
+
+                );
+
+            },
+            onButtonAjudaDisponibilidadeMonitoramentoPress() {
+
+                sap.m.MessageBox.information(
+
+                    "O que mede?\n\n" +
+
+                    "Indica o percentual de componentes que puderam ser efetivamente monitorados pela solução durante o período analisado.\n\n" +
+
+                    "Como é calculado?\n\n" +
+
+                    "Considera os componentes que ficaram disponíveis na área coberta pelos gateways FEIT durante a semana. Para componentes instalados em veículos, caso pelo menos um componente do mesmo veículo tenha sido detectado, todos os componentes desse veículo também são considerados disponíveis. Componentes fora da área operacional da Mina do Cauê são desconsiderados da análise.\n\n" +
+
+                    "Por que é importante?\n\n" +
+
+                    "Demonstra a capacidade real da solução de monitorar os componentes do piloto e validar a cobertura operacional da infraestrutura implantada.",
+
+                    {
+                        title: "Disponibilidade de Monitoramento"
+                    }
+
+                );
+
+            },
+            onButtonAjudaComponentesMovimentadosPress() {
+
+                sap.m.MessageBox.information(
+
+                    "O que mede?\n\n" +
+
+                    "Quantidade de componentes que apresentaram pelo menos uma mudança de localização durante o período do piloto.\n\n" +
+
+                    "Como é calculado?\n\n" +
+
+                    "A partir da análise do histórico de rastreamento, identificando componentes que registraram movimentações entre locais, oficinas, minas ou fases do processo.\n\n" +
+
+                    "Por que é importante?\n\n" +
+
+                    "Comprova a utilização real da solução em componentes que efetivamente circularam pela operação, validando o rastreamento em cenários reais.",
+
+                    {
+                        title: "Componentes Movimentados"
+                    }
+
+                );
+
+            },
+            onButtonAjudaCoberturaPress() {
+
+                sap.m.MessageBox.information(
+
+                    "O que mede?\n\n" +
+
+                    "Percentual da meta de implantação efetivamente alcançada durante o piloto.\n\n" +
+
+                    "Como é calculado?\n\n" +
+
+                    "Relação entre a quantidade de componentes monitorados e a meta planejada para o piloto (50 componentes).\n\n" +
+
+                    "Por que é importante?\n\n" +
+
+                    "Mostra o nível de adoção da solução e indica se os resultados obtidos são representativos para apoiar uma expansão da iniciativa.",
+
+                    {
+                        title: "Cobertura do Piloto"
+                    }
+
+                );
+
+            },
+            onButtonAjudaIndiceEfetividadePress() {
+
+                sap.m.MessageBox.information(
+
+                    "O que mede?\n\n" +
+
+                    "Consolida os principais resultados do piloto em uma única métrica de desempenho.\n\n" +
+
+                    "Como é calculado?\n\n" +
+
+                    "Combina os indicadores de tempo de localização, Disponibilidade de Monitoramento, cobertura do piloto e componentes movimentados.\n\n" +
+
+                    "Por que é importante?\n\n" +
+
+                    "Permite uma avaliação rápida da efetividade global da solução, resumindo os principais benefícios alcançados durante o piloto.",
+
+                    {
+                        title: "Índice Geral de Efetividade"
+                    }
+
+                );
+
+            },
             onCardOnlinePress() {
 
                 const agora = new Date();
@@ -857,7 +973,7 @@ sap.ui.define([
                                         title: "Atualização Manual",
 
                                         text:
-                                            "Processando localizações..."
+                                            "Atualizando dados, aguarde..."
 
                                     });
 
@@ -1572,12 +1688,6 @@ sap.ui.define([
                         "cityLabel"
                     ).addTo(this._layerLabels);
 
-
-
-                }
-                if (zoom >= 13) {
-
-
                     this.criarLabel(
                         "VESPASIANO",
                         -19.708891,
@@ -1593,7 +1703,9 @@ sap.ui.define([
 
                         "cityLabel"
                     ).addTo(this._layerLabels);
+
                 }
+
 
                 if (zoom >= 14) {
 
@@ -2121,6 +2233,13 @@ sap.ui.define([
 
                 const valorGerado =
                     await responseValorGerado.json();
+                const responseValorGeradoSemanal =
+                    await fetch(
+                        "http://localhost:4000/ValorGeradoSemanal"
+                    );
+
+                const valorGeradoSemanal =
+                    await responseValorGeradoSemanal.json();
                 let veiculos = [];
 
                 try {
@@ -2438,14 +2557,14 @@ sap.ui.define([
                 const percentualEquipamentos =
                     ((totalEquipamentos / 50) * 100).toFixed(1);
                 const percentualGateway =
-                    ((gateways.length / 8) * 100).toFixed(1) + "%";
+                    ((gateways.length / 7) * 100).toFixed(1) + "%";
                 this.getView()
                     .getModel("dashboard")
                     .setData({
 
                         totalEquipamentos,
                         percentualEquipamentos,
-
+                        
                         online,
 
                         offline,
@@ -2493,7 +2612,11 @@ sap.ui.define([
 
                         rastreabilidadeValorGerado:
                             valorGerado.rastreabilidade,
+                        disponibilidadeMonitoramento:
+                            valorGerado.disponibilidadeMonitoramento,
 
+                        componentesDisponiveis:
+                            valorGerado.componentesDisponiveis,
                         coberturaValorGerado:
                             valorGerado.cobertura,
 
@@ -2513,7 +2636,10 @@ sap.ui.define([
                             valorGerado.indiceEfetividade,
 
                         classificacaoEfetividade:
-                            valorGerado.classificacao
+                            valorGerado.classificacao,
+
+                        valorGeradoSemanal:
+                            valorGeradoSemanal
 
                     });
                 const oVizFrame =
