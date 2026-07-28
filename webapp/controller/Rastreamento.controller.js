@@ -122,6 +122,444 @@ sap.ui.define([
                 this.carregarDashboard();
 
             },
+            gerarDetalhamentoIndicadores() {
+                return [
+                    {
+                        indicador: "Disponibilidade",
+                        oQueMede: "...",
+                        comoCalculado: "...",
+                        formula: "...",
+                        importancia: "..."
+                    },
+                    {
+                        indicador: "Cobertura",
+                        oQueMede: "...",
+                        comoCalculado: "...",
+                        formula: "...",
+                        importancia: "..."
+                    },
+                    {
+                        indicador: "Gateways",
+                        oQueMede: "...",
+                        comoCalculado: "...",
+                        formula: "...",
+                        importancia: "..."
+                    },
+                    {
+                        indicador: "Consistência",
+                        oQueMede: "...",
+                        comoCalculado: "...",
+                        formula: "...",
+                        importancia: "..."
+                    },
+                    {
+                        indicador: "Índice Geral de Efetividade",
+                        oQueMede: "...",
+                        comoCalculado: "...",
+                        formula: "...",
+                        importancia: "..."
+                    }
+                ];
+            },
+            gerarDistribuicaoImplantacao(dados) {
+
+                const resumo = {};
+
+                dados.forEach(item => {
+
+                    let mina = "Itabira";
+
+                    const local =
+                        (item.localInstalacao || "")
+                            .toUpperCase();
+
+                    if (local.startsWith("FEBR")) {
+
+                        mina = "Brucutu";
+
+                    } else if (local.startsWith("PPIC")) {
+
+                        mina = "Pico";
+
+                    } else if (local.includes("_EMREF_EXT")) {
+
+                        mina = "Vespasiano";
+
+                    }
+
+                    let localizacao = "";
+
+                    if (
+                        item.grupoAtual &&
+                        item.grupoAtual.startsWith("Instalado no ")
+                    ) {
+
+                        localizacao =
+                            item.grupoAtual.replace(
+                                "Instalado no ",
+                                ""
+                            );
+
+                    } else {
+
+                        localizacao =
+                            item.descLocalInstalacao ||
+                            item.localInstalacao ||
+                            "Não informado";
+
+                    }
+
+                    const chave =
+                        mina +
+                        "|" +
+                        localizacao;
+
+                    if (!resumo[chave]) {
+
+                        resumo[chave] = {
+                            mina,
+                            localizacao,
+                            comandoFinal: 0,
+                            transmissao: 0,
+                            conversorTorque: 0,
+                            diferencial: 0,
+                            motor: 0,
+                            total: 0
+                        };
+
+                    }
+
+                    const equipamento =
+                        (item.descEquipamento || "").toUpperCase();
+
+                    if (equipamento.includes("COMANDO FINAL")) {
+                        resumo[chave].comandoFinal++;
+                    }
+                    else if (equipamento.includes("TRANSM")) {
+                        resumo[chave].transmissao++;
+                    }
+                    else if (equipamento.includes("CONVERSOR")) {
+                        resumo[chave].conversorTorque++;
+                    }
+                    else if (equipamento.includes("DIFERENCIAL")) {
+                        resumo[chave].diferencial++;
+                    }
+                    else if (equipamento.includes("MOTOR")) {
+                        resumo[chave].motor++;
+                    }
+
+                    resumo[chave].total++;
+
+                });
+
+                const resultado = Object.values(resumo)
+                    .sort((a, b) => {
+
+                        if (a.mina !== b.mina) {
+                            return a.mina.localeCompare(b.mina);
+                        }
+
+                        return a.localizacao.localeCompare(
+                            b.localizacao
+                        );
+
+                    });
+
+                const total = {
+                    mina: "",
+                    localizacao: "TOTAL",
+                    comandoFinal: 0,
+                    transmissao: 0,
+                    conversorTorque: 0,
+                    diferencial: 0,
+                    motor: 0,
+                    total: 0
+                };
+
+                resultado.forEach(item => {
+
+                    total.comandoFinal += item.comandoFinal;
+                    total.transmissao += item.transmissao;
+                    total.conversorTorque += item.conversorTorque;
+                    total.diferencial += item.diferencial;
+                    total.motor += item.motor;
+                    total.total += item.total;
+
+                });
+
+                resultado.push(total);
+
+                return resultado;
+
+            },
+            gerarDistribuicaoRastreadores(dados) {
+
+                return dados.map(item => {
+
+                    let mina = "Itabira";
+
+                    const local =
+                        (item.localInstalacao || "")
+                            .toUpperCase();
+
+                    if (local.startsWith("FEBR")) {
+
+                        mina = "Brucutu";
+
+                    } else if (local.startsWith("PPIC")) {
+
+                        mina = "Pico";
+
+                    } else if (local.includes("_EMREF_EXT")) {
+
+                        mina = "Vespasiano";
+
+                    }
+
+                    let localizacaoAtual = "";
+
+                    if (
+                        item.grupoAtual &&
+                        item.grupoAtual.startsWith("Instalado no ")
+                    ) {
+
+                        localizacaoAtual =
+                            item.grupoAtual.replace(
+                                "Instalado no ",
+                                ""
+                            );
+
+                    } else {
+
+                        localizacaoAtual =
+                            item.descLocalInstalacao ||
+                            item.localInstalacao ||
+                            "";
+
+                    }
+
+                    return {
+
+                        mina,
+
+                        localizacaoAtual,
+
+                        codigoSap:
+                            item.identificador,
+
+                        equipamento:
+                            item.descEquipamento
+
+                    };
+
+                });
+
+            },
+            _mostrarAjudaCobertura() {
+
+                const instalados =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/instalados");
+
+                const planejado = 50;
+
+                const faltantes =
+                    planejado - instalados;
+
+                sap.m.MessageBox.information(
+
+                    "Meta planejada: " +
+                    planejado +
+
+                    "\nRastreadores instalados: " +
+                    instalados +
+
+                    "\nRastreadores pendentes: " +
+                    faltantes +
+
+                    "\n\nFaltam " +
+                    faltantes +
+                    " rastreadores para atingir 100% da cobertura planejada do piloto.",
+
+                    {
+                        title: "Cobertura de Rastreadores"
+                    }
+
+                );
+
+            },
+            _mostrarAjudaDisponibilidade() {
+
+                const disponibilidade =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/disponibilidadeMonitoramento");
+
+                const componentesDisponiveis =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/componentesDisponiveis");
+
+                const totalComponentes =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/totalComponentesValorGerado");
+
+                const componentesIndisponiveis =
+                    totalComponentes - componentesDisponiveis;
+
+                sap.m.MessageBox.information(
+
+                    "Componentes elegíveis: " +
+                    totalComponentes +
+
+                    "\nComponentes disponíveis: " +
+                    componentesDisponiveis +
+
+                    "\nComponentes indisponíveis: " +
+                    componentesIndisponiveis +
+
+                    "\n\nDisponibilidade atual: " +
+                    disponibilidade +
+                    "%" +
+
+                    "\n\nExistem " +
+                    componentesIndisponiveis +
+                    " componentes que não apresentaram comunicação recente e devem ser avaliados.",
+
+                    {
+                        title: "Disponibilidade de Monitoramento"
+                    }
+
+                );
+
+            },
+            _mostrarAjudaGateway() {
+
+                const gatewaysAtivos =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/gateways");
+
+                const gatewaysPlanejados = 7;
+
+                const gatewaysPendentes =
+                    gatewaysPlanejados - gatewaysAtivos;
+
+                const percentual =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/percentualGateway");
+
+                sap.m.MessageBox.information(
+
+                    "Gateways planejados: " +
+                    gatewaysPlanejados +
+
+                    "\nGateways ativos: " +
+                    gatewaysAtivos +
+
+                    "\nGateways pendentes: " +
+                    gatewaysPendentes +
+
+                    "\n\nCobertura atual: " +
+                    percentual +
+                    "%" +
+
+                    "\n\nFaltam " +
+                    gatewaysPendentes +
+                    " gateways para concluir a infraestrutura RFID prevista para o piloto.",
+
+                    {
+                        title: "Cobertura de Gateways"
+                    }
+
+                );
+
+            },
+            _mostrarAjudaConsistencia() {
+
+                const falhas =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/falhasMovimentacao");
+
+                const consistentes =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/consistenciasMovimentacao");
+
+                const online =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/online");
+
+                const percentual =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/percentualConsistenciaMovimentacao");
+
+                sap.m.MessageBox.information(
+
+                    "Rastreadores online: " +
+                    online +
+
+                    "\nMovimentações consistentes: " +
+                    consistentes +
+
+                    "\nInconsistências identificadas: " +
+                    falhas +
+
+                    "\n\nConsistência atual: " +
+                    percentual +
+                    "%" +
+
+                    "\n\nForam identificadas " +
+                    falhas +
+                    " divergências entre a localização cadastrada no SAP e a localização detectada pela infraestrutura RFID.",
+
+                    {
+                        title: "Consistência das Movimentações"
+                    }
+
+                );
+
+            },
+            onAjudaOportunidadePress(oEvent) {
+
+                const tipo =
+                    oEvent.getSource()
+                        .getBindingContext("dashboard")
+                        .getProperty("tipo");
+
+                switch (tipo) {
+
+                    case "cobertura":
+                        this._mostrarAjudaCobertura();
+                        break;
+
+                    case "disponibilidade":
+                        this._mostrarAjudaDisponibilidade();
+                        break;
+
+                    case "gateway":
+                        this._mostrarAjudaGateway();
+                        break;
+
+                    case "consistencia":
+                        this._mostrarAjudaConsistencia();
+                        break;
+
+                    default:
+
+                        sap.m.MessageBox.information(
+                            "Nenhum detalhamento disponível."
+                        );
+
+                }
+
+            },
             async onAtualizacaoManualPress() {
 
                 const oBusyDialog = new BusyDialog({
@@ -177,53 +615,84 @@ sap.ui.define([
 
             },
 
-            onButtonAjudaTempoLocalizacaoPress() {
 
-                sap.m.MessageBox.information(
-
-                    "O que mede?\n\n" +
-
-                    "Avalia a redução do tempo necessário para localizar um componente em comparação ao processo tradicional.\n\n" +
-
-                    "Como é calculado?\n\n" +
-
-                    "Compara o tempo médio de localização antes e depois da utilização da solução de rastreamento.\n\n" +
-
-                    "Por que é importante?\n\n" +
-
-                    "Quanto menor o tempo de localização, maior a produtividade das equipes de manutenção.",
-
-                    {
-                        title: "Redução do Tempo de Localização"
-                    }
-
-                );
-
-            },
             onButtonAjudaDisponibilidadeMonitoramentoPress() {
 
-                sap.m.MessageBox.information(
+                const componentesDisponiveis =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/componentesDisponiveis");
 
-                    "O que mede?\n\n" +
+                const totalComponentes =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/totalComponentesValorGerado");
 
-                    "Indica o percentual de componentes que puderam ser efetivamente monitorados pela solução durante o período analisado.\n\n" +
+                const disponibilidade =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/disponibilidadeMonitoramento");
 
-                    "Como é calculado?\n\n" +
+                const formula =
+                    componentesDisponiveis +
+                    " componentes disponíveis ÷ " +
+                    totalComponentes +
+                    " componentes elegíveis × 100 = " +
+                    disponibilidade +
+                    "%";
 
-                    "Considera os componentes que ficaram disponíveis na área coberta pelos gateways FEIT durante a semana. Para componentes instalados em veículos, caso pelo menos um componente do mesmo veículo tenha sido detectado, todos os componentes desse veículo também são considerados disponíveis. Componentes fora da área operacional da Mina do Cauê são desconsiderados da análise.\n\n" +
+                const oDialog = new sap.m.Dialog({
+                    title: "Disponibilidade",
+                    contentWidth: "650px",
 
-                    "Por que é importante?\n\n" +
+                    content: new sap.m.FormattedText({
+                        htmlText:
 
-                    "Demonstra a capacidade real da solução de monitorar os componentes do piloto e validar a cobertura operacional da infraestrutura implantada.",
+                            "<strong>O que mede?</strong><br><br>" +
 
-                    {
-                        title: "Disponibilidade de Monitoramento"
-                    }
+                            "Indica o percentual de componentes elegíveis que permaneceram disponíveis para rastreamento durante o período analisado.<br><br>" +
 
-                );
+                            "<strong>Como é calculado?</strong><br><br>" +
+
+                            "Considera os componentes que apresentaram comunicação nos últimos 7 dias. Componentes localizados fora da área operacional FEIT são considerados disponíveis, pois não estão sob cobertura esperada da infraestrutura RFID de Itabira.<br><br>" +
+
+                            "<strong>" +
+                            formula +
+                            "</strong><br><br>" +
+
+                            "<strong>Por que é importante?</strong><br><br>" +
+
+                            "Demonstra a capacidade real da solução de monitorar continuamente os componentes do piloto, considerando apenas indisponibilidades que efetivamente podem ser atribuídas à infraestrutura monitorada."
+                    }),
+
+                    beginButton: new sap.m.Button({
+                        text: "OK",
+                        press: function () {
+                            oDialog.close();
+                            oDialog.destroy();
+                        }
+                    })
+                });
+
+                oDialog.open();
 
             },
             onButtonAjudaComponentesMovimentadosPress() {
+
+                const componentesMovimentados =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/componentesMovimentados");
+
+                const totalComponentes =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/totalComponentesValorGerado");
+
+                const percentualMovimentados =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/percentualMovimentados");
 
                 sap.m.MessageBox.information(
 
@@ -234,6 +703,13 @@ sap.ui.define([
                     "Como é calculado?\n\n" +
 
                     "A partir da análise do histórico de rastreamento, identificando componentes que registraram movimentações entre locais, oficinas, minas ou fases do processo.\n\n" +
+
+                    componentesMovimentados +
+                    " componentes movimentados ÷ " +
+                    totalComponentes +
+                    " componentes monitorados × 100 = " +
+                    percentualMovimentados +
+                    "%\n\n" +
 
                     "Por que é importante?\n\n" +
 
@@ -246,52 +722,159 @@ sap.ui.define([
                 );
 
             },
+            onAjudaOportunidadePress(oEvent) {
+
+                const tipo =
+                    oEvent.getSource()
+                        .getBindingContext("dashboard")
+                        .getProperty("tipo");
+
+                switch (tipo) {
+
+                    case "cobertura":
+                        this._mostrarAjudaCobertura();
+                        break;
+
+                    case "disponibilidade":
+                        this._mostrarAjudaDisponibilidade();
+                        break;
+
+                    case "gateway":
+                        this._mostrarAjudaGateway();
+                        break;
+
+                    case "consistencia":
+                        this._mostrarAjudaConsistencia();
+                        break;
+
+                }
+
+            },
+
             onButtonAjudaCoberturaPress() {
 
-                sap.m.MessageBox.information(
+                const oDashboard =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getData();
 
-                    "O que mede?\n\n" +
+                const instalados =
+                    oDashboard.instalados;
 
-                    "Percentual da meta de implantação efetivamente alcançada durante o piloto.\n\n" +
+                const planejado = 50;
 
-                    "Como é calculado?\n\n" +
+                const cobertura =
+                    oDashboard.coberturaValorGerado;
 
-                    "Relação entre a quantidade de componentes monitorados e a meta planejada para o piloto (50 componentes).\n\n" +
+                const oDialog = new sap.m.Dialog({
+                    title: "Cobertura de Rastreadores",
+                    contentWidth: "650px",
 
-                    "Por que é importante?\n\n" +
+                    content: new sap.m.FormattedText({
+                        htmlText:
 
-                    "Mostra o nível de adoção da solução e indica se os resultados obtidos são representativos para apoiar uma expansão da iniciativa.",
+                            "<strong>O que mede?</strong><br><br>" +
 
-                    {
-                        title: "Cobertura do Piloto"
-                    }
+                            "Percentual da meta de implantação efetivamente alcançada durante o piloto.<br><br>" +
 
-                );
+                            "<strong>Como é calculado?</strong><br><br>" +
+
+                            "Relação entre a quantidade de componentes monitorados e a meta planejada para o piloto.<br><br>" +
+
+                            "<strong>" +
+                            instalados +
+                            " componentes instalados ÷ " +
+                            planejado +
+                            " componentes planejados × 100 = " +
+                            cobertura +
+                            "%" +
+                            "</strong><br><br>" +
+
+                            "<strong>Por que é importante?</strong><br><br>" +
+
+                            "Mostra o nível de adoção da solução e indica se os resultados obtidos são representativos para apoiar uma expansão da iniciativa."
+                    }),
+
+                    beginButton: new sap.m.Button({
+                        text: "OK",
+                        press: function () {
+                            oDialog.close();
+                            oDialog.destroy();
+                        }
+                    })
+                });
+
+                oDialog.open();
 
             },
             onButtonAjudaIndiceEfetividadePress() {
 
-                sap.m.MessageBox.information(
+                const disponibilidade =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/disponibilidadeMonitoramento");
 
-                    "O que mede?\n\n" +
+                const cobertura =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/coberturaValorGerado");
 
-                    "Consolida os principais resultados do piloto em uma única métrica de desempenho.\n\n" +
+                const consistencia =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/percentualConsistenciaMovimentacao");
 
-                    "Como é calculado?\n\n" +
 
-                    "Combina os indicadores de tempo de localização, Disponibilidade de Monitoramento, cobertura do piloto e componentes movimentados.\n\n" +
+                const gateways =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/percentualGateway");
 
-                    "Por que é importante?\n\n" +
+                const indice =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/indiceEfetividade");
 
-                    "Permite uma avaliação rápida da efetividade global da solução, resumindo os principais benefícios alcançados durante o piloto.",
+                const oDialog = new sap.m.Dialog({
+                    title: "Índice Geral de Efetividade",
+                    contentWidth: "650px",
 
-                    {
-                        title: "Índice Geral de Efetividade"
-                    }
+                    content: new sap.m.FormattedText({
+                        htmlText:
+                            "<strong>O que mede?</strong><br><br>" +
 
-                );
+                            "Consolida os principais resultados do piloto em uma única métrica de desempenho.<br><br>" +
+
+                            "<strong>Como é calculado?</strong><br><br>" +
+
+                            "Combina os indicadores de Disponibilidade de Monitoramento, Cobertura do Piloto, Consistência das movimentações e Disponibilidade de Gateways, aplicando pesos conforme sua relevância para o resultado do piloto.<br><br>" +
+
+                            "<strong>Fórmula:</strong><br><br>" +
+
+                            "Disponibilidade (" + disponibilidade + "% × 50%) + " +
+                            "Cobertura (" + cobertura + "% × 25%) + " +
+                            "Consistência (" + consistencia + "% × 15%) + " +
+                            "Gateways (" + gateways + "% × 10%) = " +
+                            "<strong>" + indice + "%</strong><br><br>" +
+
+                            "<strong>Por que é importante?</strong><br><br>" +
+
+                            "Permite uma avaliação rápida da efetividade global da solução, resumindo os principais benefícios alcançados durante o piloto."
+                    }),
+
+                    beginButton: new sap.m.Button({
+                        text: "OK",
+                        press: function () {
+                            oDialog.close();
+                            oDialog.destroy();
+                        }
+                    })
+                });
+
+                oDialog.open();
 
             },
+
             onCardOnlinePress() {
 
                 const agora = new Date();
@@ -319,17 +902,42 @@ sap.ui.define([
 
                 let texto = "";
 
-                texto += `Componentes Online: ${dados.length}\n\n`;
+                texto +=
+                    "Componentes Online: " +
+                    dados.length +
+                    "\n\n";
 
                 dados.forEach(item => {
 
                     texto +=
-                        `Equipamento: ${item.identificador}\n` +
-                        `Descrição: ${item.descEquipamento}\n` +
-                        `Grupo: ${item.grupoAtual}\n` +
-                        `Gateway: ${item.gateway || "Não informado"}\n` +
-                        `Última atualização: ${item.ultimaPosicao}\n\n` +
-                        `─────────────────────────\n\n`;
+                        "Equipamento: " +
+                        item.identificador +
+                        "\n" +
+
+                        "Descrição: " +
+                        item.descEquipamento +
+                        "\n" +
+
+                        "Local: " +
+                        (item.descLocalInstalacao ||
+                            item.localInstalacao ||
+                            "Não informado") +
+                        "\n" +
+
+                        "Grupo: " +
+                        item.grupoAtual +
+                        "\n" +
+
+                        "Gateway: " +
+                        (item.gateway || "Não informado") +
+                        "\n" +
+
+                        "Última atualização: " +
+                        item.ultimaPosicao +
+                        "\n\n" +
+
+                        "─────────────────────────" +
+                        "\n\n";
 
                 });
 
@@ -375,6 +983,7 @@ sap.ui.define([
                     texto +=
                         `Equipamento: ${item.identificador}\n` +
                         `Descrição: ${item.descEquipamento}\n` +
+                        `Local: ${item.localInstalacao}\n` +
                         `Grupo: ${item.grupoAtual}\n` +
                         `Gateway: ${item.gateway || "Não informado"}\n` +
                         `Última atualização: ${item.ultimaPosicao || "Sem comunicação"}\n\n` +
@@ -407,22 +1016,30 @@ sap.ui.define([
                         .getModel("dashboard")
                         .getProperty("/totalEquipamentos");
 
-                let texto = "";
+                let html = "";
 
-                texto += `Componentes rastreados: ${total}\n\n`;
+                html +=
+                    "<b>Componentes rastreados:</b> " +
+                    total +
+                    "<br><br>";
 
-                texto += "Distribuição por fase\n";
-                texto += "─────────────────────\n";
+                html +=
+                    "<b>Distribuição por fase</b><br>" +
+                    "─────────────────────<br>";
 
                 resumoGrupoAtual.forEach(item => {
 
-                    texto +=
-                        `${item.grupo}: ${item.quantidade}\n`;
+                    html +=
+                        item.grupo +
+                        ": " +
+                        item.quantidade +
+                        "<br>";
 
                 });
 
-                texto += "\nPrincipais famílias\n";
-                texto += "─────────────────────\n";
+                html +=
+                    "<br><b>Principais famílias</b><br>" +
+                    "─────────────────────<br>";
 
                 resumoEquipamentos
                     .filter(item => item.familia !== "TOTAL")
@@ -430,20 +1047,145 @@ sap.ui.define([
                     .slice(0, 5)
                     .forEach(item => {
 
-                        texto +=
-                            `${item.familia}: ${item.total}\n`;
+                        html +=
+                            item.familia +
+                            ": " +
+                            item.total +
+                            "<br>";
 
                     });
 
-                sap.m.MessageBox.information(
-                    texto,
-                    {
-                        title: "Resumo dos Componentes"
-                    }
-                );
+                const oDialog = new sap.m.Dialog({
+                    title: "Resumo dos Componentes",
+                    contentWidth: "650px",
+
+                    content: new sap.m.FormattedText({
+                        htmlText: html
+                    }),
+
+                    beginButton: new sap.m.Button({
+                        text: "OK",
+                        press: function () {
+                            oDialog.close();
+                            oDialog.destroy();
+                        }
+                    })
+                });
+
+                oDialog.open();
 
             },
+            onButtonAjudaCoberturaGatewaysPress() {
 
+                const gatewaysAtivos =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/gateways");
+
+                const percentual =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/percentualGateway");
+
+                const gatewaysPlanejados = 7;
+
+                const oDialog = new sap.m.Dialog({
+                    title: "Cobertura de Gateways",
+                    contentWidth: "650px",
+
+                    content: new sap.m.FormattedText({
+                        htmlText:
+
+                            "<strong>O que mede?</strong><br><br>" +
+
+                            "Avalia o percentual de gateways previstos para o piloto que estão efetivamente ativos e contribuindo para a cobertura da infraestrutura RFID.<br><br>" +
+
+                            "<strong>Como é calculado?</strong><br><br>" +
+
+                            "Compara a quantidade de gateways ativos identificados no ambiente com a quantidade total planejada para o piloto.<br><br>" +
+
+                            "<strong>" +
+                            gatewaysAtivos +
+                            " gateways ativos ÷ " +
+                            gatewaysPlanejados +
+                            " gateways planejados × 100 = " +
+                            percentual +
+                            "%</strong><br><br>" +
+
+                            "<strong>Por que é importante?</strong><br><br>" +
+
+                            "A disponibilidade dos gateways impacta diretamente a capacidade da solução de detectar movimentações e monitorar componentes em tempo real. Quanto maior a cobertura da infraestrutura, maior a confiabilidade dos indicadores de rastreamento."
+                    }),
+
+                    beginButton: new sap.m.Button({
+                        text: "OK",
+                        press: function () {
+                            oDialog.close();
+                            oDialog.destroy();
+                        }
+                    })
+                });
+
+                oDialog.open();
+
+            },
+            onButtonAjudaConsistenciaMovimentacaoPress() {
+
+                const consistentes =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/consistenciasMovimentacao");
+
+                const online =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/online");
+
+                const percentual =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/percentualConsistenciaMovimentacao");
+
+                const oDialog = new sap.m.Dialog({
+                    title: "Consistência das Movimentações",
+                    contentWidth: "650px",
+
+                    content: new sap.m.FormattedText({
+                        htmlText:
+
+                            "<strong>O que mede?</strong><br><br>" +
+
+                            "Avalia a aderência entre a localização operacional cadastrada e a última movimentação detectada pela infraestrutura RFID de Itabira.<br><br>" +
+
+                            "<strong>Como é calculado?</strong><br><br>" +
+
+                            "Considera apenas rastreadores online (última atualização nos últimos 7 dias). Um rastreador é considerado consistente quando sua localização cadastrada está compatível com a área operacional onde foi detectado.<br><br>" +
+
+                            "<strong>" +
+                            consistentes +
+                            " movimentações consistentes ÷ " +
+                            online +
+                            " rastreadores online × 100 = " +
+                            percentual +
+                            "%</strong><br><br>" +
+
+                            "<strong>Por que é importante?</strong><br><br>" +
+
+                            "Permite identificar divergências entre a localização física dos componentes e os registros operacionais, aumentando a confiabilidade das informações utilizadas para gestão e rastreabilidade."
+                    }),
+
+                    beginButton: new sap.m.Button({
+                        text: "OK",
+                        press: function () {
+                            oDialog.close();
+                            oDialog.destroy();
+                        }
+                    })
+                });
+
+                oDialog.open();
+
+            },
             criarPinLocal(nome, lat, lng) {
 
                 return L.marker(
@@ -1600,35 +2342,35 @@ sap.ui.define([
                         icon: L.divIcon({
                             className: "",
                             html: `
-                        <div style="
-                            display:flex;
-                            align-items:center;
-                            white-space:nowrap;
-                        ">
-
                             <div style="
-                                width:18px;
-                                height:18px;
-                                background:#95a5a6;
-                                border-radius:50%;
-                                border:3px solid white;
-                                box-shadow:0 0 6px rgba(0,0,0,.5);
+                                display:flex;
+                                align-items:center;
+                                white-space:nowrap;
                             ">
+
+                                <div style="
+                                    width:18px;
+                                    height:18px;
+                                    background:#95a5a6;
+                                    border-radius:50%;
+                                    border:3px solid white;
+                                    box-shadow:0 0 6px rgba(0,0,0,.5);
+                                ">
+                                </div>
+
+                                <span style="
+                                    margin-left:6px;
+                                    color:white;
+                                    font-weight:bold;
+                                    font-size:14px;
+                                    text-shadow:
+                                        2px 2px 4px black;
+                                ">
+                                    ${texto}
+                                </span>
+
                             </div>
-
-                            <span style="
-                                margin-left:6px;
-                                color:white;
-                                font-weight:bold;
-                                font-size:14px;
-                                text-shadow:
-                                    2px 2px 4px black;
-                            ">
-                                ${texto}
-                            </span>
-
-                        </div>
-                    `,
+                        `,
                             iconSize: [220, 24],
                             iconAnchor: [9, 9]
                         })
@@ -1679,8 +2421,6 @@ sap.ui.define([
                         "cityLabel"
                     ).addTo(this._layerLabels);
 
-
-
                     this.criarLabel(
                         "JOÃO MONLEVADE",
                         -19.812300,
@@ -1692,15 +2432,21 @@ sap.ui.define([
                         "VESPASIANO",
                         -19.708891,
                         -43.908532,
-
                         "cityLabel"
                     ).addTo(this._layerLabels);
+
                     this.criarLabel(
                         "ITABIRITO",
                         -20.209063,
                         -43.862584,
+                        "cityLabel"
+                    ).addTo(this._layerLabels);
 
 
+                    this.criarLabel(
+                        "MARIANA",
+                        -20.376120,
+                        -43.416479,
                         "cityLabel"
                     ).addTo(this._layerLabels);
 
@@ -1762,6 +2508,10 @@ sap.ui.define([
                         });
 
                 }
+                if (zoom >= 14) {
+
+                }
+
                 if (zoom >= 13) {
 
                     this.criarLabel(
@@ -1775,19 +2525,18 @@ sap.ui.define([
                 if (zoom >= 14) {
 
                     [
-
-                        ["DIQUE DE IPOEMA", -19.567, -43.305],
-                        ["BARRAGEM DO QUINZINHO", -19.565, -43.280],
-                        ["PEDREIRA DO INSTITUTO", -19.545, -43.165],
-
-                        ["PDE BORRACHUDO", -19.600, -43.285],
-
-                        ["PEDREIRA DETALHE", -19.620, -43.258],
-
-                        ["DIQUE DE IPOEMA", -19.567, -43.305]
-
-
-
+                        ["ROSÁRIO", -20.3875, -43.4130],
+                        ["SANTO ANTÔNIO", -20.3815, -43.4230],
+                        ["BARRO PRETO", -20.3780, -43.4060],
+                        ["CABEÇAS", -20.3720, -43.4120],
+                        ["CHÁCARA", -20.3710, -43.4250],
+                        ["COLINA", -20.3680, -43.4190],
+                        ["PASSAGEM DE MARIANA", -20.3770, -43.4580],
+                        ["BANDEIRANTES", -20.3920, -43.4210],
+                        ["SÃO PEDRO", -20.3850, -43.4320],
+                        ["SANTANA", -20.3810, -43.4170],
+                        ["MORRO SANTANA", -20.3890, -43.4140],
+                        ["VILA MAQUINÉ", -20.3740, -43.4050]
                     ]
                         .forEach(item => {
 
@@ -1828,12 +2577,9 @@ sap.ui.define([
                 if (zoom >= 13) {
 
                     [
-
                         ["MINA DE BRUCUTU", -19.870131, -43.398402],
                         ["MINA DO PICO", -20.217185, -43.864846],
-
-
-
+                        ["MINA DE ALEGRIA", -20.172795, -43.490555]
                     ]
                         .forEach(item => {
 
@@ -1944,35 +2690,46 @@ sap.ui.define([
 
                 dados.forEach(item => {
 
-                    if (!item.tipo || !item.status) {
+                    let tipo =
+                        this.normalizarGrupo(
+                            item.descEquipamento
+                        );
+
+                    if (!tipo || tipo === "OUTROS") {
                         return;
                     }
 
-                    if (item.tipo === "OUTROS") {
-                        return;
-                    }
+                    let status =
+                        this.determinarGrupo(item);
 
-                    let status = item.status;
-
-                    if (status.startsWith("Instalado no ")) {
+                    if (
+                        status &&
+                        status.startsWith("Instalado no ")
+                    ) {
                         status = "Instalado";
                     }
 
                     const chave =
-                        `${item.tipo}|${status}`;
+                        `${tipo}|${status}`;
 
-                    resumo[chave] = (resumo[chave] || 0) + 1;
+                    resumo[chave] =
+                        (resumo[chave] || 0) + 1;
 
                 });
 
                 return Object.keys(resumo).map(chave => {
 
-                    const partes = chave.split("|");
+                    const partes =
+                        chave.split("|");
 
                     return {
+
                         tipo: partes[0],
+
                         status: partes[1],
+
                         quantidade: resumo[chave]
+
                     };
 
                 });
@@ -2184,6 +2941,25 @@ sap.ui.define([
                     "/odata/v4/smart-pcm/Rastreio"
                 );
                 const json = await response.json();
+                const dadosFiltrados = (json.value || []).filter(item => {
+
+                    if (
+                        item.grupoAtual ===
+                        "Tags Digitais Não Habilitadas"
+                    ) {
+                        return false;
+                    }
+
+                    if (
+                        item.identificador ===
+                        "11039948"
+                    ) {
+                        return false;
+                    }
+
+                    return true;
+
+                });
                 const responseEstrutura =
                     await fetch(
                         "http://localhost:4000/EquipamentosEstrutura"
@@ -2191,20 +2967,27 @@ sap.ui.define([
 
                 const equipamentosEstrutura =
                     await responseEstrutura.json();
+
                 const resumoTipoStatus =
-                    this.gerarResumoTipoStatus(
-                        equipamentosEstrutura
+                    this.gerarGraficoTipoStatus(
+                        dadosFiltrados
                     );
                 const resumoFrotas =
                     this.gerarResumoFrotas(
-                        equipamentosEstrutura
+                        equipamentosEstrutura.filter(
+                            item => item.equipamento !== "11039948"
+                        )
                     );
                 const responseGateway = await fetch(
                     "http://10.44.32.193:4000/Gateway"
                 );
 
                 const gateways = await responseGateway.json();
+                const responseZonas = await fetch(
+                    "http://localhost:4000/Zonas"
+                );
 
+                const zonas = await responseZonas.json();
                 // sap.m.MessageToast.show(
                 //     "Passou aqui 1"
                 // );
@@ -2233,6 +3016,7 @@ sap.ui.define([
 
                 const valorGerado =
                     await responseValorGerado.json();
+
                 const responseValorGeradoSemanal =
                     await fetch(
                         "http://localhost:4000/ValorGeradoSemanal"
@@ -2257,11 +3041,6 @@ sap.ui.define([
                     );
                 }
 
-                const dadosFiltrados = (json.value || []).filter(
-                    item =>
-                        item.grupoAtual !== "Tags Digitais Não Habilitadas" &&
-                        item.identificador !== "11039948"
-                );
 
 
 
@@ -2278,7 +3057,7 @@ sap.ui.define([
                 let online = 0;
                 let offline = 0;
 
-
+                const falhasMovimentacao = [];
 
                 dadosFiltrados.forEach(item => {
 
@@ -2312,6 +3091,36 @@ sap.ui.define([
                             gatewaysSet.add(item.gateway);
                         }
 
+                        const local =
+                            (item.localInstalacao || "")
+                                .toUpperCase();
+
+                        if (
+                            item.gateway &&
+                            !local.startsWith("FEIT")
+                        ) {
+
+                            falhasMovimentacao.push({
+
+                                identificador:
+                                    item.identificador,
+
+                                localInstalacao:
+                                    item.localInstalacao,
+
+                                equipamento:
+                                    item.descEquipamento,
+
+                                gateway:
+                                    item.gateway,
+
+                                ultimaPosicao:
+                                    item.ultimaPosicao
+
+                            });
+
+                        }
+
                     } else {
 
                         offline++;
@@ -2319,6 +3128,22 @@ sap.ui.define([
                     }
 
                 });
+                const totalFalhasMovimentacao =
+                    falhasMovimentacao.length;
+
+                const percentualFalhasMovimentacao =
+                    online > 0
+                        ? (
+                            totalFalhasMovimentacao /
+                            online
+                        ) * 100
+                        : 0;
+                const percentualConsistenciaMovimentacao =
+                    online > 0
+                        ? (
+                            ((online - totalFalhasMovimentacao) / online) * 100
+                        )
+                        : 100;
                 const gruposNormais = [];
                 const gruposEspeciais = [];
 
@@ -2366,6 +3191,12 @@ sap.ui.define([
 
                 const resumoGrupoAtual =
                     this.gerarResumoGrupoAtual(
+                        dadosFiltrados
+                    );
+
+
+                const distribuicaoImplantacao =
+                    this.gerarDistribuicaoImplantacao(
                         dadosFiltrados
                     );
                 const detalhesTagsDesatualizadas =
@@ -2478,7 +3309,7 @@ sap.ui.define([
                 }
                 const graficoTipoStatus =
                     this.gerarGraficoTipoStatus(
-                        equipamentosEstrutura
+                        dadosFiltrados
                     );
                 // sap.m.MessageBox.information(
                 //     JSON.stringify(
@@ -2557,14 +3388,70 @@ sap.ui.define([
                 const percentualEquipamentos =
                     ((totalEquipamentos / 50) * 100).toFixed(1);
                 const percentualGateway =
-                    ((gateways.length / 7) * 100).toFixed(1) + "%";
+                    ((gateways.length / 7) * 100).toFixed(1);
+
+                const oportunidadesMelhoria = [];
+
+                if (Number(valorGerado.cobertura) < 100) {
+
+                    oportunidadesMelhoria.push({
+                        tipo: "cobertura",
+                        texto:
+                            "Concluir a instalação dos rastreadores pendentes para atingir 100% da cobertura planejada.",
+                        state: "Warning"
+                    });
+
+                }
+
+                if (Number(valorGerado.disponibilidadeMonitoramento) < 100) {
+
+                    oportunidadesMelhoria.push({
+                        tipo: "disponibilidade",
+                        texto:
+                            "Inspecionar componentes com localização desatualizada para elevar a disponibilidade de monitoramento.",
+                        state: "Warning"
+                    });
+
+                }
+
+                if (Number(percentualGateway) < 100) {
+
+                    oportunidadesMelhoria.push({
+                        tipo: "gateway",
+                        texto:
+                            "Concluir a implantação dos gateways remanescentes para ampliar a cobertura RFID.",
+                        state: "Warning"
+                    });
+
+                }
+
+                if (Number(percentualConsistenciaMovimentacao) < 100) {
+
+                    oportunidadesMelhoria.push({
+                        tipo: "consistencia",
+                        texto:
+                            "Corrigir divergências entre localização SAP e posição detectada para aumentar a consistência operacional.",
+                        state: "Warning"
+                    });
+
+                }
+
+                if (oportunidadesMelhoria.length === 0) {
+
+                    oportunidadesMelhoria.push({
+                        texto:
+                            "Todas as metas operacionais do piloto foram atingidas.",
+                        state: "Success"
+                    });
+
+                }
                 this.getView()
                     .getModel("dashboard")
                     .setData({
 
                         totalEquipamentos,
                         percentualEquipamentos,
-                        
+
                         online,
 
                         offline,
@@ -2639,9 +3526,27 @@ sap.ui.define([
                             valorGerado.classificacao,
 
                         valorGeradoSemanal:
-                            valorGeradoSemanal
+                            valorGeradoSemanal,
 
-                    });
+                        falhasMovimentacao:
+                            totalFalhasMovimentacao,
+
+                        consistenciasMovimentacao:
+                            online - totalFalhasMovimentacao,
+
+                        percentualConsistenciaMovimentacao:
+                            percentualConsistenciaMovimentacao.toFixed(1),
+
+                        detalhesFalhasMovimentacao:
+                            falhasMovimentacao,
+
+                        oportunidadesMelhoria:
+                            oportunidadesMelhoria,
+
+                        distribuicaoImplantacao:
+                            distribuicaoImplantacao
+                    }
+                    );
                 const oVizFrame =
                     this.byId("idTipoStatusVizFrame");
 
@@ -2915,11 +3820,11 @@ sap.ui.define([
                 }
 
                 this.byId("htmlMapa").setContent(`
-                    <div
-                        id="mapaEquipamentos"
-                        style="height:850px;width:100%;">
-                    </div>
-                `);
+                        <div
+                            id="mapaEquipamentos"
+                            style="height:950px;width:100%;">
+                        </div>
+                    `);
                 sap.ui.getCore().applyChanges();
 
                 setTimeout(async () => {
@@ -3032,6 +3937,31 @@ sap.ui.define([
                     this._map = L.map("mapaEquipamentos", {
                         layers: [satelite]
                     });
+                    zonas.forEach(zona => {
+
+                        try {
+
+                            const pontos = JSON.parse(zona.pontos);
+
+                            L.polygon(
+                                pontos.map(p => [p.lat, p.lon]),
+                                {
+                                    color: "#FFFFFF",
+                                    weight: 3,
+                                    opacity: 0.5,
+                                    fillColor: zona.cor,
+                                    fillOpacity: 0.05
+                                }
+                            )
+                                .bindTooltip(zona.nome)
+                                .addTo(this._map);
+
+                        } catch (e) {
+
+                        }
+
+                    });
+
                     this._map.on("click", (e) => {
 
                         const latitude = e.latlng.lat.toFixed(6);
@@ -3137,18 +4067,18 @@ sap.ui.define([
                             L.DomUtil.create("div");
 
                         div.innerHTML = `
-                            <button
-                                style="
-                                    background:white;
-                                    border:1px solid #ccc;
-                                    padding:8px;
-                                    cursor:pointer;
-                                    font-size:16px;
-                                    font-weight:bold;
-                                ">
-                                📏 Medir
-                            </button>
-                        `;
+                                <button
+                                    style="
+                                        background:white;
+                                        border:1px solid #ccc;
+                                        padding:8px;
+                                        cursor:pointer;
+                                        font-size:16px;
+                                        font-weight:bold;
+                                    ">
+                                    📏 Medir
+                                </button>
+                            `;
                         div.onclick = () => {
 
                             this._modoMedicao =
@@ -3277,7 +4207,12 @@ sap.ui.define([
                             "vertical-align:middle;" +
                             "margin-right:8px;'></span> Gateway<br>" +
 
-
+                            "<span style='display:inline-block;" +
+                            "width:18px;" +
+                            "height:3px;" +
+                            "background:#666;" +
+                            "vertical-align:middle;" +
+                            "margin-right:8px;'></span> Zona<br>" +
                             "<span style='display:inline-block;" +
                             "width:8px;" +
                             "height:8px;" +
@@ -3306,17 +4241,64 @@ sap.ui.define([
                         div.style.width = '200px';
                         div.style.color = '#333';
                         div.style.marginTop = '6px';
-
+                        const htmlVeiculos = veiculos
+                            .filter(v => v.Veiculo)
+                            .sort((a, b) => a.Veiculo.localeCompare(b.Veiculo))
+                            .map(v =>
+                                `<a            ${v.Veiculo}
+        </a><br>`
+                            )
+                            .join("");
                         div.innerHTML = `
-                        <div style="font-weight:bold; margin-bottom:4px; text-align:center; border-bottom:1px solid #ddd;">
-                            Cidades (MG)
-                        </div>
-                        <a href="#" id="cidadeItabira">Itabira</a><br>
-                            <a href="#" id="cidadeItabirito">Itabirito</a><br>
-                        <a href="#" id="cidadeSaoGoncalo">São Gonçalo</a><br>
-                        <a href="#" id="cidadeVespasiano"> Vespasiano</a>
-                    `;
+    <div style="font-weight:bold; margin-bottom:4px; text-align:center; border-bottom:1px solid #ddd;">
+        Cidades (MG)
+    </div>
 
+    <a href="#" id="cidadeItabira">Itabira</a><br>
+    <a href="#" id="cidadeItabirito">Itabirito</a><br>
+    <a href="#" id="cidadeSaoGoncalo">São Gonçalo</a><br>
+    <a href="#" id="cidadeVespasiano">Vespasiano</a>
+
+    <div style="font-weight:bold; margin-top:8px; margin-bottom:4px; text-align:center; border-top:1px solid #ddd; padding-top:4px;">
+        Minas
+    </div>
+
+    <a href="#" id="minaCaue">Cauê</a><br>
+    <a href="#" id="minaConceicao">Conceição</a><br>
+    <a href="#" id="minaPeriquito">Periquito</a><br>
+    <a href="#" id="minaAlegria">Alegria</a><br>
+    <a href="#" id="minaPico">Pico</a><br>
+    <a href="#" id="minaBrucutu">Brucutu</a>
+`;
+
+                        const tituloVeiculos = document.createElement("div");
+
+                        tituloVeiculos.style.fontWeight = "bold";
+                        tituloVeiculos.style.marginTop = "8px";
+                        tituloVeiculos.style.marginBottom = "4px";
+                        tituloVeiculos.style.textAlign = "center";
+                        tituloVeiculos.style.borderTop = "1px solid #ddd";
+                        tituloVeiculos.style.paddingTop = "4px";
+
+                        tituloVeiculos.textContent = "Veículos";
+
+                        div.appendChild(tituloVeiculos);
+
+                        veiculos
+                            .filter(v => v.Veiculo)
+                            .sort((a, b) => a.Veiculo.localeCompare(b.Veiculo))
+                            .forEach(v => {
+
+                                const link = document.createElement("a");
+
+                                link.id = "veiculo_" + v.Veiculo;
+                                link.href = "#";
+                                link.textContent = v.Veiculo;
+
+                                div.appendChild(link);
+                                div.appendChild(document.createElement("br"));
+
+                            });
                         L.DomEvent.disableClickPropagation(div);
 
                         setTimeout(() => {
@@ -3365,12 +4347,107 @@ sap.ui.define([
                                     );
 
                                 });
+                            document.getElementById('minaCaue')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-19.599252, -43.218690],
+                                        15
+                                    );
+
+                                });
+
+                            document.getElementById('minaConceicao')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-19.657580, -43.269398],
+                                        15
+                                    );
+
+                                });
+
+                            document.getElementById('minaPeriquito')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-19.632715, -43.254261],
+                                        15
+                                    );
+
+                                });
+
+                            document.getElementById('minaAlegria')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-20.163679, -43.501025],
+                                        15
+                                    );
+
+                                });
+
+                            document.getElementById('minaPico')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-20.217185, -43.864846],
+                                        15
+                                    );
+
+                                });
+
+                            document.getElementById('minaBrucutu')
+                                ?.addEventListener('click', (e) => {
+
+                                    e.preventDefault();
+
+                                    this._map.setView(
+                                        [-19.870131, -43.398402],
+                                        15
+                                    );
+
+                                });
+                            veiculos.forEach(v => {
+
+                                document
+                                    .getElementById("veiculo_" + v.Veiculo)
+                                    ?.addEventListener("click", (e) => {
+
+                                        e.preventDefault();
+
+                                        const lat = parseFloat(v.Latitude);
+                                        const lng = parseFloat(v.Longitude);
+
+                                        if (isNaN(lat) || isNaN(lng)) {
+                                            return;
+                                        }
+
+                                        this._map.setView(
+                                            [lat, lng],
+                                            17
+                                        );
+
+                                    });
+
+                            });
                         }, 100);
 
                         return div;
                     };
 
                     cidades.addTo(this._map);
+
                     this._layerOnline = L.layerGroup();
                     this._layerOffline = L.layerGroup();
                     this._layerGateway = L.layerGroup();
@@ -3491,31 +4568,19 @@ sap.ui.define([
                         const online =
                             dataPosicao >= limiteOnline;
 
-                        const ehDesatualizada =
-                            item.grupoAtual === "Tags Digitais desatualizadas";
-
                         const cor =
-                            ehDesatualizada
-                                ? "#f1c40f"
-                                : (online ? "#2ecc71" : "#f1c40f");
-
+                            online
+                                ? "#2ecc71"
+                                : "#f1c40f";
                         const sombra =
-                            ehDesatualizada
-                                ? "rgba(241,196,15,0.8)"
-                                : (
-                                    online
-                                        ? "rgba(46,204,113,0.8)"
-                                        : "rgba(241,196,15,0.8)"
-                                );
+                            online
+                                ? "rgba(46,204,113,0.8)"
+                                : "rgba(241,196,15,0.8)";
 
                         const halo =
-                            ehDesatualizada
-                                ? "rgba(241,196,15,0.25)"
-                                : (
-                                    online
-                                        ? "rgba(46,204,113,0.25)"
-                                        : "rgba(241,196,15,0.25)"
-                                );
+                            online
+                                ? "rgba(46,204,113,0.25)"
+                                : "rgba(241,196,15,0.25)";
                         const ehInstalado =
                             item.grupoAtual &&
                             item.grupoAtual.startsWith("Instalado no ");
@@ -3547,74 +4612,74 @@ sap.ui.define([
                                     className: "",
                                     html: ehInstalado
                                         ? `
-                            <div style="
-                                width:16px;
-                                height:16px;
-                                background:#9B6DFF;
-                                border:3px solid white;
-                                border-radius:50%;
-                                box-shadow:
-                                    0 0 0 4px rgba(155,109,255,0.25),
-                                    0 0 10px rgba(155,109,255,0.8);
-                            "></div>
-                        `
+                                <div style="
+                                    width:16px;
+                                    height:16px;
+                                    background:#9B6DFF;
+                                    border:3px solid white;
+                                    border-radius:50%;
+                                    box-shadow:
+                                        0 0 0 4px rgba(155,109,255,0.25),
+                                        0 0 10px rgba(155,109,255,0.8);
+                                "></div>
+                            `
                                         : `
-                            <div style="
-                                width:16px;
-                                height:16px;
-                                background:${cor};
-                                border:3px solid white;
-                                border-radius:50%;
-                                box-shadow:
-                                    0 0 0 4px ${halo},
-                                    0 0 10px ${sombra};
-                            "></div>
-                        `,
+                                <div style="
+                                    width:16px;
+                                    height:16px;
+                                    background:${cor};
+                                    border:3px solid white;
+                                    border-radius:50%;
+                                    box-shadow:
+                                        0 0 0 4px ${halo},
+                                        0 0 10px ${sombra};
+                                "></div>
+                            `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         ).bindPopup(`
 
-                                       <div id="imagemVeiculoPopup_${item.identificador}" style="text-align: center;">
-                                <img 
-                                    src="${imagemEquipamento}" 
-                                    style="max-width: 220px; height: auto; display: block; margin: 0 auto;" />
-                            </div>
-
-                            <hr>
-
-                            <div style="text-align: left; margin-bottom: 10px; min-width: 280px;">
-                                <b>${item.identificador}</b><br>
-                                <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
-                                <b>Local:</b> ${item.localInstalacao || ''}<br>
-                                <b>Nota:</b> ${item.nota || 'Não informado'}<br>
-                                📡 Gateway: <b>${descricaoGateway || item.gateway || "Não informado"}</b><br>
-                                <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
-
-                                <details>
-                                    <summary style="cursor: pointer;"><b>Ver detalhes</b></summary>
-                                    <div style="margin-top: 10px;">
-                                        <b>Grupo:</b> ${item.grupoAtual || ''}<br>
-                                        <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
-                                        <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
-                                        <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
-                                        <b>Oficina:</b> ${item.oficina || 'Não informado'}
-                                
-                                    </div>
-                                </details>
-
-                                <div style="
-                                    text-align:center;
-                                    margin-top:10px;
-                                ">
-                                    <button id="btnCopiar_${item.identificador}">
-                                        📋 Copiar
-                                    </button>
+                                        <div id="imagemVeiculoPopup_${item.identificador}" style="text-align: center;">
+                                    <img 
+                                        src="${imagemEquipamento}" 
+                                        style="max-width: 220px; height: auto; display: block; margin: 0 auto;" />
                                 </div>
 
-                            </div>
-                            `);
+                                <hr>
+
+                                <div style="text-align: left; margin-bottom: 10px; min-width: 280px;">
+                                    <b>${item.identificador}</b><br>
+                                    <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
+                                    <b>Local:</b> ${item.localInstalacao || ''}<br>
+                                    <b>Nota:</b> ${item.nota || 'Não informado'}<br>
+                                    📡 Gateway: <b>${descricaoGateway || item.gateway || "Não informado"}</b><br>
+                                    <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
+
+                                    <details>
+                                        <summary style="cursor: pointer;"><b>Ver detalhes</b></summary>
+                                        <div style="margin-top: 10px;">
+                                            <b>Grupo:</b> ${item.grupoAtual || ''}<br>
+                                            <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
+                                            <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
+                                            <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
+                                            <b>Oficina:</b> ${item.oficina || 'Não informado'}
+                                    
+                                        </div>
+                                    </details>
+
+                                    <div style="
+                                        text-align:center;
+                                        margin-top:10px;
+                                    ">
+                                        <button id="btnCopiar_${item.identificador}">
+                                            📋 Copiar
+                                        </button>
+                                    </div>
+
+                                </div>
+                                `);
                         marker.on("popupopen", () => {
 
                             setTimeout(() => {
@@ -3630,18 +4695,18 @@ sap.ui.define([
                                 btn.onclick = () => {
 
                                     const texto = `
-                                    Identificador: ${item.identificador}
-                                    Equipamento: ${item.descEquipamento || ""}
-                                    Local: ${item.localInstalacao || ""}
-                                    Nota: ${item.nota || "Não informado"}
-                                    Gateway: ${descricaoGateway || item.gateway || "Não informado"}
-                                    Última Atualização: ${item.ultimaPosicao || ""}
-                                    Grupo: ${item.grupoAtual || ""}
-                                    Descrição do Local: ${item.descLocalInstalacao || ""}
-                                    Centro de Trabalho: ${item.centro_trab_resp || "Não informado"}
-                                    Centro de Localização: ${item.centro_localizacao || "Não informado"}
-                                    Oficina: ${item.oficina || "Não informado"}
-                                                `.trim();
+                                        Identificador: ${item.identificador}
+                                        Equipamento: ${item.descEquipamento || ""}
+                                        Local: ${item.localInstalacao || ""}
+                                        Nota: ${item.nota || "Não informado"}
+                                        Gateway: ${descricaoGateway || item.gateway || "Não informado"}
+                                        Última Atualização: ${item.ultimaPosicao || ""}
+                                        Grupo: ${item.grupoAtual || ""}
+                                        Descrição do Local: ${item.descLocalInstalacao || ""}
+                                        Centro de Trabalho: ${item.centro_trab_resp || "Não informado"}
+                                        Centro de Localização: ${item.centro_localizacao || "Não informado"}
+                                        Oficina: ${item.oficina || "Não informado"}
+                                                    `.trim();
 
                                     navigator.clipboard.writeText(texto);
 
@@ -3806,50 +4871,50 @@ sap.ui.define([
                             const gatewayInfo =
                                 this._gatewayInfo?.[item.gateway];
                             htmlDetalhes += `
-                                                                                        <div style="
-                            margin:6px 0;
-                            padding:4px 0;
-                            border-bottom:1px solid #eee;
-                            font-size:12px;
-                        ">
-                                                                                                            ${indicador}
-                                                                                                            <b>${item.identificador}</b>
-                                                                                                            -
-                                                                                                            <span style="
-                                display:inline-block;
-                                max-width:380px;
-                                white-space:nowrap;     
-                                overflow:hidden;
-                                text-overflow:ellipsis;
-                                vertical-align:bottom;
+                                                                                            <div style="
+                                margin:6px 0;
+                                padding:4px 0;
+                                border-bottom:1px solid #eee;
+                                font-size:12px;
                             ">
-                                                                                                                ${item.descEquipamento || ""}
-                                                                                                            </span>
-
-                                                                                                            <br>
-
+                                                                                                                ${indicador}
+                                                                                                                <b>${item.identificador}</b>
+                                                                                                                -
                                                                                                                 <span style="
-                                    color:#666;
-                                    font-size:12px;
+                                    display:inline-block;
+                                    max-width:380px;
+                                    white-space:nowrap;     
+                                    overflow:hidden;
+                                    text-overflow:ellipsis;
+                                    vertical-align:bottom;
                                 ">
-                                                                                                                                Última atualização:
-                                                                                                                ${item.ultimaPosicao || "Não informada"}
-                                                                                                            </span>
+                                                                                                                    ${item.descEquipamento || ""}
+                                                                                                                </span>
 
-                                                                                                            <br>
+                                                                                                                <br>
 
-                                                                                                                <span style="
-                    color:#3498db;
-                    font-size:12px;
-                ">
-                                                                                                                    📡 Gateway:
-                                                                                                        <b>
-                                                                                                            ${descricaoGateway || item.gateway || "Não informado"}
-                                                                                                        </b>
-                                                                                                    </span>
+                                                                                                                    <span style="
+                                        color:#666;
+                                        font-size:12px;
+                                    ">
+                                                                                                                                    Última atualização:
+                                                                                                                    ${item.ultimaPosicao || "Não informada"}
+                                                                                                                </span>
 
-                                                                                                </div>
-                                                                                                `;
+                                                                                                                <br>
+
+                                                                                                                    <span style="
+                        color:#3498db;
+                        font-size:12px;
+                    ">
+                                                                                                                        📡 Gateway:
+                                                                                                            <b>
+                                                                                                                ${descricaoGateway || item.gateway || "Não informado"}
+                                                                                                            </b>
+                                                                                                        </span>
+
+                                                                                                    </div>
+                                                                                                    `;
 
                         });
 
@@ -3867,9 +4932,9 @@ sap.ui.define([
                             .forEach(tipo => {
 
                                 htmlResumo += `
-                    <b>${tipo}:</b>
-                    ${resumo[tipo]}<br>
-                `;
+                        <b>${tipo}:</b>
+                        ${resumo[tipo]}<br>
+                    `;
 
                             });
                         const lat = parseFloat(veiculo.Latitude);
@@ -3897,121 +4962,121 @@ sap.ui.define([
                                 icon: L.divIcon({
                                     className: "",
                                     html: `
-                                                                                                <div style="
-                                width:16px;
-                                height:16px;
-                                background:#9B6DFF;
-                                border:3px solid white;
-                                border-radius:50%;
-                                box-shadow:
-                                    0 0 0 4px rgba(255,99,71,0.25),
-                                    0 0 10px rgba(255,99,71,0.8);
-                            "></div>
-                                                                                                `,
+                                                                                                    <div style="
+                                    width:16px;
+                                    height:16px;
+                                    background:#9B6DFF;
+                                    border:3px solid white;
+                                    border-radius:50%;
+                                    box-shadow:
+                                        0 0 0 4px rgba(255,99,71,0.25),
+                                        0 0 10px rgba(255,99,71,0.8);
+                                "></div>
+                                                                                                    `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
                             }
                         ).bindPopup(`
 
-                                                                                                <div
-                                                                                                    id="imagemVeiculoPopup_${veiculo.Veiculo}"
-                         <div style="text-align:center">
+                                                                                                    <div
+                                                                                                        id="imagemVeiculoPopup_${veiculo.Veiculo}"
+                            <div style="text-align:center">
 
 
-                                                                                                    <img
-                                                                                                        src="img/793D_default.png"
+                                                                                                        <img
+                                                                                                            src="img/793D_default.png"
 
-                                                                                                        style="max-width:220px;height:auto;" />
-                                                                                                </div>
+                                                                                                            style="max-width:220px;height:auto;" />
+                                                                                                    </div>
 
-                                                                                                <hr>
-                                                                                                    <div style="
-    text-align:left;
-    margin-bottom:10px;
-">
+                                                                                                    <hr>
+                                                                                                        <div style="
+        text-align:left;
+        margin-bottom:10px;
+    ">
 
-                                                                                                        <b>Veículo:</b>
-                                                                                                        ${veiculo.Veiculo}
-                                                                                                        <br>
-
-                                                                                                            <b>Local de Instalação:</b>
-                                                                                                            ${veiculo.LOCAL_INSTALACAO || "Não informado"}
+                                                                                                            <b>Veículo:</b>
+                                                                                                            ${veiculo.Veiculo}
                                                                                                             <br>
 
-                                                                                                                <b>Equipamentos Embarcados:</b>
-                                                                                                                ${totalEquipamentos}
-                                                                                                                <hr>
-                                                                                                                </div>
+                                                                                                                <b>Local de Instalação:</b>
+                                                                                                                ${veiculo.LOCAL_INSTALACAO || "Não informado"}
+                                                                                                                <br>
 
-
-                                                                                                                <details
-                                                                                                                    id="resumo_${veiculo.Veiculo}"
-                                                                                                                    data-veiculo="${veiculo.Veiculo}">
-
-                                                                                                                    <summary style="
-        cursor:pointer;
-        font-weight:bold;
-    ">
-                                                                                                                        Ver Resumo
-                                                                                                                    </summary>
+                                                                                                                    <b>Equipamentos Embarcados:</b>
+                                                                                                                    ${totalEquipamentos}
                                                                                                                     <hr>
-                                                                                                                        <div
-                                                                                                                            id="conteudoResumo_${veiculo.Veiculo}"
-                                                                                                                            style="margin-top:10px;">
+                                                                                                                    </div>
 
-                                                                                                                            ${htmlResumo}
+
+                                                                                                                    <details
+                                                                                                                        id="resumo_${veiculo.Veiculo}"
+                                                                                                                        data-veiculo="${veiculo.Veiculo}">
+
+                                                                                                                        <summary style="
+            cursor:pointer;
+            font-weight:bold;
+        ">
+                                                                                                                            Ver Resumo
+                                                                                                                        </summary>
+                                                                                                                        <hr>
+                                                                                                                            <div
+                                                                                                                                id="conteudoResumo_${veiculo.Veiculo}"
+                                                                                                                                style="margin-top:10px;">
+
+                                                                                                                                ${htmlResumo}
+
+                                                                                                                            </div>
+
+                                                                                                                    </details>
+
+                                                                                                                    <details
+                                                                                                                        id="detalhes_${veiculo.Veiculo}"
+                                                                                                                        data-veiculo="${veiculo.Veiculo}">
+
+                                                                                                                        <summary style="
+            cursor:pointer;
+            font-weight:bold;
+        ">
+                                                                                                                            Ver detalhes
+                                                                                                                        </summary>
+
+                                                                                                                        <div
+                                                                                                                            id="conteudoDetalhes_${veiculo.Veiculo}"
+                                                                                                                            style="
+            margin-top:10px;
+            max-height:350px;
+            overflow-y:auto;
+        ">
+
+                                                                                                                            ${htmlDetalhes}
+
+                                                                                                                        <div style="
+        text-align:center;
+        margin-top:10px;
+    ">
+
+        <button
+            id="btnCopiarVeiculo_${veiculo.Veiculo}">
+            📋 Copiar
+        </button>
+
+        <button
+            id="btnExportar_${veiculo.Veiculo}">
+            📊 Exportar Excel
+        </button>
+
+    </div>
 
                                                                                                                         </div>
 
-                                                                                                                </details>
+                                                                                                                    </details>
 
-                                                                                                                <details
-                                                                                                                    id="detalhes_${veiculo.Veiculo}"
-                                                                                                                    data-veiculo="${veiculo.Veiculo}">
+                                                                                                                    <hr>
 
-                                                                                                                    <summary style="
-        cursor:pointer;
-        font-weight:bold;
-    ">
-                                                                                                                        Ver detalhes
-                                                                                                                    </summary>
-
-                                                                                                                    <div
-                                                                                                                        id="conteudoDetalhes_${veiculo.Veiculo}"
-                                                                                                                        style="
-        margin-top:10px;
-        max-height:350px;
-        overflow-y:auto;
-    ">
-
-                                                                                                                        ${htmlDetalhes}
-
-                                                                                                                       <div style="
-    text-align:center;
-    margin-top:10px;
-">
-
-    <button
-        id="btnCopiarVeiculo_${veiculo.Veiculo}">
-        📋 Copiar
-    </button>
-
-    <button
-        id="btnExportar_${veiculo.Veiculo}">
-        📊 Exportar Excel
-    </button>
-
-</div>
-
-                                                                                                                    </div>
-
-                                                                                                                </details>
-
-                                                                                                                <hr>
-
-                                                                                                                    <b>Atualização:</b>
-                                                                                                                    ${new Date(veiculo.DataAtualizacao)
+                                                                                                                        <b>Atualização:</b>
+                                                                                                                        ${new Date(veiculo.DataAtualizacao)
                                 .toLocaleString("pt-BR", {
                                     day: "2-digit",
                                     month: "2-digit",
@@ -4022,9 +5087,9 @@ sap.ui.define([
                                 })
                                 .replace(",", "")}
 
+                                                                                                                    </div>
                                                                                                                 </div>
-                                                                                                            </div>
-                                                                                                            `, {
+                                                                                                                `, {
                             minWidth: 350,
                             maxWidth: 450
                         });
@@ -4091,13 +5156,13 @@ sap.ui.define([
                                     btnCopiar.onclick = () => {
 
                                         const texto = `
-Veículo: ${veiculo.Veiculo}
-Local de Instalação: ${veiculo.LOCAL_INSTALACAO || "Não informado"}
-Equipamentos Embarcados: ${totalEquipamentos}
+    Veículo: ${veiculo.Veiculo}
+    Local de Instalação: ${veiculo.LOCAL_INSTALACAO || "Não informado"}
+    Equipamentos Embarcados: ${totalEquipamentos}
 
-Resumo:
-${textoResumo}
-        `.trim();
+    Resumo:
+    ${textoResumo}
+            `.trim();
 
                                         navigator.clipboard.writeText(texto);
 
@@ -4205,17 +5270,17 @@ ${textoResumo}
                                 icon: L.divIcon({
                                     className: "",
                                     html: `
-                                                                                                            <div style="
-                                    width:16px;
-                                    height:16px;
-                                    background:#3498db;
-                                    border:3px solid white;
-                                    border-radius:50%;
-                                    box-shadow:
-                                        0 0 0 5px rgba(52,152,219,0.25),
-                                        0 0 12px rgba(52,152,219,0.8);
-                                "></div>
-                                                                                                            `,
+                                                                                                                <div style="
+                                        width:16px;
+                                        height:16px;
+                                        background:#3498db;
+                                        border:3px solid white;
+                                        border-radius:50%;
+                                        box-shadow:
+                                            0 0 0 5px rgba(52,152,219,0.25),
+                                            0 0 12px rgba(52,152,219,0.8);
+                                    "></div>
+                                                                                                                `,
                                     iconSize: [22, 22],
                                     iconAnchor: [11, 11]
                                 })
@@ -4224,11 +5289,11 @@ ${textoResumo}
 
                             .bindTooltip(gw.identificador)
                             .bindPopup(`
-                                                                                                            <b>${gw.identificador}</b><br>
-                                                                                                                Gateway ID: ${gw.gatewayId}<br>
-                                                                                                                    Localidade: ${gw.localidade}<br>
-                                                                                                                        Condição: ${gw.condicao}
-                                                                                                                        `);
+                                                                                                                <b>${gw.identificador}</b><br>
+                                                                                                                    Gateway ID: ${gw.gatewayId}<br>
+                                                                                                                        Localidade: ${gw.localidade}<br>
+                                                                                                                            Condição: ${gw.condicao}
+                                                                                                                            `);
 
                         marker.on("click", (e) => {
 
@@ -4354,11 +5419,11 @@ ${textoResumo}
                         meioLng
                     ])
                     .setContent(`
-                                                                                                                        <b>
-                                                                                                                            ${(distancia / 1000)
+                                                                                                                            <b>
+                                                                                                                                ${(distancia / 1000)
                             .toFixed(2)} km
-                                                                                                                        </b>
-                                                                                                                        `)
+                                                                                                                            </b>
+                                                                                                                            `)
                     .openOn(this._map);
 
                 this._pontosMedicao = [];

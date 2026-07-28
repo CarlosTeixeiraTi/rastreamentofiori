@@ -432,3 +432,39 @@
 .kpiClickavel * {
     cursor: pointer !important;
 }
+
+.descricaoIndicador {
+    font-size: 20px !important;
+    font-weight: 500;
+}
+
+.tituloKpiGrande {
+    font-size: 2rem !important;
+    font-weight: bold !important;
+}
+
+.statusEfetividadeGrande {
+    font-size: 28px !important;
+    font-weight: bold !important;
+}
+
+.fonteTabelaIndicadoresTitulo {
+    font-size: 1.2rem !important;
+    font-weight: bold;
+}
+
+.fonteTabelaIndicadoresIndicador .sapMObjectIdentifierTitle {
+    font-size: 1.6rem !important;
+    font-weight: 700 !important;
+    line-height: 2rem !important;
+}
+
+.fonteTabelaIndicadoresSubtitulo {
+    font-size: 1rem !important;
+    font-weight: bold;
+}
+
+.fonteTabelaIndicadoresTexto {
+    font-size: 1rem !important;
+    line-height: 1.5rem;
+}

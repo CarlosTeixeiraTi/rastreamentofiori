@@ -269,7 +269,7 @@
                                 <Panel
                                     id="panelMapa"
                                     width="100%"
-                                    height="800px"
+                                    height="1000px"
                                     class="painelMapa"
                                     headerText="">
 
@@ -876,7 +876,10 @@
                         key="valorGerado"
                         text="Valor Gerado">
 
-                        <VBox class="sapUiMediumMargin">
+                        <VBox
+                            width="100%"
+                            class="sapUiMediumMargin">
+
 
                             <Title
                                 text="Valor Gerado pelo Piloto"
@@ -888,52 +891,24 @@
 
                                 <Panel
                                     width="350px"
+                                    height="180px"
                                     class="sapUiMediumMargin">
 
                                     <VBox
                                         alignItems="Center"
-                                        class="sapUiSmallMargin">
+                                        class="sapUiSmallMargin descricaoIndicador">
 
-                                        <Title
-                                            text="{= ${dashboard>/tempoLocalizacao} + '%' }"
-                                            level="H1" />
-
-                                        <HBox
-                                            justifyContent="Center"
-                                            alignItems="Center">
-
-                                            <Text
-                                                text="Redução do Tempo de Localização" />
-
-                                            <Button
-                                                icon="sap-icon://hint"
-                                                type="Transparent"
-                                                press=".onButtonAjudaTempoLocalizacaoPress" />
-
-                                        </HBox>
-
-                                    </VBox>
-
-                                </Panel>
-
-                                <Panel
-                                    width="350px"
-                                    class="sapUiMediumMargin">
-
-                                    <VBox
-                                        alignItems="Center"
-                                        class="sapUiSmallMargin">
                                         <Title
                                             text="{= ${dashboard>/disponibilidadeMonitoramento} + '%' }"
-                                            level="H1" />
+                                            level="H2" class="tituloKpiGrande" />
 
                                         <HBox
                                             justifyContent="Center"
                                             alignItems="Center">
 
                                             <Text
-                                                text="Disponibilidade de Monitoramento"
-                                                class="sapUiTinyMarginEnd" />
+                                                text="Disponibilidade"
+                                                class="sapUiTinyMarginEnd descricaoIndicador" />
 
                                             <Button
                                                 icon="sap-icon://hint"
@@ -942,59 +917,37 @@
 
                                         </HBox>
 
-                                    </VBox>
-
-                                </Panel>
-                                <Panel
-                                    width="350px"
-                                    class="sapUiMediumMargin">
-
-                                    <VBox
-                                        alignItems="Center"
-                                        class="sapUiSmallMargin">
-
-                                        <Title
-                                            text="{dashboard>/componentesMovimentados}"
-                                            level="H1" />
-
-                                        <HBox
-                                            justifyContent="Center"
-                                            alignItems="Center">
-
-                                            <Text
-                                                text="Componentes Movimentados"
-                                                class="sapUiTinyMarginEnd" />
-
-                                            <Button
-                                                icon="sap-icon://hint"
-                                                type="Transparent"
-                                                tooltip="Entender indicador"
-                                                press=".onButtonAjudaComponentesMovimentadosPress" />
-
-                                        </HBox>
+                                        <Text
+                                            text="Capacidade da solução de monitorar continuamente os componentes"
+                                            wrapping="true"
+                                            textAlign="Center"
+                                            class="sapUiTinyMarginTop" />
 
                                     </VBox>
 
                                 </Panel>
+
                                 <Panel
                                     width="350px"
+                                    height="180px"
                                     class="sapUiMediumMargin">
 
                                     <VBox
                                         alignItems="Center"
-                                        class="sapUiSmallMargin">
+                                        class="sapUiSmallMargin descricaoIndicador">
 
                                         <Title
                                             text="{= ${dashboard>/coberturaValorGerado} + '%' }"
-                                            level="H1" />
+                                            level="H2"
+                                            class="tituloKpiGrande" />
 
                                         <HBox
                                             justifyContent="Center"
                                             alignItems="Center">
 
                                             <Text
-                                                text="Cobertura do Piloto"
-                                                class="sapUiTinyMarginEnd" />
+                                                text="Cobertura"
+                                                class="sapUiTinyMarginEnd descricaoIndicador" />
 
                                             <Button
                                                 icon="sap-icon://hint"
@@ -1003,50 +956,101 @@
 
                                         </HBox>
 
+                                        <Text
+                                            text="Evolução da instalação dos rastreadores nos ativos planejados"
+                                            wrapping="true"
+                                            textAlign="Center"
+                                            class="sapUiTinyMarginTop" />
+
                                     </VBox>
 
                                 </Panel>
+
                                 <Panel
-                                    headerText="Resumo Executivo"
-                                    class="sapUiMediumMarginTop">
+                                    width="350px"
+                                    height="180px"
+                                    class="sapUiMediumMargin">
 
-                                    <VBox class="sapUiSmallMargin">
+                                    <VBox
+                                        alignItems="Center"
+                                        class="sapUiSmallMargin descricaoIndicador">
+
+                                        <Title
+                                            text="{= ${dashboard>/percentualGateway} + '%' }"
+                                            level="H2"
+                                            class="tituloKpiGrande" />
+
+                                        <HBox
+                                            justifyContent="Center"
+                                            alignItems="Center">
+
+                                            <Text
+                                                text="Gateways"
+                                                class="sapUiTinyMarginEnd descricaoIndicador" />
+
+                                            <Button
+                                                icon="sap-icon://hint"
+                                                type="Transparent"
+                                                press=".onButtonAjudaCoberturaGatewaysPress" />
+
+                                        </HBox>
 
                                         <Text
-                                            text="{= '✓ Redução de '
-        + ${dashboard>/tempoLocalizacao}
-        + '% no tempo médio de localização de componentes.' }" />
-
-                                        <Text
-                                            text="{= '✓ Rastreabilidade de '
-        + ${dashboard>/disponibilidadeMonitoramento}
-       + '% dos componentes avaliados.' }" />
-
-                                        <Text
-                                            text="{= '✓ '
-        + ${dashboard>/componentesMovimentados}
-        + ' componentes apresentaram movimentações durante o piloto.' }" />
-
-                                        <Text
-                                            text="{= '✓ '
-        + ${dashboard>/totalMovimentacoes}
-        + ' mudanças de localização foram identificadas automaticamente pela solução.' }" />
-
-                                        <Text
-                                            text="{= '✓ Cobertura atual de '
-        + ${dashboard>/coberturaValorGerado}
-        + '% da meta prevista para o piloto.' }" />
+                                            text="Evolução da instalação dos gateways planejados"
+                                            wrapping="true"
+                                            textAlign="Center"
+                                            class="sapUiTinyMarginTop" />
 
                                     </VBox>
 
                                 </Panel>
+
+                                <Panel
+                                    width="350px"
+                                    height="180px"
+                                    class="sapUiMediumMargin">
+
+                                    <VBox
+                                        alignItems="Center"
+                                        class="sapUiSmallMargin descricaoIndicador">
+
+                                        <Title
+                                            text="{dashboard>/percentualConsistenciaMovimentacao}%"
+                                            level="H2"
+                                            class="tituloKpiGrande" />
+
+                                        <HBox
+                                            justifyContent="Center"
+                                            alignItems="Center">
+
+                                            <Text
+                                                text="Consistência"
+                                                class="sapUiTinyMarginEnd descricaoIndicador" />
+
+                                            <Button
+                                                icon="sap-icon://hint"
+                                                type="Transparent"
+                                                press=".onButtonAjudaConsistenciaMovimentacaoPress" />
+
+                                        </HBox>
+
+                                        <Text
+                                            text="Confiabilidade entre a localização do ativo no SAP e sua detecção GPS"
+                                            wrapping="true"
+                                            textAlign="Center"
+                                            class="sapUiTinyMarginTop" />
+
+                                    </VBox>
+
+                                </Panel>
+
                                 <Panel
                                     class="sapUiMediumMarginBottom"
                                     width="100%">
 
                                     <VBox
                                         alignItems="Center"
-                                        class="sapUiLargeMargin">
+                                        class="sapUiLargeMargin descricaoIndicador">
 
                                         <HBox
                                             justifyContent="Center"
@@ -1054,7 +1058,7 @@
 
                                             <Title
                                                 text="Índice Geral de Efetividade"
-                                                level="H2" />
+                                                level="H3" />
 
                                             <Button
                                                 icon="sap-icon://hint"
@@ -1067,228 +1071,576 @@
                                         <Title
                                             text="{= ${dashboard>/indiceEfetividade} + '%' }"
                                             level="H1"
-                                            class="kpiNumero" />
+                                            class="sapUiMinimumMarginTop kpiNumero" />
+
 
                                         <ObjectStatus
                                             text="{dashboard>/classificacaoEfetividade}"
-                                            state="Success" />
+                                            state="Success" class="statusEfetividadeGrande" />
 
                                     </VBox>
 
                                 </Panel>
+
+                            </HBox>
+                            <Panel
+                                width="100%"
+                                headerText="Detalhamento dos Indicadores"
+                                class="sapUiMediumMarginTop">
+
+                                <Table width="100%">
+
+                                    <columns>
+
+                                        <Column width="12rem">
+                                            <Text
+                                                text="Indicador"
+                                                class="fonteTabelaIndicadoresTitulo" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text
+                                                text="Detalhamento"
+                                                class="fonteTabelaIndicadoresTitulo" />
+                                        </Column>
+
+                                    </columns>
+
+                                    <items>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <ObjectIdentifier
+                                                    title="Disponibilidade"
+                                                    class="fonteTabelaIndicadoresIndicador" />
+
+                                                <VBox
+                                                    class="sapUiMediumMarginTop sapUiMediumMarginBottom">
+
+                                                    <Text
+                                                        text="O que mede?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiTinyMarginBottom" />
+
+                                                    <Text
+                                                        text="Indica o percentual de componentes elegíveis que permaneceram disponíveis para rastreamento durante o período analisado."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Como é calculado?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Considera os componentes que apresentaram comunicação nos últimos 7 dias. Componentes localizados fora da área operacional FEIT são considerados disponíveis, pois não estão sob cobertura esperada da infraestrutura RFID de Itabira."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Fórmula:"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="{= ${dashboard>/componentesDisponiveis}
+            + ' componentes disponíveis ÷ '
+            + ${dashboard>/totalComponentesValorGerado}
+            + ' componentes elegíveis × 100 = '
+            + ${dashboard>/disponibilidadeMonitoramento}
+            + '%' }"
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Por que é importante?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Demonstra a capacidade real da solução de monitorar continuamente os componentes do piloto, considerando apenas indisponibilidades que efetivamente podem ser atribuídas à infraestrutura monitorada."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                </VBox>
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <ObjectIdentifier
+                                                    title="Cobertura"
+                                                    class="fonteTabelaIndicadoresIndicador" />
+
+                                                <VBox
+                                                    class="sapUiMediumMarginTop sapUiMediumMarginBottom">
+
+                                                    <Text
+                                                        text="O que mede?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiTinyMarginBottom" />
+
+                                                    <Text
+                                                        text="Percentual da meta de implantação efetivamente alcançada durante o piloto."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Como é calculado?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Relação entre a quantidade de componentes monitorados e a meta planejada para o piloto."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Fórmula:"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="{= ${dashboard>/instalados}
+        + ' componentes instalados ÷ 50 componentes planejados × 100 = '
+        + ${dashboard>/coberturaValorGerado}
+        + '%' }"
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Por que é importante?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Mostra o nível de adoção da solução e indica se os resultados obtidos são representativos para apoiar uma expansão da iniciativa."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                </VBox>
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <ObjectIdentifier
+                                                    title="Gateways"
+                                                    class="fonteTabelaIndicadoresIndicador" />
+
+                                                <VBox
+                                                    class="sapUiMediumMarginTop sapUiMediumMarginBottom">
+
+                                                    <Text
+                                                        text="O que mede?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiTinyMarginBottom" />
+
+                                                    <Text
+                                                        text="Percentual da infraestrutura planejada que já foi implantada para suportar o funcionamento da solução durante o piloto."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Como é calculado?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Relação entre a quantidade de gateways instalados e a quantidade de gateways prevista para o piloto."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Fórmula:"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="{= ${dashboard>/gateways}
+            + ' gateways instalados ÷ 7 gateways planejados × 100 = '
+            + ${dashboard>/percentualGateway}
+            + '%' }"
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Por que é importante?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Garante a cobertura necessária para captura das leituras RFID e assegura que a infraestrutura suporte adequadamente a operação da solução."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                </VBox>
+
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <ObjectIdentifier
+                                                    title="Consistência"
+                                                    class="fonteTabelaIndicadoresIndicador" />
+
+                                                <VBox
+                                                    class="sapUiMediumMarginTop sapUiMediumMarginBottom">
+
+                                                    <Text
+                                                        text="O que mede?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiTinyMarginBottom" />
+
+                                                    <Text
+                                                        text="Percentual de movimentações que apresentaram aderência entre a localização registrada no SAP e a localização identificada pela infraestrutura RFID."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Como é calculado?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Compara a quantidade de movimentações consideradas consistentes com o total de movimentações analisadas durante o período."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Fórmula:"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="{= ${dashboard>/consistenciasMovimentacao}
+            + ' movimentações consistentes ÷ '
+            + ${dashboard>/online}
+            + ' movimentações analisadas × 100 = '
+            + ${dashboard>/percentualConsistenciaMovimentacao}
+            + '%' }"
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Por que é importante?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="{= 'Foram identificadas '
+            + ${dashboard>/falhasMovimentacao}
+            + ' divergências entre a localização cadastrada no SAP e a localização detectada pela infraestrutura RFID. O indicador mede a confiabilidade operacional da solução e sua aderência às informações corporativas registradas no SAP.' }"
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                </VBox>
+
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <ObjectIdentifier
+                                                    title="Índice Geral de Efetividade"
+                                                    class="fonteTabelaIndicadoresIndicador" />
+
+                                                <VBox
+                                                    class="sapUiMediumMarginTop sapUiMediumMarginBottom">
+
+                                                    <Text
+                                                        text="O que mede?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiTinyMarginBottom" />
+
+                                                    <Text
+                                                        text="Consolida os principais resultados do piloto em uma única métrica de desempenho."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Como é calculado?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Combina os indicadores de Disponibilidade de Monitoramento, Cobertura do Piloto, Consistência das movimentações e Disponibilidade de Gateways, aplicando pesos conforme sua relevância para o resultado do piloto."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Fórmula:"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="{= 'Disponibilidade (' 
+            + ${dashboard>/disponibilidadeMonitoramento}
+            + '% × 50%) + Cobertura ('
+            + ${dashboard>/coberturaValorGerado}
+            + '% × 25%) + Consistência ('
+            + ${dashboard>/percentualConsistenciaMovimentacao}
+            + '% × 15%) + Gateways ('
+            + ${dashboard>/percentualGateway}
+            + '% × 10%) = '
+            + ${dashboard>/indiceEfetividade}
+            + '%' }"
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                    <Text
+                                                        text="Por que é importante?"
+                                                        class="fonteTabelaIndicadoresSubtitulo sapUiSmallMarginTop" />
+
+                                                    <Text
+                                                        text="Permite uma avaliação rápida da efetividade global da solução, resumindo os principais benefícios alcançados durante o piloto."
+                                                        class="fonteTabelaIndicadoresTexto"
+                                                        wrapping="true" />
+
+                                                </VBox>
+
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                    </items>
+
+                                </Table>
+
+                            </Panel>
+                            <HBox
+                                width="100%"
+                                fitContainer="true"
+                                renderType="Bare"
+                                justifyContent="SpaceBetween"
+                                alignItems="Start"
+                                class="sapUiMediumMarginTop">
+
                                 <Panel
-                                    headerText="Metas do Piloto"
-                                    class="sapUiMediumMarginTop">
+                                    headerText="Resumo Executivo"
+                                    width="49%"
+                                    class="sapUiMinimumMarginTop">
 
                                     <VBox class="sapUiSmallMargin">
 
-                                        <ObjectStatus
-                                            text="Tempo de localização ≤ 5 min  •  Atingido"
-                                            state="Success" />
+                                        <Text
+                                            text="{= 'O piloto atingiu '
+                                        + ${dashboard>/coberturaValorGerado}
+                                        + '% da meta de implantação prevista, correspondendo a '
+                                        + ${dashboard>/instalados}
+                                        + ' dos 50 rastreadores planejados para o escopo inicial da iniciativa.' }"
+                                            wrapping="true" />
+                                        <Text
+                                            text="{= 'A disponibilidade de monitoramento alcançou '
+                                        + ${dashboard>/disponibilidadeMonitoramento}
+                                        + '%, demonstrando capacidade consistente de acompanhamento de '
+                                        + ${dashboard>/componentesDisponiveis}
+                                        + ' dos '
+                                        + ${dashboard>/totalComponentesValorGerado}
+                                        + ' componentes elegíveis do piloto.' }"
+                                            wrapping="true" />
+                                        <Text
+                                            text="{= 'A infraestrutura de gateways instalados alcançou '
+                                        + ${dashboard>/percentualGateway}
+                                        + '% da implantação planejada, correspondendo a '
+                                        + ${dashboard>/gateways}
+                                        + ' dos 7 gateways previstos para o piloto.' }"
+                                            wrapping="true" />
 
-                                        <ObjectStatus
-                                            text="Rastreabilidade ≥ 95%  •  Atingido"
-                                            state="Success" />
+                                        <Text
+                                            text="{= 'A consistência das movimentações atingiu '
+                                        + ${dashboard>/percentualConsistenciaMovimentacao}
+                                        + '%, representando '
+                                        + ${dashboard>/consistenciasMovimentacao}
+                                        + ' dos '
+                                        + ${dashboard>/online}
+                                        + ' componentes monitorados com aderência entre a localização registrada e a posição identificada pela solução.' }"
+                                            wrapping="true" />
 
-                                        <ObjectStatus
-                                            text="Componentes movimentados > 0  •  Atingido"
-                                            state="Success" />
-
-                                        <ObjectStatus
-                                            text="Cobertura ≥ 75%  •  Atingido"
-                                            state="Success" />
+                                        <Text
+                                            text="{= 'O Índice Geral de Efetividade atingiu '
+                                        + ${dashboard>/indiceEfetividade}
+                                        + '%, classificando o desempenho geral do piloto como '
+                                        + ${dashboard>/classificacaoEfetividade}
+                                        + '. Os resultados obtidos demonstram maturidade operacional suficiente para suportar a ampliação gradual da solução para novos ativos e áreas da operação.' }"
+                                            wrapping="true" />
 
                                     </VBox>
 
                                 </Panel>
+
                                 <Panel
-                                    headerText="Entendimento dos Indicadores"
-                                    class="sapUiMediumMarginTop">
+                                    headerText="Oportunidades de Melhoria"
+                                    width="49%"
+                                    class="sapUiMinimumMarginTop">
 
-                                    <Table>
+                                    <List
+                                        items="{dashboard>/oportunidadesMelhoria}">
 
-                                        <columns>
+                                        <CustomListItem>
 
-                                            <Column width="18rem">
-                                                <Text text="Indicador" />
-                                            </Column>
+                                            <HBox
+                                                width="100%"
+                                                alignItems="Center"
+                                                justifyContent="SpaceBetween">
 
-                                            <Column width="8rem">
-                                                <Text text="Resultado" />
-                                            </Column>
+                                                <Text
+                                                    text="{dashboard>texto}"
+                                                    width="90%"
+                                                    wrapping="true" />
 
-                                            <Column width="40rem">
-                                                <Text text="Por que é importante?" />
-                                            </Column>
+                                                <Button
+                                                    icon="sap-icon://hint"
+                                                    type="Transparent"
+                                                    press=".onAjudaOportunidadePress" />
 
-                                        </columns>
+                                            </HBox>
 
-                                        <items>
+                                        </CustomListItem>
 
-                                            <ColumnListItem>
-
-                                                <cells>
-
-                                                    <Text text="Redução do Tempo de Localização" />
-
-                                                    <Text
-                                                        text="{= ${dashboard>/tempoLocalizacao} + '%' }" />
-
-                                                    <Text
-                                                        text="Representa a redução do tempo gasto para localizar componentes em comparação ao processo anterior." />
-
-                                                </cells>
-
-                                            </ColumnListItem>
-
-                                            <ColumnListItem>
-
-                                                <cells>
-
-                                                    <Text text="Disponibilidade de Monitoramento" />
-
-                                                    <Text
-                                                        text="{= ${dashboard>/disponibilidadeMonitoramento} + '%' }" />
-
-                                                    <Text
-                                                        text="Indica o percentual de componentes monitorados cuja situação operacional é conhecida." />
-
-                                                </cells>
-
-                                            </ColumnListItem>
-
-                                            <ColumnListItem>
-
-                                                <cells>
-
-                                                    <Text text="Componentes Movimentados" />
-
-                                                    <Text
-                                                        text="{dashboard>/componentesMovimentados}" />
-
-                                                    <Text
-                                                        text="Quantidade de componentes que apresentaram mudança de localização durante o piloto, demonstrando utilização real da solução." />
-
-                                                </cells>
-
-                                            </ColumnListItem>
-
-                                            <ColumnListItem>
-
-                                                <cells>
-
-                                                    <Text text="Cobertura do Piloto" />
-
-                                                    <Text
-                                                        text="{= ${dashboard>/coberturaValorGerado} + '%' }" />
-
-                                                    <Text
-                                                        text="Mostra quanto da meta planejada de componentes monitorados foi efetivamente alcançada." />
-
-                                                </cells>
-
-                                            </ColumnListItem>
-
-                                            <ColumnListItem>
-
-                                                <cells>
-
-                                                    <Text text="Índice Geral de Efetividade" />
-
-                                                    <Text
-                                                        text="{= ${dashboard>/indiceEfetividade} + '%' }" />
-
-                                                    <Text
-                                                        text="Consolida os principais indicadores do piloto em um único resultado para avaliação executiva." />
-
-                                                </cells>
-
-                                            </ColumnListItem>
-
-                                        </items>
-
-                                    </Table>
-
-                                </Panel>
-                                <Panel
-                                    headerText="Evolução Semanal do Piloto"
-                                    class="sapUiMediumMarginTop">
-
-                                    <Table
-                                        items="{dashboard>/valorGeradoSemanal}">
-
-                                        <columns>
-
-                                            <Column width="8rem">
-                                                <Text text="Semana" />
-                                            </Column>
-
-
-                                            <Column width="12rem">
-                                                <Text text="Componentes Movimentados" />
-                                            </Column>
-
-                                            <Column width="14rem">
-                                                <Text text="Acumulado de Movimentações" />
-                                            </Column>
-
-                                            <Column width="10rem">
-                                                <Text text="Efetividade" />
-                                            </Column>
-
-                                        </columns>
-
-                                        <items>
-
-                                            <ColumnListItem>
-
-                                                <cells>
-
-                                                    <Text
-                                                        text="{dashboard>descricaoSemana}" />
-
-
-                                                    <ObjectNumber
-                                                        number="{dashboard>componentesMovimentados}" />
-
-                                                    <ObjectNumber
-                                                        number="{dashboard>acumuladoMovimentacoes}" />
-
-                                                    <ObjectNumber
-                                                        number="{dashboard>indiceEfetividade}"
-                                                        unit="%" />
-
-                                                </cells>
-
-                                            </ColumnListItem>
-
-                                        </items>
-
-                                    </Table>
-
-                                </Panel>
-                                <Panel
-                                    headerText="Conclusão do Piloto"
-                                    class="sapUiMediumMarginTop">
-
-                                    <VBox class="sapUiSma       llMargin">
-
-                                        <Text
-                                            text="O piloto demonstrou ganho operacional relevante, reduzindo o tempo necessário para localizar componentes e aumentando a visibilidade do processo de manutenção." />
-
-                                        <Text
-                                            text="Os componentes monitorados passaram a possuir rastreabilidade operacional e localização estruturada para suporte às atividades de manutenção." />
-
-                                        <Text
-                                            text="Todas as metas definidas para o piloto foram atingidas, resultando em um Índice Geral de Efetividade classificado como MUITO BOM." />
-
-                                        <Text
-                                            text="Recomenda-se a expansão gradual da cobertura da solução para os demais componentes críticos da operação." />
-
-                                    </VBox>
+                                    </List>
 
                                 </Panel>
                             </HBox>
+                            <Panel
+                                width="100%"
+                                headerText="Distribuição dos Rastreadores Implantados"
+                                class="sapUiMediumMarginTop">
+
+                                <Table
+                                    items="{dashboard>/distribuicaoImplantacao}">
+
+                                    <columns>
+
+                                        <Column>
+                                            <Text text="Mina" />
+                                        </Column>
+
+                                        <Column>
+                                            <Text text="Local / Veículo" />
+                                        </Column>
+
+                                        <Column hAlign="Center">
+                                            <Text text="Comando Final" />
+                                        </Column>
+
+                                        <Column hAlign="Center">
+                                            <Text text="Transmissão" />
+                                        </Column>
+
+                                        <Column hAlign="Center">
+                                            <Text text="Conversor Torque" />
+                                        </Column>
+
+                                        <Column hAlign="Center">
+                                            <Text text="Diferencial" />
+                                        </Column>
+
+                                        <Column hAlign="Center">
+                                            <Text text="Motor" />
+                                        </Column>
+
+                                        <Column hAlign="Center">
+                                            <Text text="Total" />
+                                        </Column>
+
+                                    </columns>
+
+                                    <items>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <Text text="{dashboard>mina}" />
+
+                                                <Text
+                                                    text="{dashboard>localizacao}"
+                                                    wrapping="true" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>comandoFinal}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>transmissao}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>conversorTorque}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>diferencial}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>motor}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>total}" />
+
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                    </items>
+
+                                </Table>
+
+                            </Panel>
+
+
+                            <Panel
+                                headerText="Evolução Semanal do Piloto"
+                                class="sapUiMediumMarginTop">
+
+                                <Table
+                                    items="{dashboard>/valorGeradoSemanal}">
+
+                                    <columns>
+
+                                        <Column width="8rem">
+                                            <Text text="Semana" />
+                                        </Column>
+
+
+                                        <Column width="12rem">
+                                            <Text text="Componentes Movimentados" />
+                                        </Column>
+
+                                        <Column width="14rem">
+                                            <Text text="Acumulado de Movimentações" />
+                                        </Column>
+
+                                        <Column width="10rem">
+                                            <Text text="Efetividade" />
+                                        </Column>
+
+                                    </columns>
+
+                                    <items>
+
+                                        <ColumnListItem>
+
+                                            <cells>
+
+                                                <Text
+                                                    text="{dashboard>descricaoSemana}" />
+
+
+                                                <ObjectNumber
+                                                    number="{dashboard>componentesMovimentados}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>acumuladoMovimentacoes}" />
+
+                                                <ObjectNumber
+                                                    number="{dashboard>indiceEfetividade}"
+                                                    unit="%" />
+
+                                            </cells>
+
+                                        </ColumnListItem>
+
+                                    </items>
+
+                                </Table>
+
+                            </Panel>
+
 
                         </VBox>
 
