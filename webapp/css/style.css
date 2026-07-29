@@ -29,7 +29,7 @@
 }
 
 .kpiNumero {
-    font-size: 46px !important;
+    font-size: 60px !important;
     font-weight: bold !important;
 }
 
@@ -467,4 +467,13 @@
 .fonteTabelaIndicadoresTexto {
     font-size: 1rem !important;
     line-height: 1.5rem;
+}
+.tituloKpiNovo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #5f6b7a;
+
+    margin-left: 12px;
+
+    text-transform: uppercase;
 }

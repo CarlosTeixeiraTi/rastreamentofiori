@@ -51,241 +51,358 @@
                             alignItems="Center"
                             justifyContent="Center"
                             wrap="Wrap"
-                            class="sapUiMediumMarginBottom">
+                            class="sapUiMinimumMarginBottom">
+
+                        <Panel
+    id="idTotalEquipamentosPanel"
+    width="500px"
+    class="sapUiSmallMargin kpiCard kpiTotal kpiClickavel">
+
+    <HBox
+        alignItems="Center"
+        justifyContent="Start"
+        class="sapUiSmallMargin">
+
+        <!-- Ícone à esquerda -->
+        <Image
+            src="img/rastreados.png"
+            width="7rem"
+            height="7rem"
+            class="sapUiMediumMarginEnd" />
+
+        <!-- Elementos à direita -->
+        <VBox
+            alignItems="Start"
+            justifyContent="Center">
+
+            <!-- Título no topo -->
+            <Title
+                text="Rastreados"
+                titleStyle="H4"
+                class="tituloKpiNovo sapUiTinyMarginBottom" />
+
+            <!-- Linha do Valor com a Porcentagem ao lado -->
+            <HBox 
+                alignItems="Center">
+                
+                <Title
+                    text="{dashboard>/totalEquipamentos}"
+                    level="H1"
+                    class="kpiNumero" />
+                
+                <Text
+                    text="{= '('
+                    + ${dashboard>/totalEquipamentos}
+                    + ' / 50) '
+                    + ${dashboard>/percentualEquipamentos}
+                    + '%' }"
+                    class="kpiPercentual sapUiSmallMarginBegin" />
+                    
+            </HBox>
+
+        </VBox>
+
+    </HBox>
+
+</Panel>
+
+
+
+
+
+
+                 <Panel
+    id="idOnlinePanel"
+    width="500px"
+    class="sapUiSmallMargin kpiCard kpiOnline kpiClickavel">
+
+    <HBox
+        alignItems="Center"
+        justifyContent="Start"
+        class="sapUiSmallMargin">
+
+        <!-- Ícone à esquerda -->
+        <Image
+            src="img/online.png"
+            width="7rem"
+            height="7rem"
+            class="sapUiMediumMarginEnd" />
+
+        <!-- Elementos à direita -->
+        <VBox
+            alignItems="Start"
+            justifyContent="Center">
+
+            <!-- Título no topo -->
+            <Title
+                text="Online"
+                titleStyle="H4"
+                class="tituloKpiNovo sapUiTinyMarginBottom" />
+
+            <!-- Linha do Valor com a Porcentagem ao lado -->
+            <HBox 
+                alignItems="Center">
+                
+                <Title
+                    text="{dashboard>/online}"
+                    level="H1"
+                    class="kpiNumero" />
+                
+                <Text
+                    text="{= '('
+                    + ${dashboard>/online}
+                    + ' / '
+                    + ${dashboard>/totalEquipamentos}
+                    + ') '
+                    + ${dashboard>/percentualOnline}
+                    + '%' }"
+                    class="kpiPercentual sapUiSmallMarginBegin" />
+                    
+            </HBox>
+
+        </VBox>
+
+    </HBox>
+
+</Panel>
+
+
+
+
+
+                           <Panel
+    id="idOfflinePanel"
+    width="500px"
+    class="sapUiSmallMargin kpiCard kpiOffline kpiClickavel">
+
+    <HBox
+        alignItems="Center"
+        justifyContent="Start"
+        class="sapUiSmallMargin">
+
+        <!-- Ícone à esquerda -->
+        <Image
+            src="img/offline.png"
+            width="7rem"
+            height="7rem"
+            class="sapUiMediumMarginEnd" />
+
+        <!-- Elementos à direita -->
+        <VBox
+            alignItems="Start"
+            justifyContent="Center">
+
+            <!-- Título no topo -->
+            <Title
+                text="Offline"
+                titleStyle="H4"
+                class="tituloKpiNovo sapUiTinyMarginBottom" />
+
+            <!-- Linha do Valor com a Porcentagem ao lado -->
+            <HBox 
+                alignItems="Center">
+                
+                <Title
+                    text="{dashboard>/offline}"
+                    level="H1"
+                    class="kpiNumero" />
+                
+                <Text
+                    text="{= '('
+                    + ${dashboard>/offline}
+                    + ' / '
+                    + ${dashboard>/totalEquipamentos}
+                    + ') '
+                    + ${dashboard>/percentualOffline}
+                    + '%' }"
+                    class="kpiPercentual sapUiSmallMarginBegin" />
+                    
+            </HBox>
+
+        </VBox>
+
+    </HBox>
+
+</Panel>
+
+
+
 
                             <Panel
-                                id="idTotalEquipamentosPanel"
-                                width="450px"
-                                class="sapUiSmallMargin kpiCard kpiTotal kpiClickavel">
+    id="idGatewayPanel"
+    width="500px"
+    class="sapUiSmallMargin kpiCard kpiGateway">
 
-                                <VBox
-                                    alignItems="Center"
-                                    class="sapUiSmallMargin">
+    <HBox
+        alignItems="Center"
+        justifyContent="Start"
+        class="sapUiSmallMargin">
 
-                                    <HBox
-                                        width="100%"
-                                        justifyContent="End">
-                                        <Text
-                                            text="{= '('
-                                        + ${dashboard>/totalEquipamentos}
-                                        + ' / 50) '
-                                        + ${dashboard>/percentualEquipamentos}
-                                        + '%' }"
-                                            class="kpiPercentual" />
+        <!-- Ícone à esquerda -->
+        <Image
+            src="img/gateway.png"
+            width="7rem"
+            height="7rem"
+            class="sapUiMediumMarginEnd" />
 
+        <!-- Elementos à direita -->
+        <VBox
+            alignItems="Start"
+            justifyContent="Center">
 
-                                    </HBox>
+            <!-- Título no topo -->
+            <Title
+                text="Gateways"
+                titleStyle="H4"
+                class="tituloKpiNovo sapUiTinyMarginBottom" />
 
-                                    <Title
-                                        text="{dashboard>/totalEquipamentos}"
-                                        level="H1"
-                                        class="kpiNumero" />
+            <!-- Linha do Valor com a Porcentagem ao lado -->
+            <HBox 
+                alignItems="Center">
+                
+                <Title
+                    text="{dashboard>/gateways}"
+                    level="H1"
+                    class="kpiNumero" />
+                
+                <Text
+                    text="{= '('
+                    + ${dashboard>/gateways}
+                    + ' / 8) '
+                    + ${dashboard>/percentualGateway} }"
+                    class="kpiPercentual sapUiSmallMarginBegin" />
+                    
+            </HBox>
 
-                                    <Text
-                                        text="Componentes rastreados"
-                                        class="kpiTexto" />
+        </VBox>
 
+    </HBox>
 
-                                </VBox>
-
-                            </Panel>
-
-                            <VBox
-                                justifyContent="Center"
-                                alignItems="Center"
-                                height="200px"
-                                class="sapUiSmallMarginBegin sapUiSmallMarginEnd">
-
-                                <Text
-                                    text="="
-                                    class="operadorDashboard" />
-
-                            </VBox>
-
-                            <Panel
-                                id="idOnlinePanel"
-                                width="450px"
-                                class="sapUiSmallMargin kpiCard kpiOnline kpiClickavel">
+</Panel>
 
 
-                                <VBox
-                                    alignItems="Center"
-                                    class="sapUiSmallMargin">
-
-                                    <HBox
-                                        width="100%"
-                                        justifyContent="End">
-
-                                        <Text
-                                            text="{= '('
-                                        + ${dashboard>/online}
-                                        + ' / '
-                                        + ${dashboard>/totalEquipamentos}
-                                        + ') '
-                                        + ${dashboard>/percentualOnline}
-                                        + '%' }"
-                                            class="kpiPercentual" />
-
-                                    </HBox>
-
-                                    <Title
-                                        text="{dashboard>/online}"
-                                        level="H1"
-                                        class="kpiNumero" />
-
-                                    <Text
-                                        text="Online"
-                                        class="kpiTexto" />
-
-                                </VBox>
-
-                            </Panel>
-
-                            <VBox
-                                justifyContent="Center"
-                                alignItems="Center"
-                                height="200px"
-                                class="sapUiSmallMarginBegin sapUiSmallMarginEnd">
-
-                                <Text
-                                    text="+"
-                                    class="operadorDashboard" />
-
-                            </VBox>
-
-                            <Panel
-                                id="idOfflinePanel"
-                                width="450px"
-                                class="sapUiSmallMargin kpiCard kpiOffline kpiClickavel">
-
-                                <VBox
-                                    alignItems="Center"
-                                    class="sapUiSmallMargin">
-
-                                    <HBox
-                                        width="100%"
-                                        justifyContent="End">
-                                        <Text
-                                            text="{= '('
-                                        + ${dashboard>/offline}
-                                        + ' / '
-                                        + ${dashboard>/totalEquipamentos}
-                                        + ') '
-                                        + ${dashboard>/percentualOffline}
-                                        + '%' }"
-                                            class="kpiPercentual" />
-
-                                    </HBox>
-
-                                    <Title
-                                        text="{dashboard>/offline}"
-                                        level="H1"
-                                        class="kpiNumero" />
-
-                                    <Text
-                                        text="Offline"
-                                        class="kpiTexto" />
-
-                                </VBox>
-
-                            </Panel>
-
-                            <Panel
-                                width="450px"
-                                class="sapUiSmallMargin kpiCard kpiGateway">
-
-                                <VBox
-                                    alignItems="Center"
-                                    class="sapUiSmallMargin">
-
-                                    <HBox
-                                        width="100%"
-                                        justifyContent="End">
-
-                                        <Text
-                                            text="{= '('
-                                        + ${dashboard>/gateways}
-                                        + ' / 8) '
-                                        + ${dashboard>/percentualGateway} }"
-                                            class="kpiPercentual" />
-
-
-                                    </HBox>
-
-                                    <Title
-                                        text="{dashboard>/gateways}"
-                                        level="H1"
-                                        class="kpiNumero" />
-
-                                    <Text
-                                        text="Gateways"
-                                        class="kpiTexto" />
-
-                                </VBox>
-
-                            </Panel>
-                        </HBox>
+                                                </HBox> <!-- Fim da HBox dos Cards -->
+                        
                         <HBox
-                            width="100%"
-                            fitContainer="true"
-                            alignItems="Start"
-                            justifyContent="SpaceBetween"
-                            renderType="Bare">
+    width="100%"
+    fitContainer="true"
+    alignItems="Stretch"
+    renderType="Bare">
 
-                            <Panel
-                                width="320px"
-                                class="sapUiSmallMarginEnd painelGrupos">
+    <!-- ESQUERDA -->
+    <VBox width="82%">
 
-                                <headerToolbar>
-                                    <Toolbar>
-                                        <Title
-                                            text="{= 'Rastreados por fase (Total: ' + ${dashboard>/totalEquipamentos} + ')' }" />
-                                    </Toolbar>
-                                </headerToolbar>
+        <SearchField
+            id="idPesquisaRastreador"
+            width="100%"
+            placeholder="Pesquisar rastreador, equipamento, gateway ou local"
+            search=".onPesquisarRastreador"
+            class="sapUiMinimumMarginBottom sapUiNoMarginTop pesquisaRastreador" />
 
-                                <List
-                                    items="{dashboard>/grupos}">
+        <!-- Correção: Removida a barra '/' do fechamento da tag para permitir conteúdo interno -->
+        <Panel
+            id="panelMapa"
+            width="100%"
+            height="100%"
+            class="painelMapa"
+            headerText="">
+            
+            <content>
+                <core:HTML
+                    id="htmlMapa"
+                    preferDOM="false" />
+            </content>
 
-                                    <ObjectListItem
-                                        type="Active"
-                                        press=".onQuantidadeObjectListItemPress"
-                                        title="{dashboard>grupo}"
-                                        number="{dashboard>quantidade}"
-                                        numberUnit="" />
+        </Panel>
 
-                                </List>
+    </VBox>
 
-                            </Panel>
+    <!-- DIREITA -->
+    <VBox
+        width="18%"
+        class="sapUiSmallMarginBegin">
 
-                            <VBox width="100%">
+        <Panel
+            headerText="Alertas e Resumos"
+            class="sapUiSmallMarginBottom">
 
-                                <SearchField
-                                    id="idPesquisaRastreador"
-                                    width="450px"
-                                    placeholder="Pesquisar rastreador"
-                                    search=".onPesquisarRastreador"
-                                    class="sapUiSmallMarginBottom pesquisaRastreador" />
+            <VBox class="sapUiSmallMargin">
 
-                                <Panel
-                                    id="panelMapa"
-                                    width="100%"
-                                    height="1000px"
-                                    class="painelMapa"
-                                    headerText="">
+                <MessageStrip
+                    text="{= ${dashboard>/offline} + ' componentes offline'}"
+                    type="Error"
+                    showIcon="true"
+                    class="sapUiTinyMarginBottom" />
 
-                                    <content>
+                <MessageStrip
+                    text="{= ${dashboard>/falhasMovimentacao} + ' inconsistências detectadas'}"
+                    type="Warning"
+                    showIcon="true"
+                    class="sapUiTinyMarginBottom" />
 
-                                        <core:HTML
-                                            id="htmlMapa"
-                                            preferDOM="false" />
+                <MessageStrip
+                    text="{= ${dashboard>/gateways} + ' gateways ativos'}"
+                    type="Success"
+                    showIcon="true" />
 
-                                    </content>
+            </VBox>
 
-                                </Panel>
+        </Panel>
 
-                            </VBox>
+        <Panel
+            width="100%"
+            class="painelGrupos">
 
-                        </HBox>
+            <headerToolbar>
+                <Toolbar>
+                    <Title
+                        text="{= 'Rastreados por fase (Total: ' + ${dashboard>/totalEquipamentos} + ')' }" />
+                </Toolbar>
+            </headerToolbar>
+
+            <List
+                items="{dashboard>/grupos}">
+                <ObjectListItem
+                    type="Active"
+                    press=".onQuantidadeObjectListItemPress"
+                    title="{dashboard>grupo}"
+                    number="{dashboard>quantidade}"
+                    numberUnit="" />
+            </List>
+
+        </Panel>
+        
+        <Panel
+            headerText="Navegação Rápida"
+            class="sapUiSmallMarginTop">
+
+            <List>
+                <StandardListItem
+                    title="Itabira"
+                    type="Active"
+                    press=".onIrItabira" />
+
+                <StandardListItem
+                    title="Brucutu"
+                    type="Active"
+                    press=".onIrBrucutu" />
+
+                <StandardListItem
+                    title="Pico"
+                    type="Active"
+                    press=".onIrPico" />
+
+                <StandardListItem
+                    title="Vespasiano"
+                    type="Active"
+                    press=".onIrVespasiano" />
+            </List>
+
+        </Panel>
+    </VBox>
+
+</HBox>
+
 
                     </IconTabFilter>
                     <IconTabFilter
@@ -309,7 +426,7 @@
                                         id="idInstalacaoVizFrame"
                                         vizType="donut"
                                         width="120%"
-                                        height="400px" />
+                                        height="500px" />
 
                                 </Panel>
                                 <Panel
