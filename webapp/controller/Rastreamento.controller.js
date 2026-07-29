@@ -2593,26 +2593,26 @@ sap.ui.define([
                         });
 
                 }
-                if (zoom >= 14 && zoom < 16) {
+                // if (zoom >= 14 && zoom < 16) {
 
-                    [
+                //     [
 
-                        ["OFICINA CENTRAL", -19.601106, -43.214199],
+                //         ["OFICINA CENTRAL", -19.601106, -43.214199],
 
-                        ["POSTO", -19.632648, -43.242334]
-                    ]
-                        .forEach(item => {
+                //         ["POSTO", -19.632648, -43.242334]
+                //     ]
+                //         .forEach(item => {
 
-                            this.criarLabel(
-                                item[0],
-                                item[1],
-                                item[2],
-                                "gatewayLabel"
-                            ).addTo(this._layerLabels);
+                //             this.criarLabel(
+                //                 item[0],
+                //                 item[1],
+                //                 item[2],
+                //                 "gatewayLabel"
+                //             ).addTo(this._layerLabels);
 
-                        });
+                //         });
 
-                }
+                // }
                 if (zoom >= 14) {
 
                     [
@@ -2633,56 +2633,56 @@ sap.ui.define([
 
                 }
 
-                if (zoom >= 16) {
+                // if (zoom >= 16) {
 
-                    [
+                //     [
 
-                        ["ÁREA 23", -19.604498, -43.211828],
+                //         ["ÁREA 23", -19.604498, -43.211828],
 
-                        ["ÁREA 27", -19.601748, -43.209649],
+                //         ["ÁREA 27", -19.601748, -43.209649],
 
-                        ["OFICINA CENTRAL", -19.601106, -43.214199],
+                //         ["OFICINA CENTRAL", -19.601106, -43.214199],
 
-                        ["PORTARIA PRINCIPAL", -19.604328, -43.216655],
+                //         ["PORTARIA PRINCIPAL", -19.604328, -43.216655],
 
-                        ["PORTARIA VALER", -19.604723, -43.214709],
+                //         ["PORTARIA VALER", -19.604723, -43.214709],
 
-                        ["POSTO PERIQUITO", -19.632648, -43.242334]
+                //         ["POSTO PERIQUITO", -19.632648, -43.242334]
 
-                    ]
-                        .forEach(item => {
+                //     ]
+                //         .forEach(item => {
 
-                            this.criarLabel(
-                                item[0],
-                                item[1],
-                                item[2],
-                                "gatewayLabel"
-                            ).addTo(this._layerLabels);
+                //             this.criarLabel(
+                //                 item[0],
+                //                 item[1],
+                //                 item[2],
+                //                 "gatewayLabel"
+                //             ).addTo(this._layerLabels);
 
-                        });
+                //         });
 
-                }
-                if (zoom >= 17) {
+                // }
+                // if (zoom >= 17) {
 
-                    [
-
-
-                        ["OFICINA DE LUBRIFICAÇÃO", -19.601286, -43.215671],
+                //     [
 
 
-                    ]
-                        .forEach(item => {
+                //         ["OFICINA DE LUBRIFICAÇÃO", -19.601286, -43.215671],
 
-                            this.criarLabel(
-                                item[0],
-                                item[1],
-                                item[2],
-                                "gatewayLabel"
-                            ).addTo(this._layerLabels);
 
-                        });
+                //     ]
+                //         .forEach(item => {
 
-                }
+                //             this.criarLabel(
+                //                 item[0],
+                //                 item[1],
+                //                 item[2],
+                //                 "gatewayLabel"
+                //             ).addTo(this._layerLabels);
+
+                //         });
+
+                // }
             },
             gerarGraficoTipoStatus(dados) {
 
@@ -3937,24 +3937,40 @@ sap.ui.define([
                     this._map = L.map("mapaEquipamentos", {
                         layers: [satelite]
                     });
+                    this._poligonosZonas = [];
+
                     zonas.forEach(zona => {
 
                         try {
 
                             const pontos = JSON.parse(zona.pontos);
 
-                            L.polygon(
+                            const poligono = L.polygon(
                                 pontos.map(p => [p.lat, p.lon]),
                                 {
                                     color: "#FFFFFF",
                                     weight: 3,
-                                    opacity: 0.5,
-                                    fillColor: zona.cor,
-                                    fillOpacity: 0.05
+                                    opacity: 0.7,
+                                    fillColor: "#FFFFFF",
+                                    fillOpacity: 0.04,
+                                    lineJoin: "round"
                                 }
                             )
-                                .bindTooltip(zona.nome)
+                                .bindTooltip(
+                                    zona.nome.toUpperCase(),
+                                    {
+                                        permanent: false,
+                                        direction: "center",
+                                        className: "gatewayLabel"
+                                    }
+                                )
                                 .addTo(this._map);
+
+                            poligono.closeTooltip();
+
+                            this._poligonosZonas.push(
+                                poligono
+                            );
 
                         } catch (e) {
 
@@ -3996,16 +4012,20 @@ sap.ui.define([
                         this.atualizarLabels();
 
                         const zoom = this._map.getZoom();
-
                         if (zoom >= 17) {
 
-                            // this._layerDetalhes.addTo(this._map);
+                            this._poligonosZonas.forEach(p => {
+                                p.openTooltip();
+                            });
 
                         } else {
 
-                            // this._map.removeLayer(this._layerDetalhes);
+                            this._poligonosZonas.forEach(p => {
+                                p.closeTooltip();
+                            });
 
                         }
+
 
                     });
 
@@ -5287,7 +5307,7 @@ sap.ui.define([
                             }
                         )
 
-                            .bindTooltip(gw.identificador)
+
                             .bindPopup(`
                                                                                                                 <b>${gw.identificador}</b><br>
                                                                                                                     Gateway ID: ${gw.gatewayId}<br>
