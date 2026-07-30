@@ -1101,7 +1101,7 @@ sap.ui.define([
                             "Avalia o percentual de gateways previstos para o piloto que estão efetivamente ativos e contribuindo para a cobertura da infraestrutura RFID.<br><br>" +
 
                             "<strong>Como é calculado?</strong><br><br>" +
-
+                        
                             "Compara a quantidade de gateways ativos identificados no ambiente com a quantidade total planejada para o piloto.<br><br>" +
 
                             "<strong>" +
@@ -3445,6 +3445,15 @@ sap.ui.define([
                     });
 
                 }
+                grupos.forEach(item => {
+
+                    item.percentual =
+                        (
+                            item.quantidade /
+                            totalEquipamentos * 100
+                        ).toFixed(1);
+
+                });
                 this.getView()
                     .getModel("dashboard")
                     .setData({
@@ -3819,10 +3828,10 @@ sap.ui.define([
                     });
                 }
 
-this.byId("htmlMapa").setContent(`
+                this.byId("htmlMapa").setContent(`
     <div
         id="mapaEquipamentos"
-        style="height:1100px;width:100%;">
+        style="height:1195px;width:100%;">
     </div>
 `);
 
@@ -4250,224 +4259,224 @@ this.byId("htmlMapa").setContent(`
                     legenda.addTo(this._map);
                     // const cidades = L.control({ position: 'topright' });
 
-//                     cidades.onAdd = () => {
-//                         const div = L.DomUtil.create('div', 'map-cities');
+                    //                     cidades.onAdd = () => {
+                    //                         const div = L.DomUtil.create('div', 'map-cities');
 
-//                         div.style.background = 'white';
-//                         div.style.padding = '6px 8px';
-//                         div.style.borderRadius = '6px';
-//                         div.style.boxShadow = '0 1px 6px rgba(0,0,0,.4)';
-//                         div.style.fontSize = '20px';
-//                         div.style.lineHeight = '30px';
-//                         div.style.width = '200px';
-//                         div.style.color = '#333';
-//                         div.style.marginTop = '6px';
-//                         const htmlVeiculos = veiculos
-//                             .filter(v => v.Veiculo)
-//                             .sort((a, b) => a.Veiculo.localeCompare(b.Veiculo))
-//                             .map(v =>
-//                                 `<a            ${v.Veiculo}
-//         </a><br>`
-//                             )
-//                             .join("");
-//                         div.innerHTML = `
-//     <div style="font-weight:bold; margin-bottom:4px; text-align:center; border-bottom:1px solid #ddd;">
-//         Cidades (MG)
-//     </div>
+                    //                         div.style.background = 'white';
+                    //                         div.style.padding = '6px 8px';
+                    //                         div.style.borderRadius = '6px';
+                    //                         div.style.boxShadow = '0 1px 6px rgba(0,0,0,.4)';
+                    //                         div.style.fontSize = '20px';
+                    //                         div.style.lineHeight = '30px';
+                    //                         div.style.width = '200px';
+                    //                         div.style.color = '#333';
+                    //                         div.style.marginTop = '6px';
+                    //                         const htmlVeiculos = veiculos
+                    //                             .filter(v => v.Veiculo)
+                    //                             .sort((a, b) => a.Veiculo.localeCompare(b.Veiculo))
+                    //                             .map(v =>
+                    //                                 `<a            ${v.Veiculo}
+                    //         </a><br>`
+                    //                             )
+                    //                             .join("");
+                    //                         div.innerHTML = `
+                    //     <div style="font-weight:bold; margin-bottom:4px; text-align:center; border-bottom:1px solid #ddd;">
+                    //         Cidades (MG)
+                    //     </div>
 
-//     <a href="#" id="cidadeItabira">Itabira</a><br>
-//     <a href="#" id="cidadeItabirito">Itabirito</a><br>
-//     <a href="#" id="cidadeSaoGoncalo">São Gonçalo</a><br>
-//     <a href="#" id="cidadeVespasiano">Vespasiano</a>
+                    //     <a href="#" id="cidadeItabira">Itabira</a><br>
+                    //     <a href="#" id="cidadeItabirito">Itabirito</a><br>
+                    //     <a href="#" id="cidadeSaoGoncalo">São Gonçalo</a><br>
+                    //     <a href="#" id="cidadeVespasiano">Vespasiano</a>
 
-//     <div style="font-weight:bold; margin-top:8px; margin-bottom:4px; text-align:center; border-top:1px solid #ddd; padding-top:4px;">
-//         Minas
-//     </div>
+                    //     <div style="font-weight:bold; margin-top:8px; margin-bottom:4px; text-align:center; border-top:1px solid #ddd; padding-top:4px;">
+                    //         Minas
+                    //     </div>
 
-//     <a href="#" id="minaCaue">Cauê</a><br>
-//     <a href="#" id="minaConceicao">Conceição</a><br>
-//     <a href="#" id="minaPeriquito">Periquito</a><br>
-//     <a href="#" id="minaAlegria">Alegria</a><br>
-//     <a href="#" id="minaPico">Pico</a><br>
-//     <a href="#" id="minaBrucutu">Brucutu</a>
-// `;
+                    //     <a href="#" id="minaCaue">Cauê</a><br>
+                    //     <a href="#" id="minaConceicao">Conceição</a><br>
+                    //     <a href="#" id="minaPeriquito">Periquito</a><br>
+                    //     <a href="#" id="minaAlegria">Alegria</a><br>
+                    //     <a href="#" id="minaPico">Pico</a><br>
+                    //     <a href="#" id="minaBrucutu">Brucutu</a>
+                    // `;
 
-//                         const tituloVeiculos = document.createElement("div");
+                    //                         const tituloVeiculos = document.createElement("div");
 
-//                         tituloVeiculos.style.fontWeight = "bold";
-//                         tituloVeiculos.style.marginTop = "8px";
-//                         tituloVeiculos.style.marginBottom = "4px";
-//                         tituloVeiculos.style.textAlign = "center";
-//                         tituloVeiculos.style.borderTop = "1px solid #ddd";
-//                         tituloVeiculos.style.paddingTop = "4px";
+                    //                         tituloVeiculos.style.fontWeight = "bold";
+                    //                         tituloVeiculos.style.marginTop = "8px";
+                    //                         tituloVeiculos.style.marginBottom = "4px";
+                    //                         tituloVeiculos.style.textAlign = "center";
+                    //                         tituloVeiculos.style.borderTop = "1px solid #ddd";
+                    //                         tituloVeiculos.style.paddingTop = "4px";
 
-//                         tituloVeiculos.textContent = "Veículos";
+                    //                         tituloVeiculos.textContent = "Veículos";
 
-//                         div.appendChild(tituloVeiculos);
+                    //                         div.appendChild(tituloVeiculos);
 
-//                         veiculos
-//                             .filter(v => v.Veiculo)
-//                             .sort((a, b) => a.Veiculo.localeCompare(b.Veiculo))
-//                             .forEach(v => {
+                    //                         veiculos
+                    //                             .filter(v => v.Veiculo)
+                    //                             .sort((a, b) => a.Veiculo.localeCompare(b.Veiculo))
+                    //                             .forEach(v => {
 
-//                                 const link = document.createElement("a");
+                    //                                 const link = document.createElement("a");
 
-//                                 link.id = "veiculo_" + v.Veiculo;
-//                                 link.href = "#";
-//                                 link.textContent = v.Veiculo;
+                    //                                 link.id = "veiculo_" + v.Veiculo;
+                    //                                 link.href = "#";
+                    //                                 link.textContent = v.Veiculo;
 
-//                                 div.appendChild(link);
-//                                 div.appendChild(document.createElement("br"));
+                    //                                 div.appendChild(link);
+                    //                                 div.appendChild(document.createElement("br"));
 
-//                             });
-//                         L.DomEvent.disableClickPropagation(div);
+                    //                             });
+                    //                         L.DomEvent.disableClickPropagation(div);
 
-//                         setTimeout(() => {
-//                             document.getElementById('cidadeItabira')
-//                                 ?.addEventListener('click', (e) => {
+                    //                         setTimeout(() => {
+                    //                             document.getElementById('cidadeItabira')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-19.641510, -43.226143],
-//                                         13
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-19.641510, -43.226143],
+                    //                                         13
+                    //                                     );
 
-//                                 });
-//                             document.getElementById('cidadeItabirito')
-//                                 ?.addEventListener('click', (e) => {
+                    //                                 });
+                    //                             document.getElementById('cidadeItabirito')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-20.217717, -43.864048],
-//                                         15
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-20.217717, -43.864048],
+                    //                                         15
+                    //                                     );
 
-//                                 });
+                    //                                 });
 
-//                             document.getElementById('cidadeSaoGoncalo')
-//                                 ?.addEventListener('click', (e) => {
+                    //                             document.getElementById('cidadeSaoGoncalo')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-19.857575, -43.389106],
-//                                         13
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-19.857575, -43.389106],
+                    //                                         13
+                    //                                     );
 
-//                                 });
-//                             document.getElementById('cidadeVespasiano')
-//                                 ?.addEventListener('click', (e) => {
+                    //                                 });
+                    //                             document.getElementById('cidadeVespasiano')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-19.708129, -43.903523],
-//                                         15
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-19.708129, -43.903523],
+                    //                                         15
+                    //                                     );
 
-//                                 });
-//                             document.getElementById('minaCaue')
-//                                 ?.addEventListener('click', (e) => {
+                    //                                 });
+                    //                             document.getElementById('minaCaue')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-19.599252, -43.218690],
-//                                         15
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-19.599252, -43.218690],
+                    //                                         15
+                    //                                     );
 
-//                                 });
+                    //                                 });
 
-//                             document.getElementById('minaConceicao')
-//                                 ?.addEventListener('click', (e) => {
+                    //                             document.getElementById('minaConceicao')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-19.657580, -43.269398],
-//                                         15
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-19.657580, -43.269398],
+                    //                                         15
+                    //                                     );
 
-//                                 });
+                    //                                 });
 
-//                             document.getElementById('minaPeriquito')
-//                                 ?.addEventListener('click', (e) => {
+                    //                             document.getElementById('minaPeriquito')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-19.632715, -43.254261],
-//                                         15
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-19.632715, -43.254261],
+                    //                                         15
+                    //                                     );
 
-//                                 });
+                    //                                 });
 
-//                             document.getElementById('minaAlegria')
-//                                 ?.addEventListener('click', (e) => {
+                    //                             document.getElementById('minaAlegria')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-20.163679, -43.501025],
-//                                         15
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-20.163679, -43.501025],
+                    //                                         15
+                    //                                     );
 
-//                                 });
+                    //                                 });
 
-//                             document.getElementById('minaPico')
-//                                 ?.addEventListener('click', (e) => {
+                    //                             document.getElementById('minaPico')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-20.217185, -43.864846],
-//                                         15
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-20.217185, -43.864846],
+                    //                                         15
+                    //                                     );
 
-//                                 });
+                    //                                 });
 
-//                             document.getElementById('minaBrucutu')
-//                                 ?.addEventListener('click', (e) => {
+                    //                             document.getElementById('minaBrucutu')
+                    //                                 ?.addEventListener('click', (e) => {
 
-//                                     e.preventDefault();
+                    //                                     e.preventDefault();
 
-//                                     this._map.setView(
-//                                         [-19.870131, -43.398402],
-//                                         15
-//                                     );
+                    //                                     this._map.setView(
+                    //                                         [-19.870131, -43.398402],
+                    //                                         15
+                    //                                     );
 
-//                                 });
-//                             veiculos.forEach(v => {
+                    //                                 });
+                    //                             veiculos.forEach(v => {
 
-//                                 document
-//                                     .getElementById("veiculo_" + v.Veiculo)
-//                                     ?.addEventListener("click", (e) => {
+                    //                                 document
+                    //                                     .getElementById("veiculo_" + v.Veiculo)
+                    //                                     ?.addEventListener("click", (e) => {
 
-//                                         e.preventDefault();
+                    //                                         e.preventDefault();
 
-//                                         const lat = parseFloat(v.Latitude);
-//                                         const lng = parseFloat(v.Longitude);
+                    //                                         const lat = parseFloat(v.Latitude);
+                    //                                         const lng = parseFloat(v.Longitude);
 
-//                                         if (isNaN(lat) || isNaN(lng)) {
-//                                             return;
-//                                         }
+                    //                                         if (isNaN(lat) || isNaN(lng)) {
+                    //                                             return;
+                    //                                         }
 
-//                                         this._map.setView(
-//                                             [lat, lng],
-//                                             17
-//                                         );
+                    //                                         this._map.setView(
+                    //                                             [lat, lng],
+                    //                                             17
+                    //                                         );
 
-//                                     });
+                    //                                      });
 
-//                             });
-//                         }, 100);
+                    //                             });
+                    //                         }, 100);
 
-//                         return div;
-//                     };
+                    //                         return div;
+                    //                     };
 
-//                     cidades.addTo(this._map);
+                    //                     cidades.addTo(this._map);
 
                     this._layerOnline = L.layerGroup();
                     this._layerOffline = L.layerGroup();

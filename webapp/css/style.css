@@ -1,31 +1,178 @@
-.painelGrupos .sapMPanelHdr {
-    font-size: 22px !important;
-    font-weight: bold !important;
-}
+/* ==========================================================================
+   ESTILIZAÇÃO DA LISTA DE INDICADORES (ITENS) - EXPLICAÇÃO DETALHADA
+   ========================================================================== */
 
-.painelGrupos .sapMObjLTitle {
-    font-size: 18px !important;
-}
-
+/* 
+   Aumenta a altura de cada linha inteira (Card). 
+   Dá espaço vertical para o texto "A reformar" crescer sem esmagar a barra cinza.
+*/
 .painelGrupos .sapMLIB {
     min-height: 110px !important;
+    transition: background-color .15s ease;
 }
 
-.painelGrupos .sapMObjectNumber {
-    min-height: 0px !important;
+/* Altera a cor de fundo para cinza claro quando o mouse passa por cima da linha */
+.painelGrupos .sapMLIB:hover {
+    background: #f8fafc;
 }
 
+/* 
+   1. MAPEA OS TEXTOS DA ESQUERDA (Ex: "A reformar", "Instalados", "Reforma externa"...)
+   
+   COMO FUNCIONA: Ele entra na linha (.sapMLIB), entra na primeira caixa (.sapMHBox)
+   e procura o primeiro elemento de texto que encontrar (.sapMText:first-of-type).
+*/
+/* ==========================================================================
+   AJUSTE DE ESPAÇAMENTO VERTICAL (PAINEL DE GRUPOS)
+   ========================================================================== */
+
+/* 1. NOME DO INDICADOR / GRUPO (Ex: A reformar, Instalados...) */
+.painelGrupos .sapMLIB .sapMHBox .sapMText:first-of-type,
+.painelGrupos .txtTituloGrupo {
+    font-size: 24px !important;
+    font-weight: 500 !important;
+  color: #111111 !important;
+    display: inline-block !important;
+    margin-bottom: 0px !important;
+    /* Zera a folga abaixo do texto da esquerda */
+    padding-bottom: 0px !important;
+}
+
+/* 2. TEXTO DA PORCENTAGEM (Ex: 2.6%, 41.0%...) */
+.painelGrupos .sapMLIB .sapMHBox .sapMHBox .sapMText,
+.painelGrupos .txtPercentualGrupo {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+    line-height: normal !important;
+    margin-bottom: 0px !important;
+    /* Zera a folga abaixo da porcentagem */
+    padding-bottom: 0px !important;
+}
+
+/* 3. QUANTIDADE ABSOLUTA (O ObjectNumber) */
 .painelGrupos .sapMObjectNumberText {
-    font-size: 48px !important;
-    font-weight: bold !important;
-    line-height: 50px !important;
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    line-height: 30px !important;
+    color: #0a6ed1 !important;
+    margin-bottom: 0px !important;
+    /* Zera a folga abaixo do número absoluto */
 }
 
-.painelGrupos .sapMObjectNumberUnit {
-    display: block !important;
+/* 4. PROGRESS INDICATOR (A BARRA DE PROGRESSO) */
+.painelGrupos .sapMProgressIndicator {
+    margin-top: 2px !important;
+    /* PUXA A BARRA PARA CIMA (Igual ao painel de Indicadores) */
+    height: 12px !important;
+}
+
+/* ==========================================================================
+   REDUÇÃO DE ESPAÇAMENTO - DISTRIBUIÇÃO DOS COMPONENTES
+   ========================================================================== */
+
+/* 1. Remove os paddings e encolhe a altura mínima de cada linha da lista */
+.painelGrupos .sapMList .sapMLIB {
+    min-height: 48px !important;
+    /* Reduzido de 110px para 48px para compactar */
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+/* 2. Controla o recuo interno do VBox que envolve o texto e a barra */
+.painelGrupos .sapMLIB .sapUiTinyMargin {
+    margin: 4px 12px !important;
+    /* Estreita o espaçamento interno do card */
+}
+
+/* 3. Ajusta a aproximação da barra de progresso verde logo abaixo do texto */
+.painelGrupos .sapMProgressIndicator {
+    margin-top: 2px !important;
+    /* Mantém a barra colada no texto correspondente */
+    margin-bottom: 2px !important;
+}
+
+/* ==========================================================================
+   PAINEL TABELA - RESUMO POR GRUPO ATUAL
+   ========================================================================== */
+
+/* Cabeçalho da Tabela (Textos: "Grupo Atual" e "Quantidade") */
+.painelTabelaResumo .txtHeaderTabela {
     font-size: 16px !important;
-    margin-top: 10px !important;
-    line-height: 18px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+}
+
+/* Texto da Célula / Nome do Grupo (Coluna da esquerda) */
+.painelTabelaResumo .txtCelulaGrupo {
+    font-size: 24px !important;
+    font-weight: 400 !important;
+    color: #111111 !important;
+    display: inline-block !important;
+}
+
+/* Número da Quantidade (Coluna da direita) */
+.painelTabelaResumo .txtCelulaQuantidade .sapMObjectNumberText {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+    color: #0a6ed1 !important;
+    line-height: normal !important;
+}
+
+/* Ajuste de altura da linha da tabela */
+.painelTabelaResumo .sapMListShowSeparators .sapMGHLI,
+.painelTabelaResumo .sapMListShowSeparators .sapMLIB {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+    min-height: 70px !important;
+}
+
+/* ==========================================================================
+   TÍTULO PRINCIPAL DO PAINEL (Ex: "Distribuição dos Componentes")
+   ========================================================================== */
+.painelGrupos .sapMPanelHdr {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+}
+
+/* ==========================================================================
+   TÍTULO DENTRO DO HEADERTOOLBAR (Ex: "Distribuição dos Componentes")
+   ========================================================================== */
+.painelGrupos .sapMBarPH .sapMTitle {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+}
+
+/* ==========================================================================
+   TÍTULO DO PAINEL DE GRUPOS (Focado no componente <Title> da Toolbar)
+   ========================================================================== */
+.painelGrupos .sapMTitle,
+.painelGrupos .sapMBar .sapMTitle,
+.painelGrupos [id$="-title"] {
+    font-size: 24px !important;
+    /* Mesma fonte de 24px do painel Indicadores */
+    font-weight: 700 !important;
+    color: #111111 !important;
+}
+
+/* ==========================================================================
+   AJUSTE DE ESPAÇAMENTO VERTICAL (PROGRESS INDICATOR)
+   ========================================================================== */
+
+/* 1. Remove qualquer margem ou padding extra abaixo dos textos */
+.painelIndicadores .sapMText,
+.painelIndicadores .sapMProgressIndicatorText,
+.painelIndicadores .sapMProgressIndicatorPercentValue {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* 2. Aproxima a barra verde subindo o contêiner dela */
+.painelIndicadores .sapMProgressIndicator {
+    margin-top: 2px !important;
+    /* Diminua este valor para aproximar ainda mais */
 }
 
 .kpiNumero {
@@ -95,14 +242,7 @@
     background: #eef6ff;
 }
 
-/* Painel grupos */
 
-.painelGrupos {
-    border-radius: 18px !important;
-    overflow: hidden;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, .08) !important;
-    background: #ffffff;
-}
 
 /* Painel mapa */
 
@@ -115,26 +255,12 @@
 
 /* Cabeçalhos dos painéis */
 
-.painelGrupos .sapMPanelHdr,
-.painelMapa .sapMPanelHdr {
-    background: #ffffff !important;
-    border-bottom: 1px solid #edf0f5 !important;
-}
 
-/* Lista */
-
-.painelGrupos .sapMLIB {
-    transition: background-color .15s ease;
-}
-
-.painelGrupos .sapMLIB:hover {
-    background: #f8fafc;
-}
 
 /* Mapa */
 .pesquisaRastreador input {
-    font-size: 20px !important;
-    font-weight: 600;
+    font-size: 26px !important;
+    font-weight: 800;
 }
 
 #mapaEquipamentos {
@@ -175,51 +301,69 @@
    ============================ */
 .dashboardTabs .sapMITBHead {
     justify-content: center;
-    padding: 0px 0 !important;
-    min-height: 120px !important;
+    min-height: 70px !important;
     align-items: center;
 }
 
 .dashboardTabs .sapMITBFilter {
     min-width: 320px !important;
-    margin: 0 20px !important;
+    margin: 0 10px !important;
+    /* Remove completamente qualquer borda ou linha nativa do contêiner */
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
 }
 
 .dashboardTabs .sapMITBFilter .sapMITBText {
-    display: block;
-    text-align: center;
-
-    min-width: 280px;
-    padding: 25px 40px !important;
-
-    font-size: 22px !important;
+    background: transparent !important;
+    border: none !important;
+    /* Garante que nenhuma borda nativa do texto apareça por padrão */
+    border-bottom: 4px solid transparent !important;
+    box-shadow: none !important;
+    color: #7f8b99 !important;
+    font-size: 28px !important;
     font-weight: 700 !important;
-
-    border-radius: 12px;
-
-    background: #ebf5fe;
-    color: #0a6ed1;
-
-    border: 1px solid #b8d6f2;
-
-    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
-
+    /* Padding inferior ligeiramente maior para afastar o texto da linha */
+    padding: 15px 16px 14px 16px !important;
+    line-height: 24px !important;
+    text-align: center;
     transition: all .2s ease;
+    display: inline-block !important;
+}
+
+/* Pseudoelemento para o emoji */
+.dashboardTabs .sapMITBFilter[data-sap-ui-key="geo"] .sapMITBText::before {
+    content: "🌐";
+    margin-right: 8px;
+    font-size: 1.2rem;
+    vertical-align: middle;
+    display: inline-block;
+    background: transparent !important;
 }
 
 .dashboardTabs .sapMITBFilter .sapMITBText:hover {
-    background: #dceeff;
+    color: #0854a0 !important;
 }
 
+/* Remove a linha nativa quando selecionado no elemento pai */
+.dashboardTabs .sapMITBSelected {
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* Aplica a linha de seleção ÚNICA diretamente na base do texto */
 .dashboardTabs .sapMITBSelected .sapMITBText {
-    background: #0a6ed1 !important;
-    color: #ffffff !important;
-    border-color: #0a6ed1 !important;
+    background: transparent !important;
+    color: #0a6ed1 !important;
+    border-bottom: 4px solid #0a6ed1 !important;
 }
 
 .dashboardTabs .sapMITBContainerContent {
     padding-top: 0 !important;
 }
+
 
 .painelEsquerdoGrafico {
     border-right: 2px solid #d9d9d9 !important;
@@ -362,31 +506,7 @@
 
     font-weight: 600;
 } */
-.painelGrupos .sapMObjLNumberDiv {
-    background: #eef0f2;
-    border: 1px solid #d9dde3;
 
-    border-radius: 8px;
-
-    min-width: 48px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 4px;
-}
-
-.painelGrupos .sapMObjLNumber {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.painelGrupos {
-    border-top: 5px solid #1976d2;
-    border-radius: 12px;
-    overflow: hidden;
-}
 
 .pesquisaRastreador .sapMSFB,
 .pesquisaRastreador .sapMSFS {
@@ -468,6 +588,7 @@
     font-size: 1rem !important;
     line-height: 1.5rem;
 }
+
 .tituloKpiNovo {
     font-size: 22px;
     font-weight: 700;
@@ -476,4 +597,159 @@
     margin-left: 12px;
 
     text-transform: uppercase;
+}
+
+/* ==========================================================================
+   AJUSTE DE FONTE - LISTA DE NAVEGAÇÃO RÁPIDA (CORRIGIDO)
+   ========================================================================== */
+
+/* 1. Alvo no texto dos itens (Itabira, Brucutu, Pico, Vespasiano) */
+.painelNavegacao .sapMSLI,
+.painelNavegacao .sapMSLITitle,
+.painelNavegacao .sapMSLITitleOnly {
+    font-size: 24px !important;
+    /* Mesma fonte de 24px dos nomes de indicadores */
+    font-weight: 500 !important;
+    color: #111111 !important;
+    /* Mesma cor cinza-azulada padrão */
+}
+
+/* 2. Alvo nos ícones laterais do mapa/prédio */
+.painelNavegacao .sapMSLIIcon {
+    font-size: 1.4rem !important;
+    /* Ícone proporcional ao tamanho 24px */
+    color: #e9730c !important;
+    margin-right: 12px !important;
+}
+
+/* ==========================================================================
+   REDUÇÃO DE ESPAÇAMENTO - NAVEGAÇÃO RÁPIDA
+   ========================================================================== */
+
+/* Reduz a altura de cada linha e elimina os paddings internos do SAPUI5 */
+.painelNavegacao .sapMList .sapMLIB {
+    min-height: 48px !important;
+    /* Reduzido de 75px para 48px para ficar mais compacto */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+
+
+
+.sapMPanelHdr {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+}
+
+
+
+--PAINEL INDICADORES --PORCENTAGEM
+/* ==========================================================================
+   PAINEL DE INDICADORES (PROGRESS INDICATOR)
+   ========================================================================== */
+
+/* 1. TÍTULO DOS INDICADORES (Ex: Cobertura, Disponibilidade, Consistência...) */
+.painelIndicadores .sapMProgressIndicator .sapMMsgStripText,
+.painelIndicadores .sapMProgressIndicatorText,
+.painelIndicadores .sapMProgressIndicator>label,
+.painelIndicadores .sapMText:not(.sapMProgressIndicatorPercentValue) {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    color: #333333 !important;
+    display: inline-block !important;
+    margin-bottom: 0px !important;
+    /* REDUZIDO de 8px para 0px para aproximar a barra */
+    padding-bottom: 0px !important;
+    /* GARANTE que não haja espaçamento interno empurrando a barra */
+}
+
+/* 2. TEXTO DO PERCENTUAL / VALOR (Ex: 78.0%, 82.1%...) */
+.painelIndicadores .sapMProgressIndicatorPercentValue,
+.painelIndicadores .sapMProgressIndicatorValue {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #111111 !important;
+}
+
+/* 3. SÍMBOLO DA PORCENTAGEM (%) */
+.painelIndicadores .sapMProgressIndicatorPercentValue::after {
+    font-size: 22px !important;
+    font-weight: 600 !important;
+}
+
+/* 4. TÍTULO DO PAINEL PRINCIPAL (O cabeçalho "Indicadores") */
+.painelIndicadores .sapMPanelHdr,
+.painelIndicadores .sapMPanelHdrTxt {
+    font-size: 24px !important;
+    font-weight: 700 !important;
+}
+
+/* ==========================================================================
+   CORREÇÃO DO PERCENTUAL / VALOR NUMÉRICO (Ex: 78.0 %)
+   ========================================================================== */
+
+/* Alvo 1: Caso seja um ObjectNumber (sap.m.ObjectNumber) */
+.painelIndicadores .sapMObjectNumberText,
+.painelIndicadores .sapMObjectNumber .sapMObjectNumberText {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    line-height: normal !important;
+    margin-bottom: 0px !important;
+    /* ADICIONADO para zerar a base do número */
+}
+
+/* Alvo 2: Caso o símbolo de "%" esteja separado na propriedade Unit */
+.painelIndicadores .sapMObjectNumberUnit,
+.painelIndicadores .sapMObjectNumber .sapMObjectNumberUnit {
+    font-size: 26px !important;
+    font-weight: 600 !important;
+}
+
+/* Alvo 3: Caso seja um NumericContent (sap.m.NumericContent) */
+.painelIndicadores .sapMNCValue .sapMNCValueScr,
+.painelIndicadores .sapMNCScale {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+}
+
+/* Alvo 4: Caso seja um Text comum alinhado à direita */
+.painelIndicadores .sapMProgressIndicatorPercentValue,
+.painelIndicadores .sapMProgressIndicatorDisplayValue {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    margin-bottom: 0px !important;
+    /* ADICIONADO para zerar a base do texto de porcentagem */
+}
+
+/* ==========================================================================
+   APROXIMAÇÃO REAL DA BARRA DE PROGRESSO
+   ========================================================================== */
+.painelIndicadores .sapMProgressIndicator {
+    margin-top: 2px !important;
+    /* Puxa fisicamente a barra verde para cima, colando nos textos */
+}
+
+/* ==========================================================================
+   REDUÇÃO DE ESPAÇAMENTO - PAINEL INDICADORES
+   ========================================================================== */
+
+/* 1. Reduz o espaçamento do contêiner mestre interno do painel */
+.painelIndicadores .sapUiSmallMargin {
+    margin: 8px 12px !important;
+    /* Estreita os recuos laterais e verticais internos */
+}
+
+/* 2. Reduz drasticamente a margem de afastamento entre um indicador e outro */
+.painelIndicadores .sapUiSmallMarginTop {
+    margin-top: 6px !important;
+    /* Reduzido de 16px padrão para apenas 6px */
+}
+
+/* 3. Ajusta o respiro da barra de progresso para acompanhar a aproximação */
+.painelIndicadores .sapMProgressIndicator {
+    margin-top: 2px !important;
+    margin-bottom: 2px !important;
 }
