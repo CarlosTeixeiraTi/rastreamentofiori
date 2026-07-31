@@ -187,15 +187,12 @@
                                         alignItems="Start"
                                         justifyContent="Center">
 
-                                        <!-- Título no topo -->
                                         <Title
                                             text="Offline"
                                             titleStyle="H4"
                                             class="tituloKpiNovo sapUiTinyMarginBottom" />
 
-                                        <!-- Linha do Valor com a Porcentagem ao lado -->
-                                        <HBox
-                                            alignItems="Center">
+                                        <HBox alignItems="Center">
 
                                             <Title
                                                 text="{dashboard>/offline}"
@@ -204,15 +201,24 @@
 
                                             <Text
                                                 text="{= '('
-                        + ${dashboard>/offline}
-                        + ' / '
-                        + ${dashboard>/totalEquipamentos}
-                        + ') '
-                        + ${dashboard>/percentualOffline}
-                        + '%' }"
+            + ${dashboard>/offline}
+            + ' / '
+            + ${dashboard>/totalEquipamentos}
+            + ') '
+            + ${dashboard>/percentualOffline}
+            + '%' }"
                                                 class="kpiPercentual sapUiSmallMarginBegin" />
 
+                                            <Text
+                                                text="{= '🚜 ' + ${dashboard>/offlineInstalados} + ' em operação' }"
+                                                class="sapUiTinyMarginTop offlineInstaladosTexto" />
+
+                                            <Text
+                                                text="{= '🌎 ' + ${dashboard>/offlineForaItabira} + ' fora de Itabira' }"
+                                                class="offlineInstaladosTexto" />
+
                                         </HBox>
+
 
                                     </VBox>
 

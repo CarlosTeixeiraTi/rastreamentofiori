@@ -891,12 +891,31 @@ sap.ui.define([
                             return false;
                         }
 
+                        if (!this._testeData) {
+
+                            this._testeData = true;
+
+                            sap.m.MessageBox.information(
+                                "Identificador: " + item.identificador +
+                                "\n\nÚltima posição recebida:" +
+                                "\n" + item.ultimaPosicao
+                            );
+
+                        }
+
                         const dataPosicao =
                             this.converterDataBr(
                                 item.ultimaPosicao
                             );
 
-                        return dataPosicao >= limiteOnline;
+                        if (
+                            !dataPosicao ||
+                            isNaN(dataPosicao.getTime())
+                        ) {
+                            return true;
+                        }
+
+                        return dataPosicao < limiteOnline;
 
                     });
 
@@ -974,9 +993,15 @@ sap.ui.define([
 
                     });
 
+
                 let texto = "";
 
-                texto += `Componentes Offline: ${dados.length}\n\n`;
+                const offlineCard =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/offline");
+
+                texto += `Componentes Offline: ${offlineCard}\n\n`;
 
                 dados.forEach(item => {
 
@@ -1101,7 +1126,7 @@ sap.ui.define([
                             "Avalia o percentual de gateways previstos para o piloto que estão efetivamente ativos e contribuindo para a cobertura da infraestrutura RFID.<br><br>" +
 
                             "<strong>Como é calculado?</strong><br><br>" +
-                        
+
                             "Compara a quantidade de gateways ativos identificados no ambiente com a quantidade total planejada para o piloto.<br><br>" +
 
                             "<strong>" +
@@ -2951,7 +2976,7 @@ sap.ui.define([
                     }
 
                     if (
-                        item.identificador ===
+                        String(item.identificador) ===
                         "11039948"
                     ) {
                         return false;
@@ -3056,7 +3081,8 @@ sap.ui.define([
 
                 let online = 0;
                 let offline = 0;
-
+                let offlineInstalados = 0;
+                let offlineForaItabira = 0;
                 const falhasMovimentacao = [];
 
                 dadosFiltrados.forEach(item => {
@@ -3074,6 +3100,28 @@ sap.ui.define([
                     if (!item.ultimaPosicao) {
 
                         offline++;
+
+                        if (
+                            item.grupoAtual &&
+                            item.grupoAtual.startsWith("Instalado no ")
+                        ) {
+                            offlineInstalados++;
+                        }
+
+                        const local =
+                            (item.localInstalacao || "")
+                                .toUpperCase();
+
+                        if (!local.startsWith("FEIT")) {
+
+                            offlineForaItabira++;
+
+                            sap.m.MessageBox.information(
+                                "Local fora de FEIT:\n" +
+                                local
+                            );
+
+                        }
                         return;
 
                     }
@@ -3083,6 +3131,16 @@ sap.ui.define([
                             item.ultimaPosicao
                         );
 
+                    if (
+                        !dataPosicao ||
+                        isNaN(dataPosicao.getTime())
+                    ) {
+
+                        offline++;
+                        return;
+
+                    }
+
                     if (dataPosicao >= limiteOnline) {
 
                         online++;
@@ -3090,6 +3148,7 @@ sap.ui.define([
                         if (item.gateway) {
                             gatewaysSet.add(item.gateway);
                         }
+
 
                         const local =
                             (item.localInstalacao || "")
@@ -3124,6 +3183,21 @@ sap.ui.define([
                     } else {
 
                         offline++;
+
+                        if (
+                            item.grupoAtual &&
+                            item.grupoAtual.startsWith("Instalado no ")
+                        ) {
+                            offlineInstalados++;
+                        }
+
+                        const local =
+                            (item.localInstalacao || "")
+                                .toUpperCase();
+
+                        if (!local.startsWith("FEIT")) {
+                            offlineForaItabira++;
+                        }
 
                     }
 
@@ -3464,6 +3538,10 @@ sap.ui.define([
                         online,
 
                         offline,
+
+                        offlineInstalados,
+
+                        offlineForaItabira,
 
                         percentualOnline,
 
@@ -3904,7 +3982,23 @@ sap.ui.define([
                             item.grupoAtual &&
                             item.grupoAtual.startsWith("Instalado no ")
                         ) {
-                            return false;
+
+                            const local =
+                                (item.localInstalacao || "")
+                                    .toUpperCase();
+
+                            if (!local.startsWith("FEMN")) {
+                                return false;
+                            }
+
+                        }
+
+                        const local =
+                            (item.localInstalacao || "")
+                                .toUpperCase();
+
+                        if (local.startsWith("FEMN")) {
+                            return true;
                         }
 
                         const lat = parseFloat(item.latitude);
@@ -4494,6 +4588,13 @@ sap.ui.define([
 
 
                     equipamentos.forEach(item => {
+                        if (
+                            item.grupoAtual &&
+                            item.grupoAtual.startsWith("Instalado no ")
+                        ) {
+                            return;
+                        }
+
                         const descricaoGateway =
                             mapaGatewayDescricao[item.gateway];
                         let lat = parseFloat(item.latitude);
@@ -4514,7 +4615,24 @@ sap.ui.define([
                             lng = -43.900855;
 
                         }
+                        if (
+                            localInstalacao.startsWith("FEMN")
+                        ) {
 
+                            // Mariana
+                            lat = -20.3776;
+                            lng = -43.4168;
+
+                        }
+                        else if (
+                            localInstalacao.startsWith("FEBR")
+                        ) {
+
+                            // Mina de Brucutu
+                            lat = -19.871612;
+                            lng = -43.392883;
+
+                        }
                         if (
                             localInstalacao.startsWith("FEBR")
                         ) {
@@ -5569,30 +5687,13 @@ sap.ui.define([
             },
             converterDataBr(dataStr) {
 
-                try {
-
-                    const partes = dataStr.split(",");
-
-                    const data = partes[0].trim().split("/");
-                    const hora = partes[1].trim().split(":");
-
-                    return new Date(
-                        parseInt(data[2], 10),
-                        parseInt(data[1], 10) - 1,
-                        parseInt(data[0], 10),
-                        parseInt(hora[0], 10),
-                        parseInt(hora[1], 10),
-                        parseInt(hora[2], 10)
-                    );
-
-                } catch (e) {
-
+                if (!dataStr) {
                     return new Date(0);
-
                 }
 
-            }
+                return new Date(dataStr);
 
+            }
         }
     );
 });
