@@ -541,7 +541,9 @@
 .sapMApp {
     zoom: 75%;
 }
-
+/* .sapUiBody {
+    zoom: 110%;
+} */
 .operadorDashboard {
     font-size: 48px;
     font-weight: bold;
@@ -757,4 +759,151 @@
 .painelIndicadores .sapMProgressIndicator {
     margin-top: 2px !important;
     margin-bottom: 2px !important;
+}
+
+
+/* --- TELA DE LOGIN FORMATADA E CORRIGIDA --- */
+
+/* Fundo da tela de login */
+.loginBackground {
+    background-image: url('../img/vale.png') !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+}
+
+/* Card customizado */
+.loginCard {
+    background: white;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .25);
+}
+
+/* Aumenta o tamanho da fonte do título principal */
+.fonteCustomizada .tituloLogin {
+    font-size: 2rem !important;
+    font-weight: bold !important;
+    text-align: center !important;
+}
+
+/* Tamanho das legendas (Labels) - Aumentado substancialmente */
+.fonteCustomizada .sapMLbl {
+    font-size: 1.65rem !important;
+    font-weight: 600 !important;
+    /* Deixa o texto ligeiramente mais grosso e visível */
+    color: #333333 !important;
+    /* Destaca o texto em cinza escuro */
+}
+
+
+
+/* Container externo */
+.fonteCustomizada .sapMInputBase {
+    height: 5rem !important;
+}
+
+/* Campo onde o texto é digitado */
+.fonteCustomizada .sapMInputBaseInner {
+    height: 100% !important;
+    line-height: 5rem !important;
+    font-size: 1.75rem !important;
+    padding-left: 1.5rem !important;
+}
+
+/* Container do ícone (olho da senha, por exemplo) */
+.fonteCustomizada .sapMInputBaseIconContainer {
+    height: 5rem !important;
+    min-width: 5rem !important;
+}
+
+/* Ícone */
+.fonteCustomizada .sapMInputBaseIcon {
+    line-height: 5rem !important;
+    font-size: 1.5rem !important;
+}
+
+.fonteCustomizada .sapMInputBaseIcon {
+    line-height: 4.5rem !important;
+    font-size: 1.5rem !important;
+    /* Deixa o ícone de olho proporcional ao campo */
+}
+
+
+/* PAINEL DINÂMICO: Remove barras de rolagem e expande a altura para não cortar nada */
+.fonteCustomizada.sapMPanel {
+    height: auto !important;
+    min-height: 600px !important;
+    /* Removido o valor fixo antigo que causava o corte */
+    overflow: hidden !important;
+}
+
+.fonteCustomizada .sapMPanelContent {
+    height: auto !important;
+    overflow: hidden !important;
+    padding: 1.5rem !important;
+    padding-bottom: 2.5rem !important;
+    /* Espaço extra para o botão caber folgado */
+}
+
+/* SEU BOTÃO AJUSTADO COM ÁREA DE SEGURANÇA */
+.loginButton .sapMBtnInner {
+    height: 70px !important;
+    border-radius: 16px !important;
+    margin-bottom: 10px !important;
+}
+
+.loginButton .sapMBtnContent {
+    font-size: 26px !important;
+    font-weight: bold !important;
+    line-height: 66px !important;
+    /* Mantém o texto "Entrar" perfeitamente centralizado */
+}
+
+/* Aumenta o tamanho da fonte do subtítulo */
+.fonteCustomizada .subtituloLogin {
+    font-size: 1.35rem !important;
+    /* Ajuste para o tamanho que desejar */
+    color: #555555 !important;
+    text-align: center !important;
+}
+
+.labelLogin {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: #333333 !important;
+}
+
+.inputLogin .sapMInputBaseContentWrapper {
+    height: 3rem !important;
+}
+
+.inputLogin .sapMInputBaseInner {
+    height: 3rem !important;
+    line-height: 3rem !important;
+    font-size: 24px !important;
+    font-weight: 400 !important;
+    padding-left: 1rem !important;
+}
+
+.inputLogin .sapMInputBaseIconContainer {
+    height: 3rem !important;
+    min-width: 3rem !important;
+}
+
+.inputLogin .sapMInputBaseIcon {
+    line-height: 3rem !important;
+}
+
+.inputLogin input,
+.inputLogin .sapMInputBaseInner {
+    font-size: 24px !important;
+    font-weight: 400 !important;
+}
+
+.inputLogin input::placeholder,
+.inputLogin .sapMInputBaseInner::placeholder {
+    font-size: 24px !important;
+    font-weight: 400 !important;
+    opacity: 1 !important;
 }

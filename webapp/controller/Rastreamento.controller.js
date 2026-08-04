@@ -54,7 +54,31 @@ sap.ui.define([
 
                 // this.carregarDashboard();
             },
+            aplicarPerfilUsuario() {
+
+                const oModelUsuario =
+                    this.getOwnerComponent()
+                        .getModel("usuarioLogado");
+
+                if (!oModelUsuario) {
+                    return;
+                }
+
+                const perfil =
+                    (oModelUsuario.getProperty("/perfil") || "")
+                        .toUpperCase();
+
+                if (perfil === "DESENVOLVEDOR") {
+                    return;
+                }
+
+                this.byId("tabDashboard").setVisible(false);
+                this.byId("tabInformacoes").setVisible(false);
+                this.byId("tabValorGerado").setVisible(false);
+                this.byId("tabAtualizacao").setVisible(false);
+            },
             onAfterRendering() {
+                this.aplicarPerfilUsuario();
 
                 if (!this._cardEventosRegistrados) {
 
@@ -989,10 +1013,16 @@ sap.ui.define([
                                 item.ultimaPosicao
                             );
 
+                        if (
+                            !dataPosicao ||
+                            isNaN(dataPosicao.getTime())
+                        ) {
+                            return true;
+                        }
+
                         return dataPosicao < limiteOnline;
 
                     });
-
 
                 let texto = "";
 
@@ -1001,7 +1031,7 @@ sap.ui.define([
                         .getModel("dashboard")
                         .getProperty("/offline");
 
-                texto += `Componentes Offline: ${offlineCard}\n\n`;
+                texto += `Componentes Offline: ${dados.length}\n\n`;
 
                 dados.forEach(item => {
 
@@ -2604,7 +2634,9 @@ sap.ui.define([
                     [
                         ["MINA DE BRUCUTU", -19.870131, -43.398402],
                         ["MINA DO PICO", -20.217185, -43.864846],
-                        ["MINA DE ALEGRIA", -20.172795, -43.490555]
+                        ["MINA DE ALEGRIA", -20.172795, -43.490555],
+                        ["MINA FAZENDÃO", -20.145046, -43.419664]
+
                     ]
                         .forEach(item => {
 
@@ -3083,6 +3115,8 @@ sap.ui.define([
                 let offline = 0;
                 let offlineInstalados = 0;
                 let offlineForaItabira = 0;
+                let offlineFeitDesatualizados = 0;
+
                 const falhasMovimentacao = [];
 
                 dadosFiltrados.forEach(item => {
@@ -3112,14 +3146,20 @@ sap.ui.define([
                             (item.localInstalacao || "")
                                 .toUpperCase();
 
-                        if (!local.startsWith("FEIT")) {
+                        if (
+                            !local.startsWith("FEIT") &&
+                            (
+                                !item.grupoAtual ||
+                                !item.grupoAtual.startsWith("Instalado no ")
+                            )
+                        ) {
 
                             offlineForaItabira++;
 
-                            sap.m.MessageBox.information(
-                                "Local fora de FEIT:\n" +
-                                local
-                            );
+                            // sap.m.MessageBox.information(
+                            //     "Local fora de FEIT:\n" +
+                            //     local
+                            // );
 
                         }
                         return;
@@ -3137,9 +3177,32 @@ sap.ui.define([
                     ) {
 
                         offline++;
+
+                        if (
+                            item.grupoAtual &&
+                            item.grupoAtual.startsWith("Instalado no ")
+                        ) {
+                            offlineInstalados++;
+                        }
+
+                        const local =
+                            (item.localInstalacao || "")
+                                .toUpperCase();
+
+                        if (
+                            !local.startsWith("FEIT") &&
+                            (
+                                !item.grupoAtual ||
+                                !item.grupoAtual.startsWith("Instalado no ")
+                            )
+                        ) {
+                            offlineForaItabira++;
+                        }
+
                         return;
 
                     }
+
 
                     if (dataPosicao >= limiteOnline) {
 
@@ -3195,7 +3258,21 @@ sap.ui.define([
                             (item.localInstalacao || "")
                                 .toUpperCase();
 
-                        if (!local.startsWith("FEIT")) {
+                        if (
+                            local.startsWith("FEIT") &&
+                            item.grupoAtual ===
+                            "Tags Digitais desatualizadas"
+                        ) {
+                            offlineFeitDesatualizados++;
+                        }
+
+                        if (
+                            !local.startsWith("FEIT") &&
+                            (
+                                !item.grupoAtual ||
+                                !item.grupoAtual.startsWith("Instalado no ")
+                            )
+                        ) {
                             offlineForaItabira++;
                         }
 
@@ -3542,6 +3619,8 @@ sap.ui.define([
                         offlineInstalados,
 
                         offlineForaItabira,
+
+                        offlineFeitDesatualizados,
 
                         percentualOnline,
 
@@ -4788,46 +4867,119 @@ sap.ui.define([
                                 })
                             }
                         ).bindPopup(`
+<div id="imagemVeiculoPopup_${item.identificador}" style="
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    padding: 4px;
+    background: #ffffff;
+    min-width: 300px;
+    max-width: 360px;
+">
+    <!-- Container da Imagem -->
+    <div style="
+        text-align: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    ">
+        <img src="${imagemEquipamento}" alt="Equipamento" style="
+            max-width: 100%;
+            height: auto;
+            max-height: 120px;
+            object-fit: contain;
+        " />
+    </div>
 
-                                        <div id="imagemVeiculoPopup_${item.identificador}" style="text-align: center;">
-                                    <img 
-                                        src="${imagemEquipamento}" 
-                                        style="max-width: 220px; height: auto; display: block; margin: 0 auto;" />
-                                </div>
+    <!-- Informações Principais -->
+    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
+        <div style="font-size: 16px; color: #0f172a; font-weight: 700; margin-bottom: 2px;">
+            ${item.identificador}
+        </div>
+        
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Equipamento</span>
+            <span style="font-size: 13px; color: #334155; font-weight: 500;">${item.descEquipamento || 'Não informado'}</span>
+        </div>
 
-                                <hr>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Local</span>
+            <span style="font-size: 13px; color: #334155; font-weight: 500;">${item.localInstalacao || 'Não informado'}</span>
+        </div>
 
-                                <div style="text-align: left; margin-bottom: 10px; min-width: 280px;">
-                                    <b>${item.identificador}</b><br>
-                                    <b>Equipamento:</b> ${item.descEquipamento || ''}<br>
-                                    <b>Local:</b> ${item.localInstalacao || ''}<br>
-                                    <b>Nota:</b> ${item.nota || 'Não informado'}<br>
-                                    📡 Gateway: <b>${descricaoGateway || item.gateway || "Não informado"}</b><br>
-                                    <b>Última Atualização:</b> ${item.ultimaPosicao || ''}<br><br>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Nota</span>
+            <span style="font-size: 13px; color: #334155; font-weight: 500;">${item.nota || 'Não informado'}</span>
+        </div>
 
-                                    <details>
-                                        <summary style="cursor: pointer;"><b>Ver detalhes</b></summary>
-                                        <div style="margin-top: 10px;">
-                                            <b>Grupo:</b> ${item.grupoAtual || ''}<br>
-                                            <b>Descrição do Local:</b> ${item.descLocalInstalacao || ''}<br>
-                                            <b>Centro de Trabalho:</b> ${item.centro_trab_resp || 'Não informado'}<br>
-                                            <b>Centro de Localização:</b> ${item.centro_localizacao || 'Não informado'}<br>
-                                            <b>Oficina:</b> ${item.oficina || 'Não informado'}
-                                    
-                                        </div>
-                                    </details>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">📡 Gateway</span>
+            <span style="font-size: 13px; color: #0284c7; font-weight: 600;">${descricaoGateway || item.gateway || "Não informado"}</span>
+        </div>
+    </div>
 
-                                    <div style="
-                                        text-align:center;
-                                        margin-top:10px;
-                                    ">
-                                        <button id="btnCopiar_${item.identificador}">
-                                            📋 Copiar
-                                        </button>
-                                    </div>
+    <!-- Seção Expansível de Detalhes -->
+    <div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #e2e8f0; padding-top: 14px; margin-bottom: 16px;">
+        <details style="
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        ">
+            <summary style="cursor: pointer; font-weight: 600; font-size: 13px; padding: 10px 12px; color: #475569; user-select: none; outline: none;">
+                🔍 Ver detalhes
+            </summary>
+            <div style="padding: 12px; border-top: 1px solid #e2e8f0; background: #ffffff; font-size: 13px; display: flex; flex-direction: column; gap: 8px; line-height: 1.4;">
+                <div><b style="color: #64748b;">Grupo:</b> <span style="color: #1e293b;">${item.grupoAtual || 'Não informado'}</span></div>
+                <div><b style="color: #64748b;">Descrição do Local:</b> <span style="color: #1e293b;">${item.descLocalInstalacao || 'Não informado'}</span></div>
+                <div><b style="color: #64748b;">Centro de Trabalho:</b> <span style="color: #1e293b;">${item.centro_trab_resp || 'Não informado'}</span></div>
+                <div><b style="color: #64748b;">Centro de Localização:</b> <span style="color: #1e293b;">${item.centro_localizacao || 'Não informado'}</span></div>
+                <div><b style="color: #64748b;">Oficina:</b> <span style="color: #1e293b;">${item.oficina || 'Não informado'}</span></div>
+            </div>
+        </details>
+    </div>
 
-                                </div>
-                                `);
+    <!-- Ações e Rodapé -->
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+        <button id="btnCopiar_${item.identificador}" style="
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background-color: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            padding: 9px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        " onmouseover="this.style.backgroundColor='#e2e8f0'" onmouseout="this.style.backgroundColor='#f1f5f9'">
+            📋 Copiar Informações
+        </button>
+
+        <div style="
+            padding-top: 10px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #94a3b8;
+            font-size: 11px;
+        ">
+            <span>Última Atualização:</span>
+            <span style="font-weight: 600; color: #64748b;">${item.ultimaPosicao || 'Sem registro'}</span>
+        </div>
+    </div>
+</div>
+`);
+
                         marker.on("popupopen", () => {
 
                             setTimeout(() => {
@@ -5126,276 +5278,253 @@ sap.ui.define([
                                 })
                             }
                         ).bindPopup(`
-
-                                                                                                    <div
-                                                                                                        id="imagemVeiculoPopup_${veiculo.Veiculo}"
-                            <div style="text-align:center">
-
-
-                                                                                                        <img
-                                                                                                            src="img/793D_default.png"
-
-                                                                                                            style="max-width:220px;height:auto;" />
-                                                                                                    </div>
-
-                                                                                                    <hr>
-                                                                                                        <div style="
-        text-align:left;
-        margin-bottom:10px;
+<div id="imagemVeiculoPopup_${veiculo.Veiculo}" style="
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    font-size: 15px;
+    color: #1e293b;
+    padding: 6px;
+    background: #ffffff;
+">
+    <!-- Header com Card da Imagem -->
+    <div style="
+        text-align: center;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     ">
-
-                                                                                                            <b>Veículo:</b>
-                                                                                                            ${veiculo.Veiculo}
-                                                                                                            <br>
-
-                                                                                                                <b>Local de Instalação:</b>
-                                                                                                                ${veiculo.LOCAL_INSTALACAO || "Não informado"}
-                                                                                                                <br>
-
-                                                                                                                    <b>Equipamentos Embarcados:</b>
-                                                                                                                    ${totalEquipamentos}
-                                                                                                                    <hr>
-                                                                                                                    </div>
-
-
-                                                                                                                    <details
-                                                                                                                        id="resumo_${veiculo.Veiculo}"
-                                                                                                                        data-veiculo="${veiculo.Veiculo}">
-
-                                                                                                                        <summary style="
-            cursor:pointer;
-            font-weight:bold;
-        ">
-                                                                                                                            Ver Resumo
-                                                                                                                        </summary>
-                                                                                                                        <hr>
-                                                                                                                            <div
-                                                                                                                                id="conteudoResumo_${veiculo.Veiculo}"
-                                                                                                                                style="margin-top:10px;">
-
-                                                                                                                                ${htmlResumo}
-
-                                                                                                                            </div>
-
-                                                                                                                    </details>
-
-                                                                                                                    <details
-                                                                                                                        id="detalhes_${veiculo.Veiculo}"
-                                                                                                                        data-veiculo="${veiculo.Veiculo}">
-
-                                                                                                                        <summary style="
-            cursor:pointer;
-            font-weight:bold;
-        ">
-                                                                                                                            Ver detalhes
-                                                                                                                        </summary>
-
-                                                                                                                        <div
-                                                                                                                            id="conteudoDetalhes_${veiculo.Veiculo}"
-                                                                                                                            style="
-            margin-top:10px;
-            max-height:350px;
-            overflow-y:auto;
-        ">
-
-                                                                                                                            ${htmlDetalhes}
-
-                                                                                                                        <div style="
-        text-align:center;
-        margin-top:10px;
-    ">
-
-        <button
-            id="btnCopiarVeiculo_${veiculo.Veiculo}">
-            📋 Copiar
-        </button>
-
-        <button
-            id="btnExportar_${veiculo.Veiculo}">
-            📊 Exportar Excel
-        </button>
-
+        <img src="img/793D_default.png" alt="Veículo" style="
+            max-width: 100%;
+            height: auto;
+            max-height: 120px;
+            object-fit: contain;
+        " />
     </div>
 
-                                                                                                                        </div>
+    <!-- Informações Principais (Sem Quebras de Linha Brutas) -->
+    <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Veículo</span>
+            <span style="font-size: 16px; color: #0f172a; font-weight: 700;">${veiculo.Veiculo}</span>
+        </div>
 
-                                                                                                                    </details>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Local de Instalação</span>
+            <span style="font-size: 15px; color: #334155; font-weight: 500;">${veiculo.LOCAL_INSTALACAO || "Não informado"}</span>
+        </div>
 
-                                                                                                                    <hr>
+        <div style="display: flex; flex-direction: column;">
+            <span style="font-size: 15px; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 600;">Equipamentos Embarcados</span>
+            <span style="font-size: 15px; color: #334155; font-weight: 500;">${totalEquipamentos}</span>
+        </div>
+    </div>
 
-                                                                                                                        <b>Atualização:</b>
-                                                                                                                        ${new Date(veiculo.DataAtualizacao)
-                                .toLocaleString("pt-BR", {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    second: "2-digit"
-                                })
-                                .replace(",", "")}
+    <!-- Componentes de Accordion Modernizados -->
+    <div style="display: flex; flex-direction: column; gap: 8px; border-top: 1px solid #e2e8f0; padding-top: 14px; margin-bottom: 16px;">
+        
+        <!-- Bloco Resumo -->
+        <details id="resumo_${veiculo.Veiculo}" data-veiculo="${veiculo.Veiculo}" style="
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        ">
+            <summary style="cursor: pointer; font-weight: 600; font-size: 15px; padding: 10px 14px; color: #475569; user-select: none; outline: none;">
+                📝 Ver Resumo
+            </summary>
+            <div id="conteudoResumo_${veiculo.Veiculo}" style="padding: 15px; border-top: 1px solid #e2e8f0; background: #ffffff; font-size: 13px; line-height: 1.5;">
+                ${htmlResumo}
+            </div>
+        </details>
 
-                                                                                                                    </div>
-                                                                                                                </div>
-                                                                                                                `, {
+        <!-- Bloco Detalhes -->
+        <details id="detalhes_${veiculo.Veiculo}" data-veiculo="${veiculo.Veiculo}" style="
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        ">
+            <summary style="cursor: pointer; font-weight: 600; font-size: 15px; padding: 10px 14px; color: #475569; user-select: none; outline: none;">
+                🔍 Ver Detalhes
+            </summary>
+            <div style="padding: 12px; border-top: 1px solid #e2e8f0; background: #ffffff;">
+                <div id="conteudoDetalhes_${veiculo.Veiculo}" style="
+                    max-height: 240px; 
+                    overflow-y: auto; 
+                    font-size: 15px; 
+                    line-height: 1.5;
+                    margin-bottom: 14px;
+                    padding-right: 4px;
+                ">
+                    ${htmlDetalhes}
+                </div>
+
+                <!-- Botões de Ação Alinhados Lado a Lado (Padrão Fiori-like) -->
+                <div style="display: flex; gap: 8px; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                    <button id="btnCopiarVeiculo_${veiculo.Veiculo}" style="
+                        flex: 1;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                        background-color: #f1f5f9;
+                        color: #334155;
+                        border: 1px solid #cbd5e1;
+                        padding: 9px 12px;
+                        border-radius: 6px;
+                        font-size: 15px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background 0.15s ease;
+                    " onmouseover="this.style.backgroundColor='#e2e8f0'" onmouseout="this.style.backgroundColor='#f1f5f9'">
+                        📋 Copiar
+                    </button>
+
+                    <button id="btnExportar_${veiculo.Veiculo}" style="
+                        flex: 1;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 6px;
+                        background-color: #10b981;
+                        color: #ffffff;
+                        border: none;
+                        padding: 9px 12px;
+                        border-radius: 6px;
+                        font-size: 15px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: background 0.15s ease;
+                    " onmouseover="this.style.backgroundColor='#059669'" onmouseout="this.style.backgroundColor='#10b981'">
+                        📊 Exportar
+                    </button>
+                </div>
+            </div>
+        </details>
+    </div>
+
+    <!-- Rodapé de Atualização Limpo -->
+    <div style="
+        padding-top: 10px;
+        border-top: 1px solid #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #94a3b8;
+        font-size: 15px;
+    ">
+        <span>Última atualização:</span>
+        <span style="font-weight: 600; color: #64748b;">
+            ${new Date(veiculo.DataAtualizacao).toLocaleString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit"
+                        }).replace(",", "")}
+        </span>
+    </div>
+</div>
+`, {
                             minWidth: 350,
                             maxWidth: 450
                         });
+
+                        // Eventos de clique do Leaflet Marker
                         marker.on("click", (e) => {
-
                             if (this._modoMedicao) {
-
-                                this.processarMedicao(
-                                    lat,
-                                    lng,
-                                    veiculo.Veiculo
-                                );
-
+                                this.processarMedicao(lat, lng, veiculo.Veiculo);
                                 e.target.closePopup();
                             }
-
                         });
+
                         markers.addLayer(marker);
+
+                        // Ciclo de vida interno quando o Popup é renderizado em tela
                         marker.on("popupopen", () => {
-
-                            const resumo = document.getElementById(
-                                `resumo_${veiculo.Veiculo}`
-                            );
-
-                            const detalhes = document.getElementById(
-                                `detalhes_${veiculo.Veiculo}`
-                            );
+                            const resumo = document.getElementById(`resumo_${veiculo.Veiculo}`);
+                            const detalhes = document.getElementById(`detalhes_${veiculo.Veiculo}`);
 
                             if (resumo) {
-
                                 resumo.addEventListener("toggle", () => {
-
                                     if (resumo.open) {
-
                                         this.centralizarPopup(marker);
-
                                     }
-
                                 });
-
                             }
 
                             if (detalhes) {
-
                                 detalhes.addEventListener("toggle", () => {
-
                                     if (detalhes.open) {
-
                                         this.centralizarPopup(marker);
-
                                     }
-
                                 });
-
                             }
 
                             setTimeout(() => {
-                                const btnCopiar = document.getElementById(
-                                    `btnCopiarVeiculo_${veiculo.Veiculo}`
-                                );
-
+                                const btnCopiar = document.getElementById(`btnCopiarVeiculo_${veiculo.Veiculo}`);
                                 if (btnCopiar) {
-
                                     btnCopiar.onclick = () => {
-
                                         const texto = `
-    Veículo: ${veiculo.Veiculo}
-    Local de Instalação: ${veiculo.LOCAL_INSTALACAO || "Não informado"}
-    Equipamentos Embarcados: ${totalEquipamentos}
+Veículo: ${veiculo.Veiculo}
+Local de Instalação: ${veiculo.LOCAL_INSTALACAO || "Não informado"}
+Equipamentos Embarcados: ${totalEquipamentos}
 
-    Resumo:
-    ${textoResumo}
-            `.trim();
+Resumo:
+${textoResumo}
+`.trim();
 
                                         navigator.clipboard.writeText(texto);
-
-                                        sap.m.MessageToast.show(
-                                            "Informações do veículo copiadas."
-                                        );
-
+                                        sap.m.MessageToast.show("Informações do veículo copiadas.");
                                     };
-
                                 }
-                                const btn = document.getElementById(
-                                    `btnExportar_${veiculo.Veiculo}`
-                                );
 
-                                if (!btn) {
-                                    return;
-                                }
+                                const btn = document.getElementById(`btnExportar_${veiculo.Veiculo}`);
+                                if (!btn) return;
 
                                 btn.onclick = async () => {
-
                                     const response = await fetch(
-                                        `http://localhost:4000/StatusComponentes/veiculo?local=${encodeURIComponent(
-                                            veiculo.LOCAL_INSTALACAO
-                                        )}`
+                                        `http://localhost:4000/StatusComponentes/veiculo?local=${encodeURIComponent(veiculo.LOCAL_INSTALACAO)}`
                                     );
-
                                     const dadosExcel = await response.json();
 
                                     const oSpreadsheet = new Spreadsheet({
-
                                         workbook: {
                                             columns: [
-                                                {
-                                                    label: "Status",
-                                                    property: "status"
-                                                },
-                                                {
-                                                    label: "Equipamento",
-                                                    property: "equipamento"
-                                                },
-                                                {
-                                                    label: "Descrição",
-                                                    property: "descricao"
-                                                },
-                                                {
-                                                    label: "Local Instalação",
-                                                    property: "localInstalacao"
-                                                }
+                                                { label: "Status", property: "status" },
+                                                { label: "Equipamento", property: "equipamento" },
+                                                { label: "Descrição", property: "descricao" },
+                                                { label: "Local Instalação", property: "localInstalacao" }
                                             ]
                                         },
-
                                         dataSource: dadosExcel,
-
-                                        fileName:
-                                            `Veiculo_${veiculo.Veiculo}.xlsx`
-
+                                        fileName: `Veiculo_${veiculo.Veiculo}.xlsx`
                                     });
 
-                                    oSpreadsheet.build()
-                                        .finally(() =>
-                                            oSpreadsheet.destroy()
-                                        );
-
+                                    oSpreadsheet.build().finally(() => oSpreadsheet.destroy());
                                 };
-
                             }, 100);
-
                         });
+
+                        // Atualização de limites no mapa baseado nas coordenadas coletadas
                         bounds.push([lat, lng]);
-
                     });
-                    // var oVizFrame =
-                    //     this.byId("idTipoStatusVizFrame");
-                    sap.m.MessageToast.show(
-                        "Markers gateway: " +
-                        gatewaysLayer.getLayers().length
-                    );
-                    equipamentos.forEach(item => {
 
+                    // Notificações e processamento de Equipamentos
+                    sap.m.MessageToast.show("Markers gateway: " + gatewaysLayer.getLayers().length);
+
+                    equipamentos.forEach(item => {
                         bounds.push([
                             parseFloat(item.latitude),
                             parseFloat(item.longitude)
                         ]);
-
                     });
+
                     sap.m.MessageToast.show(
                         "Entrando no loop de gateways: " + gateways.length
                     );
@@ -5471,21 +5600,11 @@ sap.ui.define([
                     });
                     this._map.addLayer(markers);
                     this._map.addLayer(gatewaysLayer);
-                    if (bounds.length > 0) {
 
-                        this._map.fitBounds(bounds, {
-                            padding: [30, 30]
-                        });
-
-                        this._map.once("moveend", () => {
-
-
-
-
-
-                        });
-
-                    }
+                    this._map.setView(
+                        [-19.641510, -43.226143],
+                        14
+                    );
                     if (this._primeiraCargaMapa) {
 
                         this._busyMapaInicial.close();

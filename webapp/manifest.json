@@ -98,14 +98,25 @@
       },
       "routes": [
         {
+          "name": "RouteLogin",
+          "pattern": "",
+          "target": [
+            "TargetLogin"
+          ]
+        },
+        {
           "name": "RouteRastreamento",
-          "pattern": ":?query:",
+          "pattern": "Rastreamento",
           "target": [
             "TargetRastreamento"
           ]
         }
       ],
       "targets": {
+        "TargetLogin": {
+          "id": "Login",
+          "name": "Login"
+        },
         "TargetRastreamento": {
           "id": "Rastreamento",
           "name": "Rastreamento"

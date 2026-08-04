@@ -39,15 +39,17 @@
 
 
             <IconTabBar
+                id="idTabsPrincipal"
                 class="dashboardTabs"
                 select=".onTabSelecionada">
-
                 <items>
+
                     <IconTabFilter
+                        id="tabGeo"
                         key="geo"
                         text="🌐 Geolocalização">
                         <!-- 1. CONTAINER PRINCIPAL: Divide a tela em duas colunas (Esquerda e
-                        Direita) -->
+                            Direita) -->
                         <HBox
                             width="100%"
                             alignItems="Stretch"
@@ -94,10 +96,10 @@
 
                                             <Text
                                                 text="{= '('
-                                    + ${dashboard>/totalEquipamentos}
-                                    + ' / 50) '
-                                    + ${dashboard>/percentualEquipamentos}
-                                    + '%' }"
+                                        + ${dashboard>/totalEquipamentos}
+                                        + ' / 50) '
+                                        + ${dashboard>/percentualEquipamentos}
+                                        + '%' }"
                                                 class="kpiPercentual sapUiSmallMarginBegin" />
 
                                         </HBox>
@@ -148,12 +150,12 @@
 
                                             <Text
                                                 text="{= '('
-                        + ${dashboard>/online}
-                        + ' / '
-                        + ${dashboard>/totalEquipamentos}
-                        + ') '
-                        + ${dashboard>/percentualOnline}
-                        + '%' }"
+                            + ${dashboard>/online}
+                            + ' / '
+                            + ${dashboard>/totalEquipamentos}
+                            + ') '
+                            + ${dashboard>/percentualOnline}
+                            + '%' }"
                                                 class="kpiPercentual sapUiSmallMarginBegin" />
 
                                         </HBox>
@@ -201,12 +203,12 @@
 
                                             <Text
                                                 text="{= '('
-            + ${dashboard>/offline}
-            + ' / '
-            + ${dashboard>/totalEquipamentos}
-            + ') '
-            + ${dashboard>/percentualOffline}
-            + '%' }"
+                + ${dashboard>/offline}
+                + ' / '
+                + ${dashboard>/totalEquipamentos}
+                + ') '
+                + ${dashboard>/percentualOffline}
+                + '%' }"
                                                 class="kpiPercentual sapUiSmallMarginBegin" />
 
                                             <Text
@@ -266,9 +268,9 @@
 
                                             <Text
                                                 text="{= '('
-                        + ${dashboard>/gateways}
-                        + ' / 8) '
-                        + ${dashboard>/percentualGateway} }"
+                            + ${dashboard>/gateways}
+                            + ' / 8) '
+                            + ${dashboard>/percentualGateway} }"
                                                 class="kpiPercentual sapUiSmallMarginBegin" />
 
                                         </HBox>
@@ -281,7 +283,7 @@
 
 
                         </HBox> <!--
-                            Fim da HBox dos Cards -->
+                                Fim da HBox dos Cards -->
 
                         <HBox
                             width="100%"
@@ -436,7 +438,7 @@
                                 <Panel
                                     headerText="Navegação Rápida"
                                     class="sapUiSmallMarginTop painelNavegacao"> <!-- Adicionado
-                                    'painelNavegacao' aqui -->
+                                        'painelNavegacao' aqui -->
 
                                     <List>
 
@@ -482,7 +484,7 @@
                                     class="sapUiMinimumMarginBottom sapUiNoMarginTop pesquisaRastreador" />
 
                                 <!-- Correção: Removida a barra '/' do fechamento da tag para
-                                    permitir conteúdo interno -->
+                                        permitir conteúdo interno -->
                                 <Panel
                                     id="panelMapa"
                                     width="100%"
@@ -504,6 +506,7 @@
 
                     </IconTabFilter>
                     <IconTabFilter
+                        id="tabGraficos"
                         key="graficos"
                         text="Dashboard dos Componentes">
 
@@ -708,6 +711,7 @@
                     </IconTabFilter>
 
                     <IconTabFilter
+                        id="tabDashboard"
                         key="dashboard"
                         text="Status dos rastreadores">
                         <VBox
@@ -886,10 +890,10 @@
                                     <items>
                                         <ColumnListItem
                                             highlight="{=
-                                        ${dashboard>fornecedor} === 'TOTAL'
-                                            ? 'Warning'
-                                            : 'None'
-                                    }">
+                                            ${dashboard>fornecedor} === 'TOTAL'
+                                                ? 'Warning'
+                                                : 'None'
+                                        }">
 
                                             <cells>
                                                 <Image
@@ -934,6 +938,7 @@
 
                     </IconTabFilter>
                     <IconTabFilter
+                        id="tabInformacoes"
                         key="informacoes"
                         text="Diagnóstico de falhas">
                         <VBox
@@ -1081,6 +1086,7 @@
 
                     </IconTabFilter>
                     <IconTabFilter
+                        id="tabValorGerado"
                         key="valorGerado"
                         text="Valor Gerado">
 
@@ -1351,11 +1357,11 @@
 
                                                     <Text
                                                         text="{= ${dashboard>/componentesDisponiveis}
-            + ' componentes disponíveis ÷ '
-            + ${dashboard>/totalComponentesValorGerado}
-            + ' componentes elegíveis × 100 = '
-            + ${dashboard>/disponibilidadeMonitoramento}
-            + '%' }"
+                + ' componentes disponíveis ÷ '
+                + ${dashboard>/totalComponentesValorGerado}
+                + ' componentes elegíveis × 100 = '
+                + ${dashboard>/disponibilidadeMonitoramento}
+                + '%' }"
                                                         class="fonteTabelaIndicadoresTexto"
                                                         wrapping="true" />
 
@@ -1408,9 +1414,9 @@
 
                                                     <Text
                                                         text="{= ${dashboard>/instalados}
-        + ' componentes instalados ÷ 50 componentes planejados × 100 = '
-        + ${dashboard>/coberturaValorGerado}
-        + '%' }"
+            + ' componentes instalados ÷ 50 componentes planejados × 100 = '
+            + ${dashboard>/coberturaValorGerado}
+            + '%' }"
                                                         class="fonteTabelaIndicadoresTexto"
                                                         wrapping="true" />
 
@@ -1463,9 +1469,9 @@
 
                                                     <Text
                                                         text="{= ${dashboard>/gateways}
-            + ' gateways instalados ÷ 7 gateways planejados × 100 = '
-            + ${dashboard>/percentualGateway}
-            + '%' }"
+                + ' gateways instalados ÷ 7 gateways planejados × 100 = '
+                + ${dashboard>/percentualGateway}
+                + '%' }"
                                                         class="fonteTabelaIndicadoresTexto"
                                                         wrapping="true" />
 
@@ -1519,11 +1525,11 @@
 
                                                     <Text
                                                         text="{= ${dashboard>/consistenciasMovimentacao}
-            + ' movimentações consistentes ÷ '
-            + ${dashboard>/online}
-            + ' movimentações analisadas × 100 = '
-            + ${dashboard>/percentualConsistenciaMovimentacao}
-            + '%' }"
+                + ' movimentações consistentes ÷ '
+                + ${dashboard>/online}
+                + ' movimentações analisadas × 100 = '
+                + ${dashboard>/percentualConsistenciaMovimentacao}
+                + '%' }"
                                                         class="fonteTabelaIndicadoresTexto"
                                                         wrapping="true" />
 
@@ -1533,8 +1539,8 @@
 
                                                     <Text
                                                         text="{= 'Foram identificadas '
-            + ${dashboard>/falhasMovimentacao}
-            + ' divergências entre a localização cadastrada no SAP e a localização detectada pela infraestrutura RFID. O indicador mede a confiabilidade operacional da solução e sua aderência às informações corporativas registradas no SAP.' }"
+                + ${dashboard>/falhasMovimentacao}
+                + ' divergências entre a localização cadastrada no SAP e a localização detectada pela infraestrutura RFID. O indicador mede a confiabilidade operacional da solução e sua aderência às informações corporativas registradas no SAP.' }"
                                                         class="fonteTabelaIndicadoresTexto"
                                                         wrapping="true" />
 
@@ -1579,16 +1585,16 @@
 
                                                     <Text
                                                         text="{= 'Disponibilidade (' 
-            + ${dashboard>/disponibilidadeMonitoramento}
-            + '% × 50%) + Cobertura ('
-            + ${dashboard>/coberturaValorGerado}
-            + '% × 25%) + Consistência ('
-            + ${dashboard>/percentualConsistenciaMovimentacao}
-            + '% × 15%) + Gateways ('
-            + ${dashboard>/percentualGateway}
-            + '% × 10%) = '
-            + ${dashboard>/indiceEfetividade}
-            + '%' }"
+                + ${dashboard>/disponibilidadeMonitoramento}
+                + '% × 50%) + Cobertura ('
+                + ${dashboard>/coberturaValorGerado}
+                + '% × 25%) + Consistência ('
+                + ${dashboard>/percentualConsistenciaMovimentacao}
+                + '% × 15%) + Gateways ('
+                + ${dashboard>/percentualGateway}
+                + '% × 10%) = '
+                + ${dashboard>/indiceEfetividade}
+                + '%' }"
                                                         class="fonteTabelaIndicadoresTexto"
                                                         wrapping="true" />
 
@@ -1629,44 +1635,44 @@
 
                                         <Text
                                             text="{= 'O piloto atingiu '
-                                        + ${dashboard>/coberturaValorGerado}
-                                        + '% da meta de implantação prevista, correspondendo a '
-                                        + ${dashboard>/instalados}
-                                        + ' dos 50 rastreadores planejados para o escopo inicial da iniciativa.' }"
+                                            + ${dashboard>/coberturaValorGerado}
+                                            + '% da meta de implantação prevista, correspondendo a '
+                                            + ${dashboard>/instalados}
+                                            + ' dos 50 rastreadores planejados para o escopo inicial da iniciativa.' }"
                                             wrapping="true" />
                                         <Text
                                             text="{= 'A disponibilidade de monitoramento alcançou '
-                                        + ${dashboard>/disponibilidadeMonitoramento}
-                                        + '%, demonstrando capacidade consistente de acompanhamento de '
-                                        + ${dashboard>/componentesDisponiveis}
-                                        + ' dos '
-                                        + ${dashboard>/totalComponentesValorGerado}
-                                        + ' componentes elegíveis do piloto.' }"
+                                            + ${dashboard>/disponibilidadeMonitoramento}
+                                            + '%, demonstrando capacidade consistente de acompanhamento de '
+                                            + ${dashboard>/componentesDisponiveis}
+                                            + ' dos '
+                                            + ${dashboard>/totalComponentesValorGerado}
+                                            + ' componentes elegíveis do piloto.' }"
                                             wrapping="true" />
                                         <Text
                                             text="{= 'A infraestrutura de gateways instalados alcançou '
-                                        + ${dashboard>/percentualGateway}
-                                        + '% da implantação planejada, correspondendo a '
-                                        + ${dashboard>/gateways}
-                                        + ' dos 7 gateways previstos para o piloto.' }"
+                                            + ${dashboard>/percentualGateway}
+                                            + '% da implantação planejada, correspondendo a '
+                                            + ${dashboard>/gateways}
+                                            + ' dos 7 gateways previstos para o piloto.' }"
                                             wrapping="true" />
 
                                         <Text
                                             text="{= 'A consistência das movimentações atingiu '
-                                        + ${dashboard>/percentualConsistenciaMovimentacao}
-                                        + '%, representando '
-                                        + ${dashboard>/consistenciasMovimentacao}
-                                        + ' dos '
-                                        + ${dashboard>/online}
-                                        + ' componentes monitorados com aderência entre a localização registrada e a posição identificada pela solução.' }"
+                                            + ${dashboard>/percentualConsistenciaMovimentacao}
+                                            + '%, representando '
+                                            + ${dashboard>/consistenciasMovimentacao}
+                                            + ' dos '
+                                            + ${dashboard>/online}
+                                            + ' componentes monitorados com aderência entre a localização registrada e a posição identificada pela solução.' }"
                                             wrapping="true" />
 
                                         <Text
                                             text="{= 'O Índice Geral de Efetividade atingiu '
-                                        + ${dashboard>/indiceEfetividade}
-                                        + '%, classificando o desempenho geral do piloto como '
-                                        + ${dashboard>/classificacaoEfetividade}
-                                        + '. Os resultados obtidos demonstram maturidade operacional suficiente para suportar a ampliação gradual da solução para novos ativos e áreas da operação.' }"
+                                            + ${dashboard>/indiceEfetividade}
+                                            + '%, classificando o desempenho geral do piloto como '
+                                            + ${dashboard>/classificacaoEfetividade}
+                                            + '. Os resultados obtidos demonstram maturidade operacional suficiente para suportar a ampliação gradual da solução para novos ativos e áreas da operação.' }"
                                             wrapping="true" />
 
                                     </VBox>
@@ -1854,6 +1860,7 @@
 
                     </IconTabFilter>
                     <IconTabFilter
+                        id="tabAtualizacao"
                         key="atualizacaoManual"
                         text="Atualização manual">
 
