@@ -24,7 +24,8 @@ sap.ui.define([
 
             BusyIndicator.show(0);
 
-            fetch("http://localhost:4000/Usuario/login", {
+            fetch("http://10.44.32.193:4000/Usuario/login", {
+
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -71,8 +72,14 @@ sap.ui.define([
 
                     BusyIndicator.hide();
 
-                    oComponent.getRouter()
-                        .navTo("RouteRastreamento");
+                    var oRouter = that.getOwnerComponent().getRouter();
+
+                    if ((dados.PERFIL || "").toUpperCase() === "VISUALIZADOR") {
+                        oRouter.navTo("RouteRastreamento2");
+                    } else {
+                        oRouter.navTo("RouteRastreamento");
+                    }
+
 
                 })
                 .catch(function (error) {

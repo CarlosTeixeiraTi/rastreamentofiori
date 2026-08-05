@@ -7,7 +7,7 @@
    Dá espaço vertical para o texto "A reformar" crescer sem esmagar a barra cinza.
 */
 .painelGrupos .sapMLIB {
-    min-height: 110px !important;
+    min-height: 115px !important;
     transition: background-color .15s ease;
 }
 
@@ -41,7 +41,7 @@
 /* 2. TEXTO DA PORCENTAGEM (Ex: 2.6%, 41.0%...) */
 .painelGrupos .sapMLIB .sapMHBox .sapMHBox .sapMText,
 .painelGrupos .txtPercentualGrupo {
-    font-size: 32px !important;
+    font-size: 28px !important;
     font-weight: 700 !important;
     color: #111111 !important;
     line-height: normal !important;
@@ -52,7 +52,7 @@
 
 /* 3. QUANTIDADE ABSOLUTA (O ObjectNumber) */
 .painelGrupos .sapMObjectNumberText {
-    font-size: 28px !important;
+    font-size: 24px !important;
     font-weight: 700 !important;
     line-height: 30px !important;
     color: #0a6ed1 !important;
@@ -65,6 +65,10 @@
     margin-top: 2px !important;
     /* PUXA A BARRA PARA CIMA (Igual ao painel de Indicadores) */
     height: 12px !important;
+}
+
+.painelGrupos .sapMPIBar {
+    height: 0.3rem !important;
 }
 
 /* ==========================================================================
@@ -92,20 +96,24 @@
     margin-bottom: 2px !important;
 }
 
+.painelNavegacao {
+    margin-top: 20px !important;
+}
+
 /* ==========================================================================
    PAINEL TABELA - RESUMO POR GRUPO ATUAL
    ========================================================================== */
 
 /* Cabeçalho da Tabela (Textos: "Grupo Atual" e "Quantidade") */
 .painelTabelaResumo .txtHeaderTabela {
-    font-size: 16px !important;
+    font-size: 20px !important;
     font-weight: 700 !important;
     color: #111111 !important;
 }
 
 /* Texto da Célula / Nome do Grupo (Coluna da esquerda) */
 .painelTabelaResumo .txtCelulaGrupo {
-    font-size: 24px !important;
+    font-size: 14px !important;
     font-weight: 400 !important;
     color: #111111 !important;
     display: inline-block !important;
@@ -113,7 +121,7 @@
 
 /* Número da Quantidade (Coluna da direita) */
 .painelTabelaResumo .txtCelulaQuantidade .sapMObjectNumberText {
-    font-size: 28px !important;
+    font-size: 14px !important;
     font-weight: 700 !important;
     color: #0a6ed1 !important;
     line-height: normal !important;
@@ -218,6 +226,7 @@
     overflow: hidden;
     box-shadow: 0 4px 18px rgba(0, 0, 0, .08) !important;
     border: none !important;
+    min-height: 260px;
     transition: all .2s ease;
 }
 
@@ -541,6 +550,7 @@
 .sapMApp {
     zoom: 75%;
 }
+
 /* .sapUiBody {
     zoom: 110%;
 } */
@@ -568,6 +578,18 @@
 .tituloKpiGrande {
     font-size: 2rem !important;
     font-weight: bold !important;
+}
+
+.kpiEfetividade .sapMObjectNumberText {
+    font-size: 2.2rem !important;
+    line-height: 3rem !important;
+    font-weight: 700 !important;
+}
+
+.kpiEfetividade .sapMObjectNumberUnit {
+    font-size: 1.2rem !important;
+    margin-left: 4px !important;
+    vertical-align: middle !important;
 }
 
 .statusEfetividadeGrande {
@@ -614,10 +636,10 @@
 .painelNavegacao .sapMSLI,
 .painelNavegacao .sapMSLITitle,
 .painelNavegacao .sapMSLITitleOnly {
-    font-size: 24px !important;
+    font-size: 26px !important;
     /* Mesma fonte de 24px dos nomes de indicadores */
     font-weight: 500 !important;
-    color: #111111 !important;
+    color: #0A66C2 !important;
     /* Mesma cor cinza-azulada padrão */
 }
 
@@ -635,7 +657,7 @@
 
 /* Reduz a altura de cada linha e elimina os paddings internos do SAPUI5 */
 .painelNavegacao .sapMList .sapMLIB {
-    min-height: 48px !important;
+    min-height: 43px !important;
     /* Reduzido de 75px para 48px para ficar mais compacto */
     padding-top: 0 !important;
     padding-bottom: 0 !important;
@@ -751,7 +773,7 @@
 
 /* 2. Reduz drasticamente a margem de afastamento entre um indicador e outro */
 .painelIndicadores .sapUiSmallMarginTop {
-    margin-top: 6px !important;
+    margin-top: 10px !important;
     /* Reduzido de 16px padrão para apenas 6px */
 }
 
@@ -906,4 +928,132 @@
     font-size: 24px !important;
     font-weight: 400 !important;
     opacity: 1 !important;
+}
+
+.kpiEfetividade {
+    border: 2px solid #107e3e;
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 12px;
+    background: #f5fff7;
+    text-align: center;
+}
+
+.tituloEfetividade {
+    font-weight: bold;
+    color: #107e3e;
+}
+
+.valorEfetividade {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #107e3e;
+}
+
+.subtituloEfetividade {
+    font-size: 0.75rem;
+    color: #6a6d70;
+}
+
+/* Aumenta a fonte dos links e força a prioridade sobre o estilo padrão do SAPUI5 */
+.linkGrande {
+    font-size: 18px !important;
+}
+
+/* Opcional: Se quiser que os ícones acompanhem o tamanho do texto, adicione esta regra */
+.painelNavegacao .sapUiIcon {
+    font-size: 18px !important;
+}
+
+.sugestaoInspecaoItem {
+    margin-bottom: 10px !important;
+}
+
+.sugestaoInspecaoItem .sapMObjectIdentifierTitle {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    line-height: 1.6rem !important;
+    color: #2f4e75;
+}
+
+.sugestaoIcone {
+    font-size: 1.5rem !important;
+    color: #0A6ED1;
+    margin-right: 10px;
+}
+
+.sugestaoTexto {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    line-height: 1.6rem !important;
+}
+
+.sugestaoInspecaoItem {
+    margin-bottom: 8px !important;
+}
+
+.painelSugestoes .sapMPanelContent {
+    min-height: 161px;
+}
+
+.kpiCard .sapMPanelContent {
+    min-height: 161px;
+}
+
+.kpiAlturaPadrao .sapMPanelContent {
+    min-height: 161px;
+}
+
+#idTotalEquipamentosPanel,
+#idGatewayPanel,
+#idIndicadoresPanel {
+    height: 161px !important;
+}
+
+/* Remove os espaçamentos internos padrões e força a altura compacta */
+.cardVeiculoCustom {
+    height: 6rem !important;
+    padding: 0.5rem !important;
+    border: 1px solid #EAEAEA !important;
+    border-radius: 8px !important;
+    background-color: #FFFFFF !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Remove margens e paddings do container do conteúdo interno */
+.cardVeiculoCustom .sapMGTContent {
+    height: calc(100% - 2rem) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ajusta o posicionamento do título para não cortar em alturas menores */
+.cardVeiculoCustom .sapMGTHdrTxt {
+    margin-bottom: 0 !important;
+}
+
+/* Centraliza e dá respiro à imagem compactada */
+.imagemCardReduzida {
+    margin-top: -5px !important;
+}
+/* Estilo do título do veículo com tamanho de fonte aumentado */
+.tituloCardVeiculo {
+    font-weight: bold !important;
+    font-size: 18px !important; /* Aumentado de 14px para 18px */
+    color: #333333 !important;
+    white-space: nowrap !important; /* Evita que o texto quebre em duas linhas */
+    overflow: hidden !important;
+    text-overflow: ellipsis !important; /* Adiciona '...' se o texto for maior que o card */
+}
+.painelTabelaResumo .sapMListTblCell {
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+.painelTabelaResumo .sapMColumnListItem {
+    height: 24px;
+}
+.espacoEntrePaineis {
+    height: 5px;
 }

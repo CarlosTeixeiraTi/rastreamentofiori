@@ -14,7 +14,7 @@ sap.ui.define([
     "use strict";
 
     return Controller.extend(
-        "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento",
+        "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento2",
         {
             onInit() {
                 // sap.ui.require(["sap/ui/thirdparty/jquery"], function ($) {
@@ -207,7 +207,7 @@ sap.ui.define([
 
                     } else if (local.includes("_EMREF_EXT")) {
 
-                        mina = "SOTREQ";
+                        mina = "Vespasiano";
 
                     }
 
@@ -1281,7 +1281,7 @@ sap.ui.define([
 
                 } else if (descLocal.includes("EXT")) {
 
-                    grupo = "Reforma externa";
+                    grupo = "Ref. externa";
 
                 } else if (
                     (
@@ -1291,7 +1291,7 @@ sap.ui.define([
                     !descLocal.includes("EXT")
                 ) {
 
-                    grupo = "Reforma interna";
+                    grupo = "Ref. interna";
 
                 }
 
@@ -1589,11 +1589,11 @@ sap.ui.define([
 
                         resumo[familia].instalados++;
 
-                    } else if (grupo === "Reforma interna") {
+                    } else if (grupo === "Ref. interna") {
 
                         resumo[familia].reformaInterna++;
 
-                    } else if (grupo === "Reforma externa") {
+                    } else if (grupo === "Ref. externa") {
 
                         resumo[familia].reformaExterna++;
 
@@ -2942,6 +2942,66 @@ sap.ui.define([
                 }
 
             },
+            onSelecionarVeiculo: function (oEvent) {
+
+                const oBindingContext =
+                    oEvent.getSource().getBindingContext("dashboard");
+
+                if (!oBindingContext) {
+                    return;
+                }
+
+                const oVeiculoData =
+                    oBindingContext.getObject();
+
+                const sVeiculo =
+                    oVeiculoData.veiculo;
+
+                const aVeiculos =
+                    this.getView()
+                        .getModel("dashboard")
+                        .getProperty("/veiculosApi") || [];
+
+                const oLocalizacao =
+                    aVeiculos.find(v =>
+                        v.Veiculo === sVeiculo
+                    );
+
+                if (!oLocalizacao) {
+                    sap.m.MessageToast.show(
+                        "Localização não encontrada para " +
+                        sVeiculo
+                    );
+                    return;
+                }
+
+                const nLat =
+                    parseFloat(oLocalizacao.Latitude);
+
+                const nLng =
+                    parseFloat(oLocalizacao.Longitude);
+
+                if (isNaN(nLat) || isNaN(nLng)) {
+                    sap.m.MessageToast.show(
+                        "Coordenadas inválidas para " +
+                        sVeiculo
+                    );
+                    return;
+                }
+
+                if (this._oMap) {
+
+                    this._oMap.setView(
+                        [nLat, nLng],
+                        17
+                    );
+
+                    sap.m.MessageToast.show(
+                        "Focando em " + sVeiculo
+                    );
+                }
+            },
+
             onExportarConferenciaExcel() {
 
                 const dados =
@@ -3358,6 +3418,49 @@ sap.ui.define([
                     this.gerarAnaliseInstaladosDesatualizados(
                         dadosFiltrados
                     );
+                const sugestoesInspecao = dadosFiltrados
+                    .map(item => {
+
+                        let diasSemAtualizacao = 9999;
+
+                        if (item.ultimaPosicao) {
+                            const dataPosicao =
+                                this.converterDataBr(item.ultimaPosicao);
+
+                            diasSemAtualizacao = Math.floor(
+                                (agora - dataPosicao) /
+                                (1000 * 60 * 60 * 24)
+                            );
+                        }
+
+                        const instalado =
+                            item.grupoAtual &&
+                            item.grupoAtual.startsWith('Instalado no ');
+
+                        return {
+                            nome: instalado
+                                ? item.grupoAtual.replace('Instalado no ', '')
+                                : item.identificador,
+
+                            tipo: instalado
+                                ? 'VEICULO'
+                                : 'EQUIPAMENTO',
+
+                            icone: instalado
+                                ? 'sap-icon://shipping-status'
+                                : 'sap-icon://wrench',
+
+                            equipamento: item.descEquipamento,
+                            diasSemAtualizacao,
+                            instalado
+                        };
+                    })
+                    .sort(
+                        (a, b) =>
+                            b.diasSemAtualizacao -
+                            a.diasSemAtualizacao
+                    )
+                    .slice(0, 8);
 
                 const mapaVeiculosDashboard = {};
 
@@ -3444,14 +3547,22 @@ sap.ui.define([
 
                         imagem: "img/793D.png",
 
+                        latitude: veiculo.Latitude,
+
+                        longitude: veiculo.Longitude,
+
                         conferencia,
 
                         status: divergente
+
                             ? "Divergente"
+
                             : "Conforme",
 
                         state: divergente
+
                             ? "Error"
+
                             : "Success"
 
                     });
@@ -3543,16 +3654,6 @@ sap.ui.define([
 
                 const oportunidadesMelhoria = [];
 
-                if (Number(valorGerado.cobertura) < 100) {
-
-                    oportunidadesMelhoria.push({
-                        tipo: "cobertura",
-                        texto:
-                            "Concluir a instalação dos rastreadores pendentes para atingir 100% da cobertura planejada.",
-                        state: "Warning"
-                    });
-
-                }
 
                 if (Number(valorGerado.disponibilidadeMonitoramento) < 100) {
 
@@ -3610,6 +3711,7 @@ sap.ui.define([
                     .setData({
 
                         totalEquipamentos,
+
                         percentualEquipamentos,
 
                         online,
@@ -3641,6 +3743,8 @@ sap.ui.define([
                         detalhesTagsDesatualizadas,
 
                         analiseInstaladosDesatualizados,
+
+                        sugestoesInspecao,
 
                         dashboardVeiculos,
 
@@ -3716,6 +3820,7 @@ sap.ui.define([
                 const oVizFrame =
                     this.byId("idTipoStatusVizFrame");
 
+                this.byId("idTipoStatusNovoVizFrame");
                 if (oVizFrame) {
 
                     oVizFrame.destroyFeeds();
@@ -3795,6 +3900,12 @@ sap.ui.define([
                                     fontSize: "16px",
                                     fontWeight: "bold"
                                 }
+                            }
+                        },
+
+                        categoryAxis: {
+                            label: {
+                                angle: 0
                             }
                         },
 

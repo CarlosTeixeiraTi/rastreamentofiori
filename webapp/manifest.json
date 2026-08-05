@@ -17,7 +17,7 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/odata/v4/smart-pcm/",
+        "uri": "http://10.44.32.193:4004/odata/v4/smart-pcm/",
         "type": "OData",
         "settings": {
           "annotations": [],
@@ -110,6 +110,13 @@
           "target": [
             "TargetRastreamento"
           ]
+        },
+        {
+          "name": "RouteRastreamento2",
+          "pattern": "Rastreamento2",
+          "target": [
+            "TargetRastreamento2"
+          ]
         }
       ],
       "targets": {
@@ -120,6 +127,10 @@
         "TargetRastreamento": {
           "id": "Rastreamento",
           "name": "Rastreamento"
+        },
+        "TargetRastreamento2": {
+          "id": "Rastreamento2",
+          "name": "Rastreamento2"
         }
       }
     },

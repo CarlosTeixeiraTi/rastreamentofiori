@@ -1,5 +1,5 @@
 <mvc:View
-    controllerName="br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento"
+    controllerName="br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento2"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
@@ -53,14 +53,14 @@
                         <HBox
                             width="100%"
                             alignItems="Stretch"
-                            justifyContent="SpaceBetween"
+                            justifyContent="Start"
                             wrap="NoWrap"
                             class="linhaKpis">
 
                             <Panel
                                 id="idTotalEquipamentosPanel"
-                                width="700px"
-                                class="sapUiSmallMargin kpiCard kpiTotal kpiClickavel">
+                                width="450px"
+                                class="sapUiSmallMargin kpiCard kpiAlturaPadrao">
 
                                 <HBox
                                     alignItems="Center"
@@ -110,129 +110,10 @@
 
                             </Panel>
 
-
-                            <Panel
-                                id="idOnlinePanel"
-                                width="700px"
-                                class="sapUiSmallMargin kpiCard kpiOnline kpiClickavel">
-
-                                <HBox
-                                    alignItems="Center"
-                                    justifyContent="Start"
-                                    class="sapUiSmallMargin">
-
-                                    <!-- Ícone à esquerda -->
-                                    <Image
-                                        src="img/online.png"
-                                        width="7rem"
-                                        height="7rem"
-                                        class="sapUiMediumMarginEnd" />
-
-                                    <!-- Elementos à direita -->
-                                    <VBox
-                                        alignItems="Start"
-                                        justifyContent="Center">
-
-                                        <!-- Título no topo -->
-                                        <Title
-                                            text="Online"
-                                            titleStyle="H4"
-                                            class="tituloKpiNovo sapUiTinyMarginBottom" />
-
-                                        <!-- Linha do Valor com a Porcentagem ao lado -->
-                                        <HBox
-                                            alignItems="Center">
-
-                                            <Title
-                                                text="{dashboard>/online}"
-                                                level="H1"
-                                                class="kpiNumero" />
-
-                                            <Text
-                                                text="{= '('
-                            + ${dashboard>/online}
-                            + ' / '
-                            + ${dashboard>/totalEquipamentos}
-                            + ') '
-                            + ${dashboard>/percentualOnline}
-                            + '%' }"
-                                                class="kpiPercentual sapUiSmallMarginBegin" />
-
-                                        </HBox>
-
-                                    </VBox>
-
-                                </HBox>
-
-                            </Panel>
-
-
-                            <Panel
-                                id="idOfflinePanel"
-                                width="700px"
-                                class="sapUiSmallMargin kpiCard kpiOffline kpiClickavel">
-
-                                <HBox
-                                    alignItems="Center"
-                                    justifyContent="Start"
-                                    class="sapUiSmallMargin">
-
-                                    <!-- Ícone à esquerda -->
-                                    <Image
-                                        src="img/offline.png"
-                                        width="7rem"
-                                        height="7rem"
-                                        class="sapUiMediumMarginEnd" />
-
-                                    <!-- Elementos à direita -->
-                                    <VBox
-                                        alignItems="Start"
-                                        justifyContent="Center">
-
-                                        <Title
-                                            text="Offline"
-                                            titleStyle="H4"
-                                            class="tituloKpiNovo sapUiTinyMarginBottom" />
-
-                                        <HBox alignItems="Center">
-
-                                            <Title
-                                                text="{dashboard>/offline}"
-                                                level="H1"
-                                                class="kpiNumero" />
-
-                                            <Text
-                                                text="{= '('
-                + ${dashboard>/offline}
-                + ' / '
-                + ${dashboard>/totalEquipamentos}
-                + ') '
-                + ${dashboard>/percentualOffline}
-                + '%' }"
-                                                class="kpiPercentual sapUiSmallMarginBegin" />
-
-                                            <Text
-                                                text="{= '🚜 ' + ${dashboard>/offlineInstalados} + ' em operação' }"
-                                                class="sapUiTinyMarginTop offlineInstaladosTexto" />
-
-                                            <Text
-                                                text="{= '🌎 ' + ${dashboard>/offlineForaItabira} + ' fora de Itabira' }"
-                                                class="offlineInstaladosTexto" />
-
-                                        </HBox>
-
-
-                                    </VBox>
-
-                                </HBox>
-
-                            </Panel>
-
-
                             <Panel
                                 id="idGatewayPanel"
-                                width="700px"
-                                class="sapUiSmallMargin kpiCard kpiGateway">
+                                width="450px"
+                                class="sapUiSmallMargin kpiCard kpiAlturaPadrao">
 
                                 <HBox
                                     alignItems="Center"
@@ -281,52 +162,20 @@
 
                             </Panel>
 
+                            <Panel
+                                id="idIndicadoresPanel"
+                                width="480px"
+                                class="sapUiSmallMargin painelSugestoes kpiCard">
 
-                        </HBox> <!--
-                                Fim da HBox dos Cards -->
+                                <HBox
+                                    alignItems="Stretch"
+                                    justifyContent="SpaceBetween"
+                                    class="sapUiSmallMargin">
 
-                        <HBox
-                            width="100%"
-                            fitContainer="true"
-                            alignItems="Stretch"
-                            renderType="Bare">
-
-                            <!-- ESQUERDA -->
-
-
-                            <!-- DIREITA -->
-                            <VBox
-                                width="22%"
-                                class="painelLateralMapa">
-
-
-                                <!-- INDICADORES -->
-
-                                <Panel
-                                    headerText="Indicadores"
-                                    class="painelIndicadores sapUiSmallMarginBottom">
-
-                                    <VBox class="sapUiSmallMargin">
+                                    <VBox width="45%">
 
                                         <HBox justifyContent="SpaceBetween">
-                                            <Text text="Cobertura" />
-                                            <ObjectNumber
-                                                number="{dashboard>/coberturaValorGerado}"
-                                                unit="%"
-                                                emphasized="true" />
-                                        </HBox>
-
-                                        <ProgressIndicator
-                                            percentValue="{dashboard>/coberturaValorGerado}"
-                                            displayValue=""
-                                            state="Success" />
-
-                                        <HBox
-                                            justifyContent="SpaceBetween"
-                                            class="sapUiSmallMarginTop">
-
                                             <Text text="Disponibilidade" />
-
                                             <ObjectNumber
                                                 number="{dashboard>/disponibilidadeMonitoramento}"
                                                 unit="%" />
@@ -346,6 +195,7 @@
                                             <ObjectNumber
                                                 number="{dashboard>/percentualConsistenciaMovimentacao}"
                                                 unit="%" />
+
                                         </HBox>
 
                                         <ProgressIndicator
@@ -353,129 +203,406 @@
                                             displayValue=""
                                             state="Success" />
 
-                                        <VBox class="kpiEfetividade">
+                                    </VBox>
 
-                                            <HBox justifyContent="Center">
-                                                <Text text="EFETIVIDADE" />
-                                            </HBox>
+                                    <VBox
+                                        width="55%"
+                                        class="sapUiLargeMarginBegin">
 
-                                            <HBox justifyContent="Center">
-                                                <ObjectNumber
-                                                    number="{dashboard>/indiceEfetividade}"
-                                                    unit="%" />
-                                            </HBox>
+                                        <VBox
+                                            class="kpiEfetividade"
+                                            height="110px"
+                                            justifyContent="Center"
+                                            alignItems="Center">
 
+                                            <Text
+                                                text="EFETIVIDADE"
+                                                class="tituloKpiNovo" />
+
+                                            <ObjectNumber
+                                                number="{dashboard>/indiceEfetividade}"
+                                                unit="%"
+                                                class="tituloKpiMedio"
+                                                emphasized="true" />
 
                                         </VBox>
 
-                                        <ProgressIndicator
-                                            percentValue="{dashboard>/indiceEfetividade}"
-                                            displayValue=""
-                                            state="Success" />
-
                                     </VBox>
 
-                                </Panel>
-                                <!-- DISTRIBUIÇÃO -->
+                                </HBox>
 
-                                <Panel
-                                    width="100%"
-                                    class="painelGrupos">
+                            </Panel>
+
+                            <VBox width="0px" />
+
+                            <Panel
+                                width="480px"
+                                class="sapUiSmallMargin kpiCard painelSugestoes painelGrupos">
+
+                                <VBox class="sapUiTinyMargin">
+
+                                    <HBox justifyContent="SpaceBetween">
+
+                                        <VBox width="48%">
+
+                                            <HBox justifyContent="SpaceBetween">
+
+                                                <Text
+                                                    text="{dashboard>/grupos/0/grupo}" />
+
+                                                <HBox>
+
+                                                    <Text
+                                                        text="{dashboard>/grupos/0/percentual}%"
+                                                        class="sapUiTinyMarginEnd" />
+
+                                                    <ObjectNumber
+                                                        number="{dashboard>/grupos/0/quantidade}" />
+
+                                                </HBox>
+
+                                            </HBox>
+
+                                            <ProgressIndicator
+                                                percentValue="{dashboard>/grupos/0/percentual}"
+                                                displayValue="" />
+
+                                        </VBox>
+
+                                        <VBox width="48%">
+
+                                            <HBox justifyContent="SpaceBetween">
+
+                                                <Text
+                                                    text="{dashboard>/grupos/1/grupo}" />
+
+                                                <HBox>
+
+                                                    <Text
+                                                        text="{dashboard>/grupos/1/percentual}%"
+                                                        class="sapUiTinyMarginEnd" />
+
+                                                    <ObjectNumber
+                                                        number="{dashboard>/grupos/1/quantidade}" />
+
+                                                </HBox>
+
+                                            </HBox>
+
+                                            <ProgressIndicator
+                                                percentValue="{dashboard>/grupos/1/percentual}"
+                                                displayValue="" />
+
+                                        </VBox>
+
+                                    </HBox>
+
+                                    <HBox
+                                        justifyContent="SpaceBetween"
+                                        class="sapUiTinyMarginTop">
+
+                                        <VBox width="48%">
+
+                                            <HBox justifyContent="SpaceBetween">
+
+                                                <Text
+                                                    text="{dashboard>/grupos/2/grupo}" />
+
+                                                <HBox>
+
+                                                    <Text
+                                                        text="{dashboard>/grupos/2/percentual}%"
+                                                        class="sapUiTinyMarginEnd" />
+
+                                                    <ObjectNumber
+                                                        number="{dashboard>/grupos/2/quantidade}" />
+
+                                                </HBox>
+
+                                            </HBox>
+
+                                            <ProgressIndicator
+                                                percentValue="{dashboard>/grupos/2/percentual}"
+                                                displayValue="" />
+
+                                        </VBox>
+
+                                        <VBox width="48%">
+
+                                            <HBox justifyContent="SpaceBetween">
+
+                                                <Text
+                                                    text="{dashboard>/grupos/3/grupo}" />
+
+                                                <HBox>
+
+                                                    <Text
+                                                        text="{dashboard>/grupos/3/percentual}%"
+                                                        class="sapUiTinyMarginEnd" />
+
+                                                    <ObjectNumber
+                                                        number="{dashboard>/grupos/3/quantidade}" />
+
+                                                </HBox>
+
+                                            </HBox>
+
+                                            <ProgressIndicator
+                                                percentValue="{dashboard>/grupos/3/percentual}"
+                                                displayValue="" />
+
+                                        </VBox>
+
+                                    </HBox>
+
+                                </VBox>
+
+                            </Panel>
+
+                            <VBox width="0px" />
+
+                            <Panel
+                                width="480px"
+                                class="sapUiSmallMargin kpiCard painelSugestoes painelNavegacao">
+
+                                <List>
+
+                                    <StandardListItem
+                                        title="Itabira"
+                                        icon="sap-icon://map"
+                                        type="Active"
+                                        press=".onIrItabira" />
+
+                                    <StandardListItem
+                                        title="Brucutu"
+                                        icon="sap-icon://map"
+                                        type="Active"
+                                        press=".onIrBrucutu" />
+
+                                    <StandardListItem
+                                        title="Pico"
+                                        icon="sap-icon://map"
+                                        type="Active"
+                                        press=".onIrPico" />
+
+                                    <StandardListItem
+                                        title="Sotreq"
+                                        icon="sap-icon://building"
+                                        type="Active"
+                                        press=".onIrVespasiano" />
+
+                                </List>
+
+                            </Panel>
+                            <Panel
+                                width="480px"
+                                class="sapUiSmallMargin kpiCard painelSugestoes painelNavegacao">
+
+                                <headerToolbar>
+                                    <Toolbar>
+                                        <Title text="Sugestões de Inspeção" />
+                                        <ToolbarSpacer />
+                                        <ObjectStatus text="Top 8" state="Warning" />
+                                    </Toolbar>
+                                </headerToolbar>
+
+                                <HBox justifyContent="SpaceBetween">
+
+                                    <VBox width="48%">
+                                        <HBox alignItems="Center" class="sugestaoInspecaoItem">
+                                            <core:Icon src="{dashboard>/sugestoesInspecao/0/icone}"
+                                                class="sugestaoIcone" />
+                                            <Text text="{dashboard>/sugestoesInspecao/0/nome}"
+                                                class="sugestaoTexto" />
+                                        </HBox>
+
+                                        <HBox alignItems="Center" class="sugestaoInspecaoItem">
+                                            <core:Icon src="{dashboard>/sugestoesInspecao/1/icone}"
+                                                class="sugestaoIcone" />
+                                            <Text text="{dashboard>/sugestoesInspecao/1/nome}"
+                                                class="sugestaoTexto" />
+                                        </HBox>
+
+                                        <HBox alignItems="Center" class="sugestaoInspecaoItem">
+                                            <core:Icon src="{dashboard>/sugestoesInspecao/2/icone}"
+                                                class="sugestaoIcone" />
+                                            <Text text="{dashboard>/sugestoesInspecao/2/nome}"
+                                                class="sugestaoTexto" />
+                                        </HBox>
+
+                                        <HBox alignItems="Center" class="sugestaoInspecaoItem">
+                                            <core:Icon src="{dashboard>/sugestoesInspecao/3/icone}"
+                                                class="sugestaoIcone" />
+                                            <Text text="{dashboard>/sugestoesInspecao/3/nome}"
+                                                class="sugestaoTexto" />
+                                        </HBox>
+                                    </VBox>
+
+                                    <VBox width="48%">
+                                        <HBox alignItems="Center" class="sugestaoInspecaoItem">
+                                            <core:Icon src="{dashboard>/sugestoesInspecao/4/icone}"
+                                                class="sugestaoIcone" />
+                                            <Text text="{dashboard>/sugestoesInspecao/4/nome}"
+                                                class="sugestaoTexto" />
+                                        </HBox>
+
+                                        <HBox alignItems="Center" class="sugestaoInspecaoItem">
+                                            <core:Icon src="{dashboard>/sugestoesInspecao/5/icone}"
+                                                class="sugestaoIcone" />
+                                            <Text text="{dashboard>/sugestoesInspecao/5/nome}"
+                                                class="sugestaoTexto" />
+                                        </HBox>
+
+                                        <HBox alignItems="Center" class="sugestaoInspecaoItem">
+                                            <core:Icon src="{dashboard>/sugestoesInspecao/6/icone}"
+                                                class="sugestaoIcone" />
+                                            <Text text="{dashboard>/sugestoesInspecao/6/nome}"
+                                                class="sugestaoTexto" />
+                                        </HBox>
+
+                                        <HBox alignItems="Center" class="sugestaoInspecaoItem">
+                                            <core:Icon src="{dashboard>/sugestoesInspecao/7/icone}"
+                                                class="sugestaoIcone" />
+                                            <Text text="{dashboard>/sugestoesInspecao/7/nome}"
+                                                class="sugestaoTexto" />
+                                        </HBox>
+                                    </VBox>
+
+                                </HBox>
+
+                            </Panel>
+
+
+                        </HBox> <!--
+                                Fim da HBox dos Cards -->
+
+                        <HBox
+                            width="100%"
+                            fitContainer="true"
+                            alignItems="Stretch"
+                            renderType="Bare">
+
+                            <!-- ESQUERDA -->
+
+
+                            <!-- DIREITA -->
+                            <VBox width="22%" class="painelEsquerdoGrafico">
+
+                                <Panel width="100%">
 
                                     <headerToolbar>
                                         <Toolbar>
                                             <Title
-                                                text="Distribuição dos Componentes" />
-
+                                                text="Componentes embarcados"
+                                                titleStyle="H4" />
                                             <ToolbarSpacer />
-
-                                            <ObjectStatus
-                                                text="{= ${dashboard>/totalEquipamentos} + ' ativos' }"
-                                                state="Success" />
+                                            <Button
+                                                text="Detalhamento"
+                                                icon="sap-icon://excel-attachment"
+                                                type="Emphasized"
+                                                press=".onExportarDetalhamento" />
                                         </Toolbar>
                                     </headerToolbar>
 
-                                    <List
-                                        items="{dashboard>/grupos}"
-                                        showSeparators="None">
+                                    <!-- Container flexível estruturado para exibição em lista
+                                    vertical de cards modernos -->
+                                    <FlexBox
+                                        items="{dashboard>/dashboardVeiculos}"
+                                        wrap="Wrap"
+                                        justifyContent="Start"
+                                        class="sapUiTinyMarginTop gridVeiculosFlex">
 
-                                        <CustomListItem
-                                            type="Active"
-                                            press=".onQuantidadeObjectListItemPress">
+                                        <items>
+                                            <!-- Mantemos o tamanho em 31% para caber exatamente 3
+                                            colunas -->
+                                            <VBox
+                                                class="cardVeiculoCustom sapUiSmallMarginBottom"
+                                                width="31%"
+                                                alignItems="Center"
+                                                justifyContent="Center">
 
-                                            <VBox class="sapUiTinyMargin">
+                                                <customData>
+                                                    <core:CustomData key="pressable" value="true"
+                                                        writeToDom="true" />
+                                                </customData>
 
-                                                <HBox
-                                                    justifyContent="SpaceBetween"
-                                                    alignItems="Center">
-
-                                                    <Text
-                                                        text="{dashboard>grupo}" />
-
-                                                    <HBox alignItems="Center">
-
-                                                        <Text
-                                                            text="{dashboard>percentual}%"
-                                                            class="sapUiTinyMarginEnd" />
-
-                                                        <ObjectNumber
-                                                            number="{dashboard>quantidade}" />
-
-                                                    </HBox>
-
+                                                <HBox width="100%" justifyContent="SpaceBetween"
+                                                    alignItems="Center"
+                                                    class="sapUiTinyMarginBottom">
+                                                    <Text text="{dashboard>veiculo}"
+                                                        class="tituloCardVeiculo" />
+                                                    <core:Icon
+                                                        src="sap-icon://navigation-right-arrow"
+                                                        size="0.6rem" color="#888888" />
                                                 </HBox>
 
-                                                <ProgressIndicator
-                                                    percentValue="{dashboard>percentual}"
-                                                    displayValue="" />
+                                                <Image
+                                                    src="img/793D.png"
+                                                    width="100%"
+                                                    height="auto"
+                                                />
 
                                             </VBox>
+                                        </items>
 
-                                        </CustomListItem>
+                                    </FlexBox>
 
-                                    </List>
 
                                 </Panel>
+                                <Panel
+                                    headerText="Status por Tipo"
+                                    class="sapUiMediumMarginTop painelEsquerdoGrafico">
 
-                                <!-- NAVEGAÇÃO -->
+                                    <layoutData>
+                                        <FlexItemData growFactor="1" />
+                                    </layoutData>
+
+                                    <viz:VizFrame
+                                        id="idTipoStatusVizFrame"
+                                        vizType="stacked_column"
+                                        width="100%"
+                                        height="500px" />
+                                </Panel>
 
                                 <Panel
-                                    headerText="Navegação Rápida"
-                                    class="sapUiSmallMarginTop painelNavegacao"> <!-- Adicionado
-                                        'painelNavegacao' aqui -->
+                                    width="100%"
+                                          class="sapUiMediumMarginTop painelTabelaResumo">
 
-                                    <List>
+                                    <Table
+                                        width="100%"
+                                        items="{dashboard>/resumoGrupoAtual}">
 
-                                        <StandardListItem
-                                            title="Itabira"
-                                            icon="sap-icon://map"
-                                            type="Active"
-                                            press=".onIrItabira" />
+                                        <columns>
+                                            <Column width="15rem">
+                                                <Text text="Grupo Atual" class="txtHeaderTabela" />
+                                            </Column>
 
-                                        <StandardListItem
-                                            title="Brucutu"
-                                            icon="sap-icon://map"
-                                            type="Active"
-                                            press=".onIrBrucutu" />
+                                            <Column
+                                                width="8rem"
+                                                hAlign="Begin">
+                                                <Text text="Quantidade" class="txtHeaderTabela" />
+                                            </Column>
+                                        </columns>
 
-                                        <StandardListItem
-                                            title="Pico"
-                                            icon="sap-icon://map"
-                                            type="Active"
-                                            press=".onIrPico" />
+                                        <items>
+                                            <ColumnListItem>
+                                                <cells>
+                                                    <Text
+                                                        text="{dashboard>grupo}"
+                                                        class="txtCelulaGrupo" />
 
-                                        <StandardListItem
-                                            title="Sotreq"
-                                            icon="sap-icon://building"
-                                            type="Active"
-                                            press=".onIrSotreq" />
+                                                    <ObjectNumber
+                                                        number="{dashboard>quantidade}"
+                                                        class="txtCelulaQuantidade" />
+                                                </cells>
+                                            </ColumnListItem>
+                                        </items>
 
-                                    </List>
+                                    </Table>
 
                                 </Panel>
-
-
                             </VBox>
+
                             <VBox
                                 width="100%"
                                 class="sapUiSmallMarginEnd">
@@ -542,7 +669,7 @@
                                         <Toolbar>
 
                                             <Title
-                                                text="Conferência de Componentes Embarcados" />
+                                                text="Componentes em operação" />
 
                                             <ToolbarSpacer />
 
@@ -672,42 +799,6 @@
                                 </Panel>
 
                             </HBox>
-                            <HBox
-                                width="100%"
-                                fitContainer="true"
-                                alignItems="Start">
-
-                                <Panel
-                                    headerText="Status dos Componentes por Tipo"
-                                    class="sapUiMediumMarginTop painelEsquerdoGrafico">
-
-                                    <layoutData>
-                                        <FlexItemData growFactor="1" />
-                                    </layoutData>
-
-                                    <viz:VizFrame
-                                        id="idTipoStatusVizFrame"
-                                        vizType="stacked_column"
-                                        width="100%"
-                                        height="500px" />
-                                </Panel>
-
-                                <Panel
-                                    headerText="Reformados por localização"
-                                    class="sapUiMediumMarginTop">
-
-                                    <layoutData>
-                                        <FlexItemData growFactor="1" />
-                                    </layoutData>
-
-                                    <viz:VizFrame
-                                        id="idReformadosOficinaVizFrame"
-                                        vizType="stacked_bar"
-                                        width="100%"
-                                        height="500px" />
-                                </Panel>
-
-                            </HBox>
 
 
                         </VBox>
@@ -795,45 +886,6 @@
 
                                             </ColumnListItem>
 
-                                        </items>
-
-                                    </Table>
-
-                                </Panel>
-
-                                <Panel
-                                    width="100%"
-                                    headerText="Resumo por Grupo Atual"
-                                    class="sapUiMediumMarginTop painelTabelaResumo">
-
-                                    <Table
-                                        width="100%"
-                                        items="{dashboard>/resumoGrupoAtual}">
-
-                                        <columns>
-                                            <Column width="15rem">
-                                                <Text text="Grupo Atual" class="txtHeaderTabela" />
-                                            </Column>
-
-                                            <Column
-                                                width="8rem"
-                                                hAlign="Begin">
-                                                <Text text="Quantidade" class="txtHeaderTabela" />
-                                            </Column>
-                                        </columns>
-
-                                        <items>
-                                            <ColumnListItem>
-                                                <cells>
-                                                    <Text
-                                                        text="{dashboard>grupo}"
-                                                        class="txtCelulaGrupo" />
-
-                                                    <ObjectNumber
-                                                        number="{dashboard>quantidade}"
-                                                        class="txtCelulaQuantidade" />
-                                                </cells>
-                                            </ColumnListItem>
                                         </items>
 
                                     </Table>
