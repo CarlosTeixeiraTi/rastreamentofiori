@@ -59,7 +59,7 @@
 
                             <Panel
                                 id="idTotalEquipamentosPanel"
-                                width="350px"
+                                width="450px"
                                 class="sapUiSmallMargin kpiCard kpiAlturaPadrao">
 
                                 <HBox
@@ -94,6 +94,13 @@
                                                 level="H1"
                                                 class="kpiNumero" />
 
+                                            <Text
+                                                text="{= '('
+                                        + ${dashboard>/totalEquipamentos}
+                                        + ' / 50) '
+                                        + ${dashboard>/percentualEquipamentos}
+                                        + '%' }"
+                                                class="kpiPercentual sapUiSmallMarginBegin" />
 
                                         </HBox>
 
@@ -105,7 +112,7 @@
 
                             <Panel
                                 id="idGatewayPanel"
-                                width="350px"
+                                width="450px"
                                 class="sapUiSmallMargin kpiCard kpiAlturaPadrao">
 
                                 <HBox
@@ -140,6 +147,12 @@
                                                 level="H1"
                                                 class="kpiNumero" />
 
+                                            <Text
+                                                text="{= '('
+                            + ${dashboard>/gateways}
+                            + ' / 8) '
+                            + ${dashboard>/percentualGateway} }"
+                                                class="kpiPercentual sapUiSmallMarginBegin" />
 
                                         </HBox>
 
@@ -223,7 +236,7 @@
                             <VBox width="0px" />
 
                             <Panel
-                                width="420px"
+                                width="480px"
                                 class="sapUiSmallMargin kpiCard painelSugestoes painelGrupos">
 
                                 <VBox class="sapUiTinyMargin">
@@ -349,7 +362,7 @@
                             <VBox width="0px" />
 
                             <Panel
-                                width="200px"
+                                width="480px"
                                 class="sapUiSmallMargin kpiCard painelSugestoes painelNavegacao">
 
                                 <List>
@@ -382,7 +395,7 @@
 
                             </Panel>
                             <Panel
-                                width="250px"
+                                width="480px"
                                 class="sapUiSmallMargin kpiCard painelSugestoes painelNavegacao">
 
                                 <headerToolbar>
@@ -475,7 +488,7 @@
                             <!-- DIREITA -->
                             <!-- Container com altura total e distribuição vertical justificada -->
                             <VBox
-                                width="20%"
+                                width="22%"
                                 height="100%"
                                 justifyContent="SpaceBetween"
                                 class="painelEsquerdoGrafico">
@@ -530,8 +543,7 @@
 
                                 <!-- Painel 2: Status por Tipo (Gráfico) - Removida margem superior
                                 fixa -->
-                                <Panel headerText="Status por Tipo"
-                                    class="sapUiMediumMarginTop painelEsquerdoGrafico">
+                                <Panel headerText="Status por Tipo" class="sapUiMediumMarginTop painelEsquerdoGrafico">
                                     <layoutData>
                                         <FlexItemData growFactor="1" />
                                     </layoutData>
@@ -540,66 +552,32 @@
                                         id="idTipoStatusVizFrame"
                                         vizType="stacked_column"
                                         width="100%"
-                                        height="300px" />
+                                        height="500px" />
                                 </Panel>
 
                                 <!-- Painel 3: Tabela Resumo - Removida margem superior fixa -->
-                                <Panel
-                                    width="100%"
-                                    class="sapUiMediumMarginTop painelTabelaResumo">
-
-                                    <headerToolbar>
-                                        <Toolbar>
-                                            <Title text="Resumo por Grupo Atual" />
-
-                                            <ToolbarSpacer />
-
-                                            <Button
-                                                text="Detalhamento"
-                                                icon="sap-icon://excel-attachment"
-                                                type="Emphasized"
-                                                press=".onExportarResumoGrupoAtual" />
-                                        </Toolbar>
-                                    </headerToolbar>
-
-                                    <Table
-                                        width="100%"
-                                        items="{dashboard>/resumoGrupoAtual}">
-
+                                <Panel width="100%" class="sapUiMediumMarginTop painelTabelaResumo">
+                                    <Table width="100%" items="{dashboard>/resumoGrupoAtual}">
                                         <columns>
                                             <Column width="15rem">
-                                                <Text
-                                                    text="Grupo Atual"
-                                                    class="txtHeaderTabela" />
+                                                <Text text="Grupo Atual" class="txtHeaderTabela" />
                                             </Column>
-
-                                            <Column
-                                                width="8rem"
-                                                hAlign="Begin">
-                                                <Text
-                                                    text="Quantidade"
-                                                    class="txtHeaderTabela" />
+                                            <Column width="8rem" hAlign="Begin">
+                                                <Text text="Quantidade" class="txtHeaderTabela" />
                                             </Column>
                                         </columns>
 
                                         <items>
                                             <ColumnListItem>
                                                 <cells>
-
-                                                    <Text
-                                                        text="{dashboard>grupo}"
+                                                    <Text text="{dashboard>grupo}"
                                                         class="txtCelulaGrupo" />
-
-                                                    <ObjectNumber
-                                                        number="{dashboard>quantidade}"
+                                                    <ObjectNumber number="{dashboard>quantidade}"
                                                         class="txtCelulaQuantidade" />
-
                                                 </cells>
                                             </ColumnListItem>
                                         </items>
-
                                     </Table>
-
                                 </Panel>
 
                             </VBox>
@@ -811,7 +789,7 @@
                     <IconTabFilter
                         id="tabDashboard"
                         key="dashboard"
-                        visible="{= ${usuarioLogado>/perfil} === 'DESENVOLVEDOR' }"
+                         visible="{= ${usuarioLogado>/perfil} === 'DESENVOLVEDOR' }"
                         text="Status dos rastreadores">
                         <VBox
                             id="mainContainer"
@@ -1000,7 +978,7 @@
                     <IconTabFilter
                         id="tabInformacoes"
                         key="informacoes"
-                        visible="{= ${usuarioLogado>/perfil} === 'DESENVOLVEDOR' }"
+                         visible="{= ${usuarioLogado>/perfil} === 'DESENVOLVEDOR' }"
                         text="Diagnóstico de falhas">
                         <VBox
                             class="sapUiMediumMargin"
@@ -1149,7 +1127,7 @@
                     <IconTabFilter
                         id="tabValorGerado"
                         key="valorGerado"
-                        visible="{= ${usuarioLogado>/perfil} === 'DESENVOLVEDOR' }"
+                         visible="{= ${usuarioLogado>/perfil} === 'DESENVOLVEDOR' }"
                         text="Valor Gerado">
 
                         <VBox
@@ -1921,7 +1899,7 @@
                         </VBox>
 
                     </IconTabFilter>
-
+                    
                 </items>
 
             </IconTabBar>

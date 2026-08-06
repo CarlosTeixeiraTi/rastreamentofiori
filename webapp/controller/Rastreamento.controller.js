@@ -17,9 +17,7 @@ sap.ui.define([
         "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento",
         {
             onInit() {
-                // sap.ui.require(["sap/ui/thirdparty/jquery"], function ($) {
-                //     $("body").css("zoom", "75%");
-                // });
+
                 this._busyDialog = new BusyDialog({
                     title: "Carregando",
                     text: "Reconstruindo mapa..."

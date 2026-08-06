@@ -17,9 +17,28 @@ sap.ui.define([
         "br.com.smartpcm.rastreamento.zrastreio.controller.Rastreamento2",
         {
             onInit() {
-                // sap.ui.require(["sap/ui/thirdparty/jquery"], function ($) {
-                //     $("body").css("zoom", "75%");
-                // });
+
+                const oModelUsuario =
+                    this.getOwnerComponent()
+                        .getModel("usuarioLogado");
+
+                if (!oModelUsuario) {
+
+                    this.getOwnerComponent()
+                        .getRouter()
+                        .navTo("RouteLogin");
+
+                    return;
+                }
+
+                this.byId("tabDashboard")?.setVisible(false);
+
+                this.byId("tabInformacoes")?.setVisible(false);
+
+                this.byId("tabValorGerado")?.setVisible(false);
+
+                this.byId("tabGraficos")?.setVisible(false);
+
                 this._busyDialog = new BusyDialog({
                     title: "Carregando",
                     text: "Reconstruindo mapa..."
@@ -34,25 +53,24 @@ sap.ui.define([
 
                 this.resumoTipoStatus = [];
 
-                const oDashboardModel = new JSONModel({
-                    totalEquipamentos: 0,
-                    online: 0,
-                    offline: 0,
-                    gateways: 0,
-                    grupos: [],
-                    ultimasLeituras: [],
-                    dashboardVeiculos: [],
-                    resumoFrotas: []
-                });
-
                 this.getView().setModel(
-                    oDashboardModel,
+                    new JSONModel({
+                        totalEquipamentos: 0,
+                        online: 0,
+                        offline: 0,
+                        gateways: 0,
+                        grupos: [],
+                        ultimasLeituras: [],
+                        dashboardVeiculos: [],
+                        resumoFrotas: []
+                    }),
                     "dashboard"
                 );
 
                 this._grupoSelecionado = null;
 
-                // this.carregarDashboard();
+                this.aplicarPerfilUsuario();
+
             },
             aplicarPerfilUsuario() {
 
@@ -68,14 +86,15 @@ sap.ui.define([
                     (oModelUsuario.getProperty("/perfil") || "")
                         .toUpperCase();
 
-                if (perfil === "DESENVOLVEDOR") {
+                if (perfil !== "VISUALIZADOR") {
                     return;
                 }
 
                 this.byId("tabDashboard").setVisible(false);
                 this.byId("tabInformacoes").setVisible(false);
                 this.byId("tabValorGerado").setVisible(false);
-                this.byId("tabAtualizacao").setVisible(false);
+                this.byId("tabGraficos").setVisible(false);
+
             },
             onAfterRendering() {
                 this.aplicarPerfilUsuario();
@@ -1490,6 +1509,61 @@ sap.ui.define([
                     });
 
             },
+            onExportarResumoGrupoAtual() {
+
+                fetch("http://10.44.32.193:4000/StatusComponentes")
+                    .then(response => response.json())
+                    .then(dados => {
+
+                        const oSpreadsheet = new Spreadsheet({
+
+                            workbook: {
+
+                                columns: [
+
+                                    {
+                                        label: "Status",
+                                        property: "status"
+                                    },
+
+                                    {
+                                        label: "Equipamento",
+                                        property: "equipamento"
+                                    },
+
+                                    {
+                                        label: "Descrição",
+                                        property: "descricao"
+                                    },
+
+                                    {
+                                        label: "Local de Instalação",
+                                        property: "localInstalacao"
+                                    }
+
+                                ]
+
+                            },
+
+                            dataSource: dados,
+
+                            fileName: "Status_Componentes.xlsx"
+
+                        });
+
+                        oSpreadsheet.build()
+                            .then(() => {
+                                oSpreadsheet.destroy();
+                            });
+
+                    })
+                    .catch(() => {
+                        MessageBox.error(
+                            "Erro ao gerar detalhamento."
+                        );
+                    });
+
+            },
             onQuantidadeObjectListItemPress(oEvent) {
 
                 const grupo =
@@ -1974,6 +2048,13 @@ sap.ui.define([
                         this.determinarGrupo(item);
 
                     if (
+                        grupo &&
+                        grupo.startsWith("Instalado no ")
+                    ) {
+                        grupo = "Instalados";
+                    }
+
+                    if (
                         grupo ===
                         "Tags Digitais desatualizadas"
                     ) {
@@ -1998,6 +2079,7 @@ sap.ui.define([
                     });
 
                 });
+
                 resultado.sort((a, b) =>
                     (a.grupo || "").localeCompare(
                         b.grupo || "",
@@ -3170,7 +3252,7 @@ sap.ui.define([
                 const limiteOnline = new Date(
                     agora.getTime() - (7 * 24 * 60 * 60 * 1000)
                 );
-
+                let indisponiveisEfetividade = 0;
                 let online = 0;
                 let offline = 0;
                 let offlineInstalados = 0;
@@ -3205,7 +3287,12 @@ sap.ui.define([
                         const local =
                             (item.localInstalacao || "")
                                 .toUpperCase();
+                        const instalado =
+                            item.grupoAtual &&
+                            item.grupoAtual.startsWith("Instalado no ");
 
+                        const emFeit =
+                            local.startsWith("FEIT");
                         if (
                             !local.startsWith("FEIT") &&
                             (
@@ -3305,40 +3392,28 @@ sap.ui.define([
 
                     } else {
 
-                        offline++;
-
-                        if (
+                        const instalado =
                             item.grupoAtual &&
-                            item.grupoAtual.startsWith("Instalado no ")
-                        ) {
-                            offlineInstalados++;
-                        }
+                            item.grupoAtual.startsWith("Instalado no ");
 
                         const local =
                             (item.localInstalacao || "")
                                 .toUpperCase();
 
-                        if (
-                            local.startsWith("FEIT") &&
-                            item.grupoAtual ===
-                            "Tags Digitais desatualizadas"
-                        ) {
-                            offlineFeitDesatualizados++;
-                        }
+                        const emFeit =
+                            local.startsWith("FEIT");
 
-                        if (
-                            !local.startsWith("FEIT") &&
-                            (
-                                !item.grupoAtual ||
-                                !item.grupoAtual.startsWith("Instalado no ")
-                            )
-                        ) {
-                            offlineForaItabira++;
+                        if (!instalado && emFeit) {
+
+                            offline++;
+                            offlineFeitDesatualizados++;
+
                         }
 
                     }
 
                 });
+
                 const totalFalhasMovimentacao =
                     falhasMovimentacao.length;
 
@@ -3707,116 +3782,132 @@ sap.ui.define([
 
                 });
                 this.getView()
-                    .getModel("dashboard")
-                    .setData({
+                let oDashboardModel =
+                    this.getView().getModel("dashboard");
 
-                        totalEquipamentos,
+                if (!oDashboardModel) {
 
-                        percentualEquipamentos,
+                    oDashboardModel =
+                        new JSONModel({});
 
-                        online,
-
-                        offline,
-
-                        offlineInstalados,
-
-                        offlineForaItabira,
-
-                        offlineFeitDesatualizados,
-
-                        percentualOnline,
-
-                        percentualOffline,
-
-                        gateways: gateways.length,
-
-                        percentualGateway,
-
-                        grupos,
-
-                        ultimasLeituras,
-
-                        resumoEquipamentos,
-
-                        resumoGrupoAtual,
-
-                        detalhesTagsDesatualizadas,
-
-                        analiseInstaladosDesatualizados,
-
-                        sugestoesInspecao,
-
-                        dashboardVeiculos,
-
-                        resumoFrotas,
-
-                        resumoTipoStatus,
-
-                        graficoTipoStatus,
-
-                        reformadosPorOficina,
-
-                        graficoInstalacao,
-
-                        instalados,
-
-                        faltantes,
-
-                        percentualInstalado,
-
-                        tempoLocalizacao:
-                            valorGerado.tempoLocalizacao,
-
-                        rastreabilidadeValorGerado:
-                            valorGerado.rastreabilidade,
-                        disponibilidadeMonitoramento:
-                            valorGerado.disponibilidadeMonitoramento,
-
-                        componentesDisponiveis:
-                            valorGerado.componentesDisponiveis,
-                        coberturaValorGerado:
-                            valorGerado.cobertura,
-
-                        componentesMovimentados:
-                            valorGerado.componentesMovimentados,
-
-                        percentualMovimentados:
-                            valorGerado.percentualMovimentados,
-
-                        totalMovimentacoes:
-                            valorGerado.totalMovimentacoes,
-
-                        totalComponentesValorGerado:
-                            valorGerado.totalComponentes,
-
-                        indiceEfetividade:
-                            valorGerado.indiceEfetividade,
-
-                        classificacaoEfetividade:
-                            valorGerado.classificacao,
-
-                        valorGeradoSemanal:
-                            valorGeradoSemanal,
-
-                        falhasMovimentacao:
-                            totalFalhasMovimentacao,
-
-                        consistenciasMovimentacao:
-                            online - totalFalhasMovimentacao,
-
-                        percentualConsistenciaMovimentacao:
-                            percentualConsistenciaMovimentacao.toFixed(1),
-
-                        detalhesFalhasMovimentacao:
-                            falhasMovimentacao,
-
-                        oportunidadesMelhoria:
-                            oportunidadesMelhoria,
-
-                        distribuicaoImplantacao:
-                            distribuicaoImplantacao
-                    }
+                    this.getView().setModel(
+                        oDashboardModel,
+                        "dashboard"
                     );
+
+                }
+
+                oDashboardModel.setData({
+
+                    totalEquipamentos,
+
+                    percentualEquipamentos,
+
+                    online,
+
+                    offline,
+
+                    offlineInstalados,
+
+                    offlineForaItabira,
+
+                    offlineFeitDesatualizados,
+
+                    percentualOnline,
+
+                    percentualOffline,
+
+                    gateways: gateways.length,
+
+                    percentualGateway,
+
+                    grupos,
+
+                    ultimasLeituras,
+
+                    resumoEquipamentos,
+
+                    resumoGrupoAtual,
+
+                    detalhesTagsDesatualizadas,
+
+                    analiseInstaladosDesatualizados,
+
+                    sugestoesInspecao,
+
+                    dashboardVeiculos,
+
+                    resumoFrotas,
+
+                    resumoTipoStatus,
+
+                    graficoTipoStatus,
+
+                    reformadosPorOficina,
+
+                    graficoInstalacao,
+
+                    instalados,
+
+                    faltantes,
+
+                    percentualInstalado,
+
+                    tempoLocalizacao:
+                        valorGerado.tempoLocalizacao,
+
+                    rastreabilidadeValorGerado:
+                        valorGerado.rastreabilidade,
+
+                    disponibilidadeMonitoramento:
+                        valorGerado.disponibilidadeMonitoramento,
+
+                    componentesDisponiveis:
+                        valorGerado.componentesDisponiveis,
+
+                    coberturaValorGerado:
+                        valorGerado.cobertura,
+
+                    componentesMovimentados:
+                        valorGerado.componentesMovimentados,
+
+                    percentualMovimentados:
+                        valorGerado.percentualMovimentados,
+
+                    totalMovimentacoes:
+                        valorGerado.totalMovimentacoes,
+
+                    totalComponentesValorGerado:
+                        valorGerado.totalComponentes,
+
+                    indiceEfetividade:
+                        valorGerado.indiceEfetividade,
+
+                    classificacaoEfetividade:
+                        valorGerado.classificacao,
+
+                    valorGeradoSemanal:
+                        valorGeradoSemanal,
+
+                    falhasMovimentacao:
+                        totalFalhasMovimentacao,
+
+                    consistenciasMovimentacao:
+                        online - totalFalhasMovimentacao,
+
+                    percentualConsistenciaMovimentacao:
+                        percentualConsistenciaMovimentacao.toFixed(1),
+
+                    detalhesFalhasMovimentacao:
+                        falhasMovimentacao,
+
+                    oportunidadesMelhoria:
+                        oportunidadesMelhoria,
+
+                    distribuicaoImplantacao:
+                        distribuicaoImplantacao
+
+                });
                 const oVizFrame =
                     this.byId("idTipoStatusVizFrame");
 
@@ -3904,12 +3995,32 @@ sap.ui.define([
                         },
 
                         categoryAxis: {
+                            title: {
+                                visible: false
+                            },
                             label: {
                                 angle: 0
                             }
                         },
 
+                        valueAxis: {
+                            title: {
+                                visible: false
+                            },
+                            label: {
+                                visible: false
+                            }
+                        },
+
+                        legendGroup: {
+                            layout: {
+                                position: "top"
+                            }
+                        },
+
                         legend: {
+                            visible: true,
+                            position: "top",
                             title: {
                                 visible: false
                             }
@@ -4099,10 +4210,9 @@ sap.ui.define([
                 this.byId("htmlMapa").setContent(`
     <div
         id="mapaEquipamentos"
-        style="height:1220px;width:100%;">
+        style="height:calc(100vh - 420px);width:100%;">
     </div>
 `);
-
                 sap.ui.getCore().applyChanges();
 
                 setTimeout(async () => {

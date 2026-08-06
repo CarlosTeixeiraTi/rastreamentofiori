@@ -4,23 +4,32 @@ sap.ui.define([
 ], (UIComponent, models) => {
     "use strict";
 
-    return UIComponent.extend("br.com.smartpcm.rastreamento.zrastreio.Component", {
-        metadata: {
-            manifest: "json",
-            interfaces: [
-                "sap.ui.core.IAsyncContentCreation"
-            ]
-        },
+    return UIComponent.extend(
+        "br.com.smartpcm.rastreamento.zrastreio.Component",
+        {
+            metadata: {
+                manifest: "json",
+                interfaces: [
+                    "sap.ui.core.IAsyncContentCreation"
+                ]
+            },
 
-        init() {
-            // call the base component's init function
-            UIComponent.prototype.init.apply(this, arguments);
+            init() {
 
-            // set the device model
-            this.setModel(models.createDeviceModel(), "device");
+                UIComponent.prototype.init.apply(
+                    this,
+                    arguments
+                );
 
-            // enable routing
-            this.getRouter().initialize();
+                this.setModel(
+                    models.createDeviceModel(),
+                    "device"
+                );
+
+                this.getRouter().initialize();
+
+            }
         }
-    });
+    );
+
 });

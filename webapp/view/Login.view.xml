@@ -11,16 +11,16 @@
 
         <content>
 
-            <VBox
+            <VBox   
                 width="100%"
                 height="100%"
                 justifyContent="Center"
                 alignItems="Center"
                 backgroundDesign="Transparent">
-
-                <!-- ALTERADO: width aumentado de 500px para 600px -->
+            
+                <!-- ALTERADO: width aumentado de 500px     para 600px -->
                 <Panel
-                    width="600px"
+                    width="420px"
                     accessibleRole="Form"
                     backgroundDesign="Solid"
                     class="sapUiResponsivePadding fonteCustomizada">
@@ -45,9 +45,7 @@
                             <Text
                                 text=""
                                 class="sapUiTinyMarginTop subtituloLogin" />
-                            <Text
-                                text=""
-                                class="sapUiTinyMarginTop subtituloLogin" />
+
 
                         </VBox>
 
@@ -67,7 +65,7 @@
                         <Label
                             text="Senha"
                             required="true"
-                            class="sapUiTinyMarginBottom labelLogin" />
+                            class="sapUiTinyMarginBosttom slabelLogin" />
 
                         <Input
                             id="idSenha"
